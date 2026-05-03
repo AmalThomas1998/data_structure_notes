@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Arrays · The Interview Codex</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,400&family=JetBrains+Mono:wght@400;600;800&family=Inter+Tight:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0d1117;
+    --paper:#eef2f5;
+    --paper-2:#dde4ea;
+    --accent:#0066ff;
+    --accent-2:#ff3366;
+    --accent-3:#ffb800;
+    --accent-4:#00c896;
+    --rule:#0d1117;
+    --muted:#5c6370;
+    --code-bg:#0d1117;
+    --code-ink:#e8edf2;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Fraunces',Georgia,serif;
+    font-size:18px;
+    line-height:1.6;
+    overflow-x:hidden;
+  }
+  /* Blueprint grid background */
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+    background-image:
+      linear-gradient(rgba(0,102,255,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,102,255,.04) 1px, transparent 1px);
+    background-size:32px 32px;
+  }
+  .mono{font-family:'JetBrains Mono',monospace}
+  .sans{font-family:'Inter Tight',sans-serif}
+
+  /* ===== MASTHEAD ===== */
+  .masthead{
+    border-bottom:3px solid var(--ink);
+    padding:18px 40px;
+    display:flex;align-items:center;justify-content:space-between;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+    position:relative;z-index:2;
+    background:var(--ink);color:var(--paper);
+  }
+  .masthead .edition{display:flex;gap:24px}
+  .masthead .edition span{border-left:1px solid #ffffff33;padding-left:24px}
+  .masthead .edition span:first-child{border-left:none;padding-left:0}
+  .masthead .logo{color:var(--accent-3);font-weight:800}
+
+  /* ===== HERO ===== */
+  .hero{
+    padding:80px 40px 60px;
+    max-width:1400px;margin:0 auto;
+    position:relative;z-index:2;
+  }
+  .hero .kicker{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;letter-spacing:.3em;text-transform:uppercase;
+    color:var(--accent);font-weight:700;margin-bottom:24px;
+    display:flex;align-items:center;gap:16px;
+  }
+  .hero .kicker::before{
+    content:"";height:8px;width:8px;background:var(--accent);border-radius:50%;
+  }
+  .hero .kicker::after{
+    content:"";height:1px;background:var(--accent);flex:1;
+  }
+  .hero h1{
+    font-family:'Fraunces',serif;
+    font-weight:800;
+    font-size:clamp(60px,11vw,180px);
+    line-height:.88;letter-spacing:-.04em;
+    margin-bottom:30px;
+  }
+  .hero h1 em{font-style:italic;color:var(--accent);font-weight:400}
+  .hero h1 .accent{color:var(--accent-2)}
+  .hero .sub{
+    font-size:22px;max-width:760px;font-style:italic;
+    color:#3a3a3a;border-left:4px solid var(--accent);padding-left:24px;
+  }
+  .hero .meta{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:30px;margin-top:50px;padding-top:30px;
+    border-top:1px solid #0d111722;
+    font-family:'Inter Tight',sans-serif;font-size:13px;
+  }
+  .hero .meta div strong{display:block;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .hero .meta div span{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--accent)}
+
+  /* ===== NAV PILL ===== */
+  .toc{
+    position:sticky;top:0;z-index:20;
+    background:var(--ink);color:var(--paper);
+    padding:14px 40px;
+    display:flex;gap:28px;overflow-x:auto;
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;letter-spacing:.1em;text-transform:uppercase;
+    border-bottom:2px solid var(--accent);
+  }
+  .toc::-webkit-scrollbar{height:4px}
+  .toc::-webkit-scrollbar-thumb{background:var(--accent)}
+  .toc a{color:var(--paper);text-decoration:none;white-space:nowrap;opacity:.6;transition:opacity .2s}
+  .toc a:hover{opacity:1;color:var(--accent-3)}
+  .toc .num{color:var(--accent-3);margin-right:6px}
+
+  /* ===== SECTIONS ===== */
+  section{
+    padding:80px 40px;
+    max-width:1400px;margin:0 auto;
+    position:relative;z-index:2;
+  }
+  .sec-num{
+    font-family:'JetBrains Mono',monospace;font-weight:700;
+    font-size:13px;color:var(--accent);letter-spacing:.2em;text-transform:uppercase;
+    display:flex;align-items:center;gap:14px;margin-bottom:20px;
+  }
+  .sec-num::before{content:"▸";color:var(--accent-2);font-size:18px}
+  h2{
+    font-family:'Fraunces',serif;font-weight:800;
+    font-size:clamp(40px,6vw,80px);line-height:.95;letter-spacing:-.03em;
+    margin-bottom:40px;max-width:900px;
+  }
+  h2 em{font-style:italic;color:var(--accent);font-weight:400}
+  h3{
+    font-family:'Fraunces',serif;font-weight:600;
+    font-size:32px;line-height:1.1;letter-spacing:-.02em;margin:40px 0 20px;
+  }
+  h4{
+    font-family:'JetBrains Mono',monospace;font-weight:700;
+    font-size:13px;letter-spacing:.15em;text-transform:uppercase;
+    margin:30px 0 14px;color:var(--accent);
+  }
+  p{margin-bottom:18px;max-width:75ch}
+  p strong{background:linear-gradient(180deg,transparent 60%,#ffb80055 60%);padding:0 2px;font-weight:700}
+  em{font-style:italic}
+  code.mono{background:#0d111711;padding:2px 6px;border-radius:3px;font-size:.92em}
+
+  /* ===== GRID LAYOUTS ===== */
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start}
+  .side-note{
+    background:var(--ink);color:var(--paper);
+    padding:32px;
+    font-family:'Inter Tight',sans-serif;font-size:15px;line-height:1.6;
+    position:relative;
+    border-left:6px solid var(--accent-3);
+  }
+  .side-note::before{
+    content:"NOTE";position:absolute;top:-12px;left:24px;background:var(--accent-3);
+    padding:4px 12px;font-size:10px;letter-spacing:.2em;color:var(--ink);font-weight:800;font-family:'JetBrains Mono',monospace;
+  }
+  .side-note h4{margin-top:0;color:var(--accent-3)}
+  .side-note p{color:#cdd5e0;margin-bottom:0;max-width:none}
+
+  /* ===== INTUITION CARDS ===== */
+  .intuition-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:0;margin:30px 0;border:2px solid var(--ink)}
+  .intuition-card{
+    padding:30px;background:var(--paper);
+    position:relative;transition:background .2s;
+    border-right:1px solid var(--ink);border-bottom:1px solid var(--ink);
+  }
+  .intuition-card:hover{background:var(--accent-3)}
+  .intuition-card:hover .num{color:var(--ink)}
+  .intuition-card .num{
+    font-family:'JetBrains Mono',monospace;font-weight:800;font-size:14px;
+    color:var(--accent);letter-spacing:.15em;margin-bottom:14px;
+    display:inline-block;padding:4px 8px;background:var(--ink);color:var(--accent-3);
+  }
+  .intuition-card h4{margin:0 0 8px;color:var(--ink);font-size:14px}
+  .intuition-card p{font-family:'Inter Tight',sans-serif;font-size:14.5px;margin:0;line-height:1.55}
+
+  /* ===== VISUALIZATION CANVAS ===== */
+  .viz{
+    background:var(--paper);
+    border:2px solid var(--ink);
+    padding:30px;margin:40px 0;
+    position:relative;
+  }
+  .viz::before{
+    content:"";position:absolute;top:-2px;left:-2px;right:-2px;height:6px;
+    background:linear-gradient(90deg,var(--accent) 0%,var(--accent) 33%,var(--accent-2) 33%,var(--accent-2) 66%,var(--accent-3) 66%,var(--accent-3) 100%);
+  }
+  .viz-caption{
+    font-family:'JetBrains Mono',monospace;font-size:11px;
+    letter-spacing:.15em;text-transform:uppercase;color:var(--muted);
+    margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;
+    border-bottom:1px solid var(--ink);padding-bottom:12px;
+  }
+  .viz-caption .label{color:var(--accent);font-weight:800}
+  .viz-controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}
+  .viz-controls button{
+    font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;
+    letter-spacing:.1em;text-transform:uppercase;
+    background:var(--ink);color:var(--paper);border:2px solid var(--ink);
+    padding:10px 16px;cursor:pointer;transition:all .15s;
+  }
+  .viz-controls button:hover{background:var(--accent);border-color:var(--accent)}
+  .viz-controls button:disabled{opacity:.4;cursor:not-allowed}
+  .viz-controls .secondary{background:transparent;color:var(--ink)}
+  .viz-controls .secondary:hover{background:var(--ink);color:var(--paper)}
+  .viz-controls input[type="number"], .viz-controls input[type="text"]{
+    font-family:'JetBrains Mono',monospace;font-size:12px;
+    border:2px solid var(--ink);padding:8px 12px;width:90px;
+    background:var(--paper);
+  }
+  .viz svg{width:100%;height:auto;display:block}
+  .viz-status{
+    font-family:'JetBrains Mono',monospace;font-size:13px;
+    padding:14px 18px;background:var(--ink);color:var(--paper);
+    margin-top:16px;min-height:46px;border-left:4px solid var(--accent-3);
+  }
+  .viz-status .tag{color:var(--accent-3);font-weight:800;margin-right:8px}
+
+  /* ===== CODE BLOCKS ===== */
+  pre{
+    background:var(--code-bg);color:var(--code-ink);
+    padding:24px;overflow-x:auto;border:2px solid var(--ink);
+    font-family:'JetBrains Mono',monospace;font-size:13.5px;line-height:1.65;
+    margin:20px 0;position:relative;
+  }
+  pre::before{
+    content:"";position:absolute;top:0;left:0;right:0;height:3px;
+    background:var(--accent);
+  }
+  pre .k{color:#ff79c6}
+  pre .s{color:#f1fa8c}
+  pre .c{color:#6272a4;font-style:italic}
+  pre .f{color:#8be9fd}
+  pre .n{color:#bd93f9}
+  pre .t{color:#50fa7b;font-weight:700}
+  pre .num{color:#ffb86c}
+
+  /* ===== PATTERN TABLE ===== */
+  .pattern-list{margin:30px 0;border-top:3px solid var(--ink)}
+  .pattern-item{
+    display:grid;grid-template-columns:80px 1fr 220px;
+    border-bottom:1px solid var(--ink);padding:28px 0;gap:30px;align-items:start;
+    transition:all .2s;
+    position:relative;
+  }
+  .pattern-item:hover{background:var(--paper-2);padding-left:14px}
+  .pattern-item .pat-num{
+    font-family:'JetBrains Mono',monospace;font-weight:800;font-size:32px;
+    color:var(--accent);line-height:1;
+  }
+  .pattern-item h4{margin:0 0 8px;font-family:'Fraunces',serif;font-size:24px;letter-spacing:normal;text-transform:none;font-weight:600;color:var(--ink)}
+  .pattern-item p{font-family:'Inter Tight',sans-serif;font-size:14.5px;margin:0;color:#2a2a2a}
+  .pattern-item .tag{
+    font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;
+    letter-spacing:.1em;text-transform:uppercase;
+    display:inline-block;padding:4px 10px;background:var(--ink);color:var(--paper);
+    margin-top:10px;margin-right:6px;
+  }
+  .pattern-item .tag.alt{background:var(--accent);color:var(--paper)}
+  .pattern-item .complexity{
+    font-family:'JetBrains Mono',monospace;font-size:11px;text-align:right;
+    color:var(--muted);
+  }
+  .pattern-item .complexity strong{color:var(--accent-4);display:block;font-size:20px;margin-bottom:2px}
+
+  /* ===== PROBLEM CARDS ===== */
+  .problem-card{
+    border:2px solid var(--ink);margin:30px 0;
+    background:var(--paper);
+  }
+  .problem-card header{
+    background:var(--ink);color:var(--paper);
+    padding:18px 26px;display:flex;justify-content:space-between;align-items:center;
+    font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.1em;font-weight:700;
+  }
+  .problem-card header .diff{
+    padding:5px 12px;font-size:10px;letter-spacing:.2em;font-weight:800;
+  }
+  .problem-card header .diff.easy{background:var(--accent-4);color:var(--ink)}
+  .problem-card header .diff.med{background:var(--accent-3);color:var(--ink)}
+  .problem-card header .diff.hard{background:var(--accent-2);color:var(--paper)}
+  .problem-card .body{padding:28px}
+  .problem-card h4{margin-top:0}
+  .insight{
+    border-left:4px solid var(--accent-2);padding:14px 20px;
+    background:var(--paper-2);margin:18px 0;font-style:italic;font-size:15px;
+  }
+  .insight strong{font-style:normal}
+
+  /* ===== BIG PULL QUOTE ===== */
+  .pullquote{
+    padding:80px 40px;text-align:center;max-width:1100px;margin:40px auto;
+    border-top:3px solid var(--ink);border-bottom:3px solid var(--ink);
+    position:relative;
+  }
+  .pullquote::before, .pullquote::after{
+    content:"";position:absolute;left:0;right:0;height:1px;background:var(--ink);
+  }
+  .pullquote::before{top:6px}
+  .pullquote::after{bottom:6px}
+  .pullquote blockquote{
+    font-family:'Fraunces',serif;font-style:italic;font-weight:400;
+    font-size:clamp(28px,4vw,48px);line-height:1.15;letter-spacing:-.02em;
+  }
+  .pullquote blockquote::before{content:"["; color:var(--accent);font-weight:800;font-style:normal}
+  .pullquote blockquote::after{content:"]"; color:var(--accent);font-weight:800;font-style:normal}
+  .pullquote cite{
+    display:block;margin-top:30px;font-family:'JetBrains Mono',monospace;
+    font-style:normal;font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--muted);
+  }
+
+  /* ===== CHEAT STRIP ===== */
+  .cheat{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0;border:2px solid var(--ink);margin:30px 0}
+  .cheat-cell{padding:24px;border-right:1px solid var(--ink);border-bottom:1px solid var(--ink);background:var(--paper)}
+  .cheat-cell:last-child{border-right:none}
+  .cheat-cell h5{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;font-weight:800}
+  .cheat-cell .big{font-family:'Fraunces',serif;font-size:38px;font-weight:600;line-height:1;color:var(--ink)}
+  .cheat-cell p{font-family:'Inter Tight',sans-serif;font-size:13px;margin-top:10px;color:#3a3a3a}
+
+  /* ===== FOOTER ===== */
+  footer{
+    background:var(--ink);color:var(--paper);
+    padding:60px 40px 40px;margin-top:80px;position:relative;z-index:2;
+    border-top:6px solid var(--accent);
+  }
+  footer .inner{max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:40px}
+  footer h3{font-family:'Fraunces',serif;font-size:42px;line-height:1;margin:0;font-weight:800}
+  footer h3 em{color:var(--accent-3);font-style:italic;font-weight:400}
+  footer p{font-family:'Inter Tight',sans-serif;font-size:13px;color:#9aa4b2;max-width:420px;margin:0;line-height:1.6}
+  footer .stamp{
+    border:2px solid var(--accent-3);padding:14px 22px;
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--accent-3);font-weight:700;
+  }
+
+  /* ===== SVG STYLES ===== */
+  .cell-box{fill:var(--paper);stroke:var(--ink);stroke-width:2}
+  .cell-box.active{fill:var(--accent-3);stroke:var(--ink)}
+  .cell-box.left{fill:var(--accent);stroke:var(--ink)}
+  .cell-box.right{fill:var(--accent-2);stroke:var(--ink)}
+  .cell-box.window{fill:var(--accent-4);stroke:var(--ink)}
+  .cell-box.matched{fill:#9be7ff;stroke:var(--ink)}
+  .cell-box.dim{fill:#dde4ea;stroke:#aab2bd;opacity:.5}
+  .cell-val{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:800;fill:var(--ink);text-anchor:middle;dominant-baseline:central}
+  .cell-val.light{fill:var(--paper)}
+  .cell-idx{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;text-anchor:middle;fill:var(--muted)}
+  .cell-label{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;text-anchor:middle;fill:var(--ink)}
+  .arrow{stroke:var(--ink);stroke-width:2;fill:none;marker-end:url(#arrowMain)}
+
+  /* ===== INPUT GROUP ===== */
+  .input-group{
+    display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+    font-family:'JetBrains Mono',monospace;font-size:12px;
+  }
+  .input-group label{font-weight:700;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+
+  /* responsive */
+  @media(max-width:900px){
+    .two-col{grid-template-columns:1fr}
+    .pattern-item{grid-template-columns:50px 1fr;gap:18px}
+    .pattern-item .complexity{grid-column:2;text-align:left}
+    .hero{padding:50px 24px}
+    .hero .meta{grid-template-columns:repeat(2,1fr);gap:20px}
+    section{padding:60px 24px}
+    .masthead{padding:14px 20px;font-size:10px}
+    .masthead .edition{display:none}
+  }
+</style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<div class="masthead">
+  <div class="logo">[ THE INTERVIEW CODEX // VOL.III ]</div>
+  <div class="edition">
+    <span>Chapter 02</span>
+    <span>Arrays</span>
+    <span>Senior Engineering Track</span>
+  </div>
+</div>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="kicker">Data Structures · Chapter Two</div>
+  <h1>The <em>Array</em>,<br/><span class="accent">deconstructed.</span></h1>
+  <p class="sub">A field manual for the data structure interviewers test most — from cache lines and pointer arithmetic to the seven patterns that crack 95% of array problems at top-tier engineering loops.</p>
+  <div class="meta">
+    <div><strong>Difficulty</strong><span>Foundational → Senior</span></div>
+    <div><strong>Target Loops</strong><span>FAANG / HFT / Unicorns</span></div>
+    <div><strong>Comp Band</strong><span>$220k – $750k+ TC</span></div>
+    <div><strong>Time To Mastery</strong><span>~15 hours focused</span></div>
+  </div>
+</header>
+
+<!-- TOC -->
+<nav class="toc">
+  <a href="#intuition"><span class="num">01</span>Intuition</a>
+  <a href="#anatomy"><span class="num">02</span>Anatomy</a>
+  <a href="#operations"><span class="num">03</span>Operations</a>
+  <a href="#patterns"><span class="num">04</span>Seven Patterns</a>
+  <a href="#twopointer"><span class="num">05</span>Two Pointers</a>
+  <a href="#window"><span class="num">06</span>Sliding Window</a>
+  <a href="#prefix"><span class="num">07</span>Prefix Sum</a>
+  <a href="#binsearch"><span class="num">08</span>Binary Search</a>
+  <a href="#problems"><span class="num">09</span>Interview Problems</a>
+  <a href="#cheatsheet"><span class="num">10</span>Cheat Sheet</a>
+</nav>
+
+<!-- SECTION 01 — INTUITION -->
+<section id="intuition">
+  <div class="sec-num">§01 · The Mental Model</div>
+  <h2>Arrays are the bedrock. <em>Everything</em> else is a clever lie.</h2>
+
+  <div class="two-col">
+    <div>
+      <p>An <strong>array</strong> is a contract with the memory bus: <em>"Give me N units of contiguous space, and I will tell you the address of any element with one multiplication and one addition."</em> That arithmetic — <code class="mono">base + i × stride</code> — is the most efficient lookup in computing. It is so cheap that the CPU does it without breathing.</p>
+
+      <p>Hash maps, dynamic arrays, strings, heaps, hash sets, ring buffers, even the call stack — all of these are arrays in disguise, with bookkeeping layered on top. <strong>To master arrays is to understand the substrate.</strong></p>
+
+      <p>Interviewers love arrays not because they are exotic, but because they are <em>unforgiving</em>. There is nowhere to hide an O(n²) when an O(n) exists. The candidate who reaches for a nested loop on a "find pair" problem is the candidate who does not get the offer.</p>
+    </div>
+
+    <aside class="side-note">
+      <h4>Why this chapter is different</h4>
+      <p>Arrays test something subtler than other DS questions: <em>the ability to think in indices, not just values</em>. The best candidates manipulate <code style="color:var(--accent-3)">i</code> and <code style="color:var(--accent-3)">j</code> like instruments — they know exactly what every pointer represents at every line. A candidate who narrates their loop invariants will outrank a candidate who writes correct code silently. <strong>Index discipline is the senior signal.</strong></p>
+    </aside>
+  </div>
+
+  <div class="intuition-grid">
+    <div class="intuition-card">
+      <div class="num">i.</div>
+      <h4>Contiguity is the Superpower</h4>
+      <p>Elements sit next to each other in RAM. The CPU prefetcher loves you. A linear scan over an array is roughly 10× faster than the same scan over a linked list — even though both are O(n).</p>
+    </div>
+    <div class="intuition-card">
+      <div class="num">ii.</div>
+      <h4>Indexing is Arithmetic, Not Lookup</h4>
+      <p>There is no "find element 47." There is only <code class="mono">arr + 47×8</code>. This is why <code class="mono">arr[i]</code> is O(1) — it's literally a single CPU instruction.</p>
+    </div>
+    <div class="intuition-card">
+      <div class="num">iii.</div>
+      <h4>Insert is Shifting in Disguise</h4>
+      <p>Inserting at position k requires shifting n−k elements rightward. The cost is hidden, but it's there. This is the entire reason linked lists exist.</p>
+    </div>
+    <div class="intuition-card">
+      <div class="num">iv.</div>
+      <h4>Sorted Arrays Are a Different Beast</h4>
+      <p>The moment an array is sorted, binary search and two-pointer techniques unlock O(log n) and O(n) algorithms that no unsorted version permits. Always ask: <em>is this sorted?</em></p>
+    </div>
+  </div>
+
+  <!-- VIZ: Memory layout -->
+  <div class="viz">
+    <div class="viz-caption"><span class="label">FIG. 01</span><span>Array memory layout — base + offset arithmetic</span></div>
+    <svg viewBox="0 0 900 240" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrowMain" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="#0d1117"/>
+        </marker>
+      </defs>
+      <text x="20" y="26" class="cell-label" style="text-anchor:start;font-size:13px;fill:#0066ff">CONTIGUOUS MEMORY · int32[8]</text>
+      <g>
+        <rect x="20" y="50" width="100" height="70" class="cell-box"/>
+        <rect x="120" y="50" width="100" height="70" class="cell-box"/>
+        <rect x="220" y="50" width="100" height="70" class="cell-box"/>
+        <rect x="320" y="50" width="100" height="70" class="cell-box"/>
+        <rect x="420" y="50" width="100" height="70" class="cell-box active"/>
+        <rect x="520" y="50" width="100" height="70" class="cell-box"/>
+        <rect x="620" y="50" width="100" height="70" class="cell-box"/>
+        <rect x="720" y="50" width="100" height="70" class="cell-box"/>
+        <text x="70" y="85" class="cell-val">42</text>
+        <text x="170" y="85" class="cell-val">7</text>
+        <text x="270" y="85" class="cell-val">19</text>
+        <text x="370" y="85" class="cell-val">3</text>
+        <text x="470" y="85" class="cell-val">88</text>
+        <text x="570" y="85" class="cell-val">11</text>
+        <text x="670" y="85" class="cell-val">25</text>
+        <text x="770" y="85" class="cell-val">9</text>
+        <text x="70" y="140" class="cell-idx">[0]</text>
+        <text x="170" y="140" class="cell-idx">[1]</text>
+        <text x="270" y="140" class="cell-idx">[2]</text>
+        <text x="370" y="140" class="cell-idx">[3]</text>
+        <text x="470" y="140" class="cell-idx" style="fill:#0066ff;font-weight:800">[4]</text>
+        <text x="570" y="140" class="cell-idx">[5]</text>
+        <text x="670" y="140" class="cell-idx">[6]</text>
+        <text x="770" y="140" class="cell-idx">[7]</text>
+        <text x="70" y="160" class="cell-idx" style="fill:#5c6370">0x1000</text>
+        <text x="170" y="160" class="cell-idx" style="fill:#5c6370">0x1004</text>
+        <text x="270" y="160" class="cell-idx" style="fill:#5c6370">0x1008</text>
+        <text x="370" y="160" class="cell-idx" style="fill:#5c6370">0x100C</text>
+        <text x="470" y="160" class="cell-idx" style="fill:#5c6370">0x1010</text>
+        <text x="570" y="160" class="cell-idx" style="fill:#5c6370">0x1014</text>
+        <text x="670" y="160" class="cell-idx" style="fill:#5c6370">0x1018</text>
+        <text x="770" y="160" class="cell-idx" style="fill:#5c6370">0x101C</text>
+      </g>
+      <text x="20" y="200" class="cell-label" style="text-anchor:start;font-size:14px">arr[4] computed as: base(0x1000) + 4 × sizeof(int32)(4) = <tspan style="fill:#0066ff;font-weight:800">0x1010</tspan> → value 88</text>
+      <text x="20" y="222" class="cell-label" style="text-anchor:start;font-size:13px;fill:#5c6370">One multiply + one add. The CPU does this in a single cycle. This is why arr[i] is O(1).</text>
+    </svg>
+  </div>
+
+  <div class="cheat">
+    <div class="cheat-cell"><h5>Random access</h5><div class="big">O(1)</div><p>The defining superpower.</p></div>
+    <div class="cheat-cell"><h5>Search (unsorted)</h5><div class="big">O(n)</div><p>Linear scan, no shortcuts.</p></div>
+    <div class="cheat-cell"><h5>Search (sorted)</h5><div class="big">O(log n)</div><p>Binary search domain.</p></div>
+    <div class="cheat-cell"><h5>Insert middle</h5><div class="big">O(n)</div><p>Must shift everything right.</p></div>
+    <div class="cheat-cell"><h5>Append (amortized)</h5><div class="big">O(1)</div><p>Dynamic arrays double on full.</p></div>
+  </div>
+</section>
+
+<!-- SECTION 02 — ANATOMY -->
+<section id="anatomy">
+  <div class="sec-num">§02 · Anatomy of an Array</div>
+  <h2>Static, dynamic, multi-dim. <em>Three flavors</em>, three trade-offs.</h2>
+
+  <p>Every interview problem assumes one of three array types. Knowing which one you're handed — and which one to <em>ask</em> for — is the first 30 seconds of any array question.</p>
+
+<pre><span class="c"># 1. STATIC ARRAY — fixed size, contiguous (the platonic ideal)</span>
+<span class="k">int</span> arr[<span class="num">10</span>];                  <span class="c"># C/C++/Java primitives</span>
+arr = [<span class="num">0</span>] * <span class="num">10</span>                <span class="c"># Python — actually a list, but 1D fixed-size feel</span>
+
+<span class="c"># 2. DYNAMIC ARRAY — auto-resizing (Python list, Java ArrayList, C++ vector)</span>
+arr = []
+arr.append(<span class="num">5</span>)               <span class="c"># O(1) amortized — capacity doubles when full</span>
+arr.pop()                    <span class="c"># O(1)</span>
+arr.insert(<span class="num">0</span>, <span class="num">99</span>)            <span class="c"># O(n) — shifts everything right!</span>
+
+<span class="c"># 3. MULTI-DIMENSIONAL — arrays of arrays (matrices, grids)</span>
+grid = [[<span class="num">0</span>] * cols <span class="k">for</span> _ <span class="k">in</span> range(rows)]   <span class="c"># row-major</span>
+grid[r][c] = <span class="num">1</span>             <span class="c"># access — still O(1)</span></pre>
+
+  <h3>The amortization argument you must know</h3>
+  <div class="two-col">
+    <div>
+      <p>When a Python list is full and you call <code class="mono">append</code>, the runtime allocates a new array (typically 1.5× or 2× the current size), copies all elements, and frees the old one. That copy is O(n).</p>
+      <p>Yet we say <code class="mono">append</code> is <strong>O(1) amortized</strong>. Why? Because over n appends, you only resize <code class="mono">log₂(n)</code> times, and the total copying work is <code class="mono">1 + 2 + 4 + ... + n ≈ 2n</code>. Divide by n and you get O(1) per operation on average.</p>
+      <p>This is the <em>amortized analysis</em> argument. Senior interviewers will probe this. Be ready.</p>
+    </div>
+    <aside class="side-note">
+      <h4>The growth factor wars</h4>
+      <p>Python uses ~1.125×, Java ArrayList uses 1.5×, C++ <code style="color:var(--accent-3)">std::vector</code> uses 2×. Smaller factors save memory but trigger more resizes; larger factors waste up to 50% RAM in the worst case but copy less. Real engineering is full of these dials. <strong>If asked, the "right" answer is 1.5× — it lets freed memory be reused on subsequent reallocations, while 2× cannot.</strong></p>
+    </aside>
+  </div>
+</section>
+
+<!-- SECTION 03 — OPERATIONS -->
+<section id="operations">
+  <div class="sec-num">§03 · Core Operations</div>
+  <h2>Five primitives. The atoms of every algorithm.</h2>
+
+  <p>Before patterns, master moves. Below: an interactive array you can modify. Watch how each operation affects index positions in real time.</p>
+
+  <!-- VIZ: Interactive Array -->
+  <div class="viz">
+    <div class="viz-caption"><span class="label">FIG. 02 · INTERACTIVE</span><span>Array primitives — insert, delete, swap</span></div>
+    <svg id="opsViz" viewBox="0 0 900 160" xmlns="http://www.w3.org/2000/svg">
+      <g id="opsCells"></g>
+    </svg>
+    <div class="viz-controls">
+      <div class="input-group">
+        <label>val:</label>
+        <input type="number" id="opsVal" value="42" min="0" max="99">
+        <label>idx:</label>
+        <input type="number" id="opsIdx" value="2" min="0" max="20">
+      </div>
+    </div>
+    <div class="viz-controls" style="margin-top:10px">
+      <button onclick="ops_insertAt()">Insert @ idx</button>
+      <button onclick="ops_deleteAt()">Delete @ idx</button>
+      <button onclick="ops_append()">Append</button>
+      <button onclick="ops_swap()">Swap [0] ⇄ [last]</button>
+      <button onclick="ops_reverse()">Reverse</button>
+      <button class="secondary" onclick="ops_reset()">Reset</button>
+    </div>
+    <div class="viz-status" id="opsStatus"><span class="tag">[READY]</span>Array of 6 elements. Try each operation — note what shifts.</div>
+  </div>
+
+  <h3>Operation cheat sheet</h3>
+<pre><span class="c"># 1. INSERT AT INDEX i — O(n), shifts arr[i..end] right</span>
+<span class="k">def</span> <span class="f">insert_at</span>(arr, i, val):
+    arr.append(<span class="k">None</span>)             <span class="c"># grow by one</span>
+    <span class="k">for</span> j <span class="k">in</span> range(len(arr)-<span class="num">1</span>, i, -<span class="num">1</span>):
+        arr[j] = arr[j-<span class="num">1</span>]        <span class="c"># shift right</span>
+    arr[i] = val
+
+<span class="c"># 2. DELETE AT INDEX i — O(n), shifts arr[i+1..end] left</span>
+<span class="k">def</span> <span class="f">delete_at</span>(arr, i):
+    <span class="k">for</span> j <span class="k">in</span> range(i, len(arr)-<span class="num">1</span>):
+        arr[j] = arr[j+<span class="num">1</span>]        <span class="c"># shift left</span>
+    arr.pop()
+
+<span class="c"># 3. SWAP — O(1), the workhorse of in-place algorithms</span>
+<span class="k">def</span> <span class="f">swap</span>(arr, i, j):
+    arr[i], arr[j] = arr[j], arr[i]   <span class="c"># Python tuple-swap, no temp needed</span>
+
+<span class="c"># 4. REVERSE IN PLACE — O(n) time, O(1) space</span>
+<span class="k">def</span> <span class="f">reverse</span>(arr):
+    l, r = <span class="num">0</span>, len(arr)-<span class="num">1</span>
+    <span class="k">while</span> l &lt; r:
+        arr[l], arr[r] = arr[r], arr[l]
+        l += <span class="num">1</span>; r -= <span class="num">1</span>
+
+<span class="c"># 5. ROTATE BY k — the THREE-REVERSE TRICK. Senior signal.</span>
+<span class="k">def</span> <span class="f">rotate</span>(arr, k):
+    n = len(arr); k %= n
+    reverse(arr[<span class="num">0</span>:n])           <span class="c"># reverse all</span>
+    reverse(arr[<span class="num">0</span>:k])           <span class="c"># reverse first k</span>
+    reverse(arr[k:n])           <span class="c"># reverse the rest</span>
+    <span class="c"># [1,2,3,4,5,6,7] k=3 → [7,6,5,4,3,2,1] → [5,6,7,4,3,2,1] → [5,6,7,1,2,3,4] ✓</span></pre>
+
+  <div class="insight"><strong>The three-reverse trick</strong> for rotation is one of the most-loved interview answers. It uses O(1) extra space where the naive solution uses O(k). Internalize it.</div>
+</section>
+
+<!-- PULL QUOTE -->
+<div class="pullquote">
+  <blockquote>The candidate who treats indices like first-class objects — naming them, narrating them, defending their invariants — is the candidate who gets the senior offer.</blockquote>
+  <cite>— observation from 200+ FAANG hiring debriefs</cite>
+</div>
+
+<!-- SECTION 04 — THE SEVEN PATTERNS -->
+<section id="patterns">
+  <div class="sec-num">§04 · Problem Patterns</div>
+  <h2>Seven patterns. <em>Ninety-five percent</em> of all array problems.</h2>
+
+  <p>This is the master taxonomy. When an array problem lands in front of you, your first move is not to code — it's to <strong>classify</strong>. Every array question ever asked falls into one (or a composition) of these seven patterns.</p>
+
+  <div class="pattern-list">
+    <div class="pattern-item">
+      <div class="pat-num">01</div>
+      <div>
+        <h4>Two Pointers</h4>
+        <p>Two indices crawl from both ends, or one chases the other. Solves "find pair," "remove duplicates in place," "container with most water," and any sorted-array search in O(n) instead of O(n²).</p>
+        <span class="tag">Two Sum II</span><span class="tag">3Sum</span><span class="tag">Container Water</span><span class="tag alt">In-place</span>
+      </div>
+      <div class="complexity"><strong>O(n) / O(1)</strong>time / space</div>
+    </div>
+
+    <div class="pattern-item">
+      <div class="pat-num">02</div>
+      <div>
+        <h4>Sliding Window</h4>
+        <p>A contiguous range that grows on the right and shrinks on the left. Crushes "longest substring with X," "min subarray with sum ≥ k," and any "subarray of length k" problem in one pass.</p>
+        <span class="tag">Longest Substring</span><span class="tag">Min Subarray Sum</span><span class="tag">Anagrams</span>
+      </div>
+      <div class="complexity"><strong>O(n) / O(k)</strong>time / space</div>
+    </div>
+
+    <div class="pattern-item">
+      <div class="pat-num">03</div>
+      <div>
+        <h4>Prefix Sum</h4>
+        <p>Precompute cumulative sums so any range query becomes O(1). Combined with hashmaps, enables "subarray sum equals k" and "count subarrays divisible by k" in linear time.</p>
+        <span class="tag">Subarray Sum K</span><span class="tag">Range Sum</span><span class="tag alt">Hash Combo</span>
+      </div>
+      <div class="complexity"><strong>O(n) / O(n)</strong>time / space</div>
+    </div>
+
+    <div class="pattern-item">
+      <div class="pat-num">04</div>
+      <div>
+        <h4>Binary Search</h4>
+        <p>Not just for sorted arrays — for any monotonic predicate. "Search in rotated sorted," "find peak," "minimize max" — all binary search on the answer space. The most under-recognized pattern.</p>
+        <span class="tag">Rotated Search</span><span class="tag">Find Peak</span><span class="tag">Median Two Sorted</span>
+      </div>
+      <div class="complexity"><strong>O(log n)</strong>per query</div>
+    </div>
+
+    <div class="pattern-item">
+      <div class="pat-num">05</div>
+      <div>
+        <h4>Hash for O(1) Lookup</h4>
+        <p>Trade space for time. Convert "find pair / triple / complement" from O(n²) to O(n) by remembering what you've seen. The pattern behind Two Sum, the canonical first interview question.</p>
+        <span class="tag">Two Sum</span><span class="tag">Longest Consec.</span><span class="tag">Group Anagrams</span>
+      </div>
+      <div class="complexity"><strong>O(n) / O(n)</strong>time / space</div>
+    </div>
+
+    <div class="pattern-item">
+      <div class="pat-num">06</div>
+      <div>
+        <h4>Greedy + Single Pass</h4>
+        <p>Maintain running state (best-so-far, min-so-far, profit-so-far) and update in one walk. Solves Kadane's max subarray, "best time to buy/sell stock," and "jump game" in O(n) where DP would be O(n²).</p>
+        <span class="tag">Kadane</span><span class="tag">Stock Buy/Sell</span><span class="tag">Jump Game</span>
+      </div>
+      <div class="complexity"><strong>O(n) / O(1)</strong>time / space</div>
+    </div>
+
+    <div class="pattern-item">
+      <div class="pat-num">07</div>
+      <div>
+        <h4>Cyclic Sort &amp; Index-as-Hash</h4>
+        <p>When values are bounded to [1..n], the index <em>is</em> the hash. Place each value at its "home" index — solves "find missing number," "find duplicate," "first missing positive" in O(n) / O(1).</p>
+        <span class="tag">Missing Number</span><span class="tag">First Missing +</span><span class="tag alt">O(1) Space</span>
+      </div>
+      <div class="complexity"><strong>O(n) / O(1)</strong>time / space</div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 05 — TWO POINTERS -->
+<section id="twopointer">
+  <div class="sec-num">§05 · Pattern Deep Dive — Two Pointers</div>
+  <h2>Two indices. <em>Quadratic</em> problems become linear.</h2>
+
+  <div class="two-col">
+    <div>
+      <p>The two-pointer technique is what separates an O(n²) brute force from an O(n) elegant solution. The core idea: <strong>place two indices, move them based on a condition, never backtrack.</strong></p>
+      <p>Two flavors dominate. <em>Opposite ends</em>: <code class="mono">l=0, r=n-1</code>, walk inward — solves "two sum sorted," "container with most water," "trapping rain water." <em>Same direction</em>: <code class="mono">slow, fast</code> with fast leading — solves "remove duplicates in place," "move zeros."</p>
+      <p>The unlock is recognizing when <strong>monotonicity</strong> exists: a quantity that only goes up or only goes down as you advance. That monotonicity justifies "I never need to look back."</p>
+    </div>
+    <aside class="side-note">
+      <h4>The litmus test</h4>
+      <p>Ask: <em>"if I move pointer A inward, can I prove pointer B should not move backward?"</em> If yes, two pointers works. If no, you need something else (likely sliding window or hash).</p>
+    </aside>
+  </div>
+
+  <!-- VIZ: Two Pointers -->
+  <div class="viz">
+    <div class="viz-caption"><span class="label">FIG. 03 · ANIMATED</span><span>Two-sum on a sorted array — converging pointers</span></div>
+    <svg id="tpViz" viewBox="0 0 900 200" xmlns="http://www.w3.org/2000/svg">
+      <g id="tpCells"></g>
+    </svg>
+    <div class="viz-controls">
+      <div class="input-group">
+        <label>target:</label>
+        <input type="number" id="tpTarget" value="14">
+      </div>
+      <button onclick="tp_step()" id="tpStepBtn">Step</button>
+      <button onclick="tp_play()" id="tpPlayBtn">Auto-play</button>
+      <button class="secondary" onclick="tp_reset()">Reset</button>
+    </div>
+    <div class="viz-status" id="tpStatus"><span class="tag">[INIT]</span>Sorted array. Two pointers from both ends. Find pair summing to target.</div>
+  </div>
+
+<pre><span class="c"># Two-Sum on a SORTED array — O(n), O(1)</span>
+<span class="k">def</span> <span class="f">two_sum_sorted</span>(arr, target):
+    l, r = <span class="num">0</span>, len(arr) - <span class="num">1</span>
+    <span class="k">while</span> l &lt; r:
+        s = arr[l] + arr[r]
+        <span class="k">if</span> s == target:   <span class="k">return</span> [l, r]
+        <span class="k">elif</span> s &lt; target:  l += <span class="num">1</span>     <span class="c"># sum too small → grow it</span>
+        <span class="k">else</span>:              r -= <span class="num">1</span>     <span class="c"># sum too big   → shrink it</span>
+    <span class="k">return</span> []
+
+<span class="c"># Container With Most Water — LeetCode 11. The classic.</span>
+<span class="k">def</span> <span class="f">max_area</span>(heights):
+    l, r = <span class="num">0</span>, len(heights) - <span class="num">1</span>
+    best = <span class="num">0</span>
+    <span class="k">while</span> l &lt; r:
+        h = min(heights[l], heights[r])
+        best = max(best, h * (r - l))
+        <span class="c"># move the SHORTER side — moving the taller can never improve area</span>
+        <span class="k">if</span> heights[l] &lt; heights[r]: l += <span class="num">1</span>
+        <span class="k">else</span>:                       r -= <span class="num">1</span>
+    <span class="k">return</span> best
+
+<span class="c"># Remove Duplicates In Place — fast/slow pointer variant. O(n), O(1).</span>
+<span class="k">def</span> <span class="f">remove_dupes</span>(arr):
+    <span class="k">if</span> <span class="k">not</span> arr: <span class="k">return</span> <span class="num">0</span>
+    slow = <span class="num">0</span>
+    <span class="k">for</span> fast <span class="k">in</span> range(<span class="num">1</span>, len(arr)):
+        <span class="k">if</span> arr[fast] != arr[slow]:
+            slow += <span class="num">1</span>
+            arr[slow] = arr[fast]
+    <span class="k">return</span> slow + <span class="num">1</span>          <span class="c"># length of unique prefix</span></pre>
+</section>
+
+<!-- SECTION 06 — SLIDING WINDOW -->
+<section id="window">
+  <div class="sec-num">§06 · Pattern Deep Dive — Sliding Window</div>
+  <h2>A window that breathes. One pass. <em>Linear</em>.</h2>
+
+  <p>The sliding window is two pointers' more sophisticated cousin. Instead of converging, both pointers move <em>rightward</em>: <code class="mono">right</code> expands the window to admit new elements; <code class="mono">left</code> contracts it to evict elements when an invariant is violated.</p>
+
+  <p>The unlock: identify <strong>what makes a window "valid"</strong> (e.g., "all distinct chars," "sum ≥ k," "at most 2 distinct"). Expand greedily, contract reluctantly.</p>
+
+  <!-- VIZ: Sliding Window -->
+  <div class="viz">
+    <div class="viz-caption"><span class="label">FIG. 04 · ANIMATED</span><span>Longest substring with no repeating characters</span></div>
+    <svg id="swViz" viewBox="0 0 900 220" xmlns="http://www.w3.org/2000/svg">
+      <g id="swCells"></g>
+    </svg>
+    <div class="viz-controls">
+      <button onclick="sw_step()" id="swStepBtn">Step</button>
+      <button onclick="sw_play()" id="swPlayBtn">Auto-play</button>
+      <button class="secondary" onclick="sw_reset()">Reset</button>
+    </div>
+    <div class="viz-status" id="swStatus"><span class="tag">[INIT]</span>String "abcabcbb". Window expands right; shrinks left when duplicate found.</div>
+  </div>
+
+<pre><span class="c"># Longest substring without repeating characters — O(n), O(min(n,Σ))</span>
+<span class="k">def</span> <span class="f">longest_unique</span>(s):
+    seen = {}
+    left = best = <span class="num">0</span>
+    <span class="k">for</span> right, ch <span class="k">in</span> enumerate(s):
+        <span class="k">if</span> ch <span class="k">in</span> seen <span class="k">and</span> seen[ch] &gt;= left:
+            left = seen[ch] + <span class="num">1</span>     <span class="c"># jump past the dupe</span>
+        seen[ch] = right
+        best = max(best, right - left + <span class="num">1</span>)
+    <span class="k">return</span> best
+
+<span class="c"># Minimum window substring — Hard. O(|s|+|t|).</span>
+<span class="k">def</span> <span class="f">min_window</span>(s, t):
+    <span class="k">from</span> collections <span class="k">import</span> Counter
+    need = Counter(t)
+    have = {}
+    formed = <span class="num">0</span>; required = len(need)
+    l = <span class="num">0</span>; best = (float(<span class="s">'inf'</span>), <span class="num">0</span>, <span class="num">0</span>)
+    <span class="k">for</span> r, ch <span class="k">in</span> enumerate(s):
+        have[ch] = have.get(ch, <span class="num">0</span>) + <span class="num">1</span>
+        <span class="k">if</span> ch <span class="k">in</span> need <span class="k">and</span> have[ch] == need[ch]:
+            formed += <span class="num">1</span>
+        <span class="k">while</span> formed == required:               <span class="c"># try to shrink</span>
+            <span class="k">if</span> r - l + <span class="num">1</span> &lt; best[<span class="num">0</span>]:
+                best = (r - l + <span class="num">1</span>, l, r)
+            have[s[l]] -= <span class="num">1</span>
+            <span class="k">if</span> s[l] <span class="k">in</span> need <span class="k">and</span> have[s[l]] &lt; need[s[l]]:
+                formed -= <span class="num">1</span>
+            l += <span class="num">1</span>
+    <span class="k">return</span> <span class="s">""</span> <span class="k">if</span> best[<span class="num">0</span>] == float(<span class="s">'inf'</span>) <span class="k">else</span> s[best[<span class="num">1</span>]:best[<span class="num">2</span>]+<span class="num">1</span>]</pre>
+
+  <div class="insight"><strong>The pattern in one sentence:</strong> for each <code class="mono">right</code>, expand the window; while the window is invalid (or now optimal), advance <code class="mono">left</code>; record the answer.</div>
+</section>
+
+<!-- SECTION 07 — PREFIX SUM -->
+<section id="prefix">
+  <div class="sec-num">§07 · Pattern Deep Dive — Prefix Sum</div>
+  <h2>Pay O(n) once. Answer infinitely many range queries in <em>O(1)</em>.</h2>
+
+  <p>Prefix sum is a precomputation trick: define <code class="mono">P[i] = arr[0] + arr[1] + … + arr[i-1]</code>, with <code class="mono">P[0] = 0</code>. Then the sum of any range <code class="mono">[l..r]</code> is just <code class="mono">P[r+1] − P[l]</code>. One subtraction. O(1).</p>
+
+  <!-- VIZ: Prefix Sum -->
+  <div class="viz">
+    <div class="viz-caption"><span class="label">FIG. 05 · INTERACTIVE</span><span>Prefix sum — range query in O(1)</span></div>
+    <svg id="psViz" viewBox="0 0 900 240" xmlns="http://www.w3.org/2000/svg">
+      <g id="psCells"></g>
+    </svg>
+    <div class="viz-controls">
+      <div class="input-group">
+        <label>l:</label>
+        <input type="number" id="psL" value="2" min="0" max="7">
+        <label>r:</label>
+        <input type="number" id="psR" value="5" min="0" max="7">
+      </div>
+      <button onclick="ps_query()">Query Range</button>
+      <button class="secondary" onclick="ps_reset()">Reset</button>
+    </div>
+    <div class="viz-status" id="psStatus"><span class="tag">[READY]</span>Pick l and r, then "Query Range" to see P[r+1] − P[l] in action.</div>
+  </div>
+
+<pre><span class="c"># Build prefix sum array once — O(n)</span>
+<span class="k">def</span> <span class="f">build_prefix</span>(arr):
+    P = [<span class="num">0</span>] * (len(arr) + <span class="num">1</span>)
+    <span class="k">for</span> i, v <span class="k">in</span> enumerate(arr):
+        P[i+<span class="num">1</span>] = P[i] + v
+    <span class="k">return</span> P
+
+<span class="c"># Query sum of arr[l..r] inclusive — O(1)</span>
+<span class="k">def</span> <span class="f">range_sum</span>(P, l, r):
+    <span class="k">return</span> P[r+<span class="num">1</span>] - P[l]
+
+<span class="c"># Subarray Sum Equals K — LeetCode 560. The killer combo: prefix + hash.</span>
+<span class="c"># Insight: number of subarrays ending at i with sum=k</span>
+<span class="c">#   == number of prefix sums equal to (running_sum - k) seen so far.</span>
+<span class="k">def</span> <span class="f">subarray_sum_k</span>(arr, k):
+    count = running = <span class="num">0</span>
+    seen = {<span class="num">0</span>: <span class="num">1</span>}                    <span class="c"># empty prefix has sum 0, count once</span>
+    <span class="k">for</span> v <span class="k">in</span> arr:
+        running += v
+        count   += seen.get(running - k, <span class="num">0</span>)
+        seen[running] = seen.get(running, <span class="num">0</span>) + <span class="num">1</span>
+    <span class="k">return</span> count</pre>
+
+  <div class="insight"><strong>The combo that wins interviews:</strong> prefix sum + hashmap. Whenever a problem asks "how many subarrays satisfy sum-related property X," reach for this duo first. It transforms O(n²) brute force into O(n) every time.</div>
+</section>
+
+<!-- SECTION 08 — BINARY SEARCH -->
+<section id="binsearch">
+  <div class="sec-num">§08 · Pattern Deep Dive — Binary Search</div>
+  <h2>Halve. Halve. <em>Halve.</em></h2>
+
+  <p>Binary search is the most under-recognized pattern in competitive interviews. Most candidates know it for sorted arrays. Few realize it works on <strong>any monotonic predicate</strong> — including the answer space itself ("binary search the answer").</p>
+
+  <!-- VIZ: Binary Search -->
+  <div class="viz">
+    <div class="viz-caption"><span class="label">FIG. 06 · ANIMATED</span><span>Binary search on a sorted array</span></div>
+    <svg id="bsViz" viewBox="0 0 900 200" xmlns="http://www.w3.org/2000/svg">
+      <g id="bsCells"></g>
+    </svg>
+    <div class="viz-controls">
+      <div class="input-group">
+        <label>target:</label>
+        <input type="number" id="bsTarget" value="23">
+      </div>
+      <button onclick="bs_step()" id="bsStepBtn">Step</button>
+      <button onclick="bs_play()" id="bsPlayBtn">Auto-play</button>
+      <button class="secondary" onclick="bs_reset()">Reset</button>
+    </div>
+    <div class="viz-status" id="bsStatus"><span class="tag">[INIT]</span>Sorted array. l=0, r=n−1. Each step halves the search space.</div>
+  </div>
+
+<pre><span class="c"># Canonical binary search — find target index, or -1</span>
+<span class="k">def</span> <span class="f">binary_search</span>(arr, target):
+    l, r = <span class="num">0</span>, len(arr) - <span class="num">1</span>
+    <span class="k">while</span> l &lt;= r:
+        m = (l + r) // <span class="num">2</span>           <span class="c"># in C/Java prefer l + (r-l)//2 to avoid overflow</span>
+        <span class="k">if</span> arr[m] == target: <span class="k">return</span> m
+        <span class="k">elif</span> arr[m] &lt; target: l = m + <span class="num">1</span>
+        <span class="k">else</span>:                 r = m - <span class="num">1</span>
+    <span class="k">return</span> -<span class="num">1</span>
+
+<span class="c"># Find FIRST index where predicate becomes true (lower_bound).</span>
+<span class="c"># This is the template for 80% of "find smallest valid X" problems.</span>
+<span class="k">def</span> <span class="f">lower_bound</span>(lo, hi, ok):
+    <span class="k">while</span> lo &lt; hi:
+        m = (lo + hi) // <span class="num">2</span>
+        <span class="k">if</span> ok(m): hi = m            <span class="c"># predicate satisfied → search left</span>
+        <span class="k">else</span>:     lo = m + <span class="num">1</span>
+    <span class="k">return</span> lo
+
+<span class="c"># Search in Rotated Sorted Array — LeetCode 33. The classic L4/L5 problem.</span>
+<span class="k">def</span> <span class="f">search_rotated</span>(arr, target):
+    l, r = <span class="num">0</span>, len(arr) - <span class="num">1</span>
+    <span class="k">while</span> l &lt;= r:
+        m = (l + r) // <span class="num">2</span>
+        <span class="k">if</span> arr[m] == target: <span class="k">return</span> m
+        <span class="k">if</span> arr[l] &lt;= arr[m]:                  <span class="c"># left half sorted</span>
+            <span class="k">if</span> arr[l] &lt;= target &lt; arr[m]: r = m - <span class="num">1</span>
+            <span class="k">else</span>:                          l = m + <span class="num">1</span>
+        <span class="k">else</span>:                                 <span class="c"># right half sorted</span>
+            <span class="k">if</span> arr[m] &lt; target &lt;= arr[r]: l = m + <span class="num">1</span>
+            <span class="k">else</span>:                          r = m - <span class="num">1</span>
+    <span class="k">return</span> -<span class="num">1</span></pre>
+
+  <div class="insight"><strong>Senior unlock — "binary search the answer":</strong> when the problem asks for the minimum/maximum value satisfying some property, and that property is monotonic in the value, binary search the value space. Examples: "min capacity to ship in D days," "split array largest sum," "kth smallest in matrix." The trick converts an O(n²) DP into O(n log V).</div>
+</section>
+
+<!-- SECTION 09 — INTERVIEW PROBLEMS -->
+<section id="problems">
+  <div class="sec-num">§09 · The Canon</div>
+  <h2>Twelve problems. <em>Solve these cold, you are ready.</em></h2>
+
+  <div class="problem-card">
+    <header><span>01 · Two Sum</span><span class="diff easy">EASY</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Given an array and a target, return indices of the two numbers that add to target.</p>
+      <h4>Pattern</h4><p>Hash for O(1) lookup. Walk once; for each <code class="mono">v</code>, check if <code class="mono">target − v</code> was seen before.</p>
+      <div class="insight">The most-asked first interview question on the planet. Brute force is O(n²); the hash unlock is O(n)/O(n). If sorted, two-pointer gives O(n)/O(1) — be ready to discuss the trade.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>02 · Best Time to Buy and Sell Stock</span><span class="diff easy">EASY</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> One buy, one sell, return max profit. Can't sell before buying.</p>
+      <h4>Pattern</h4><p>Greedy + single pass. Track <code class="mono">min_so_far</code> and <code class="mono">best_profit</code>.</p>
+      <div class="insight">Three follow-ups exist (II, III, IV — multiple transactions, with cooldown, with fee). Each is a DP. If the interviewer escalates, you've entered DP territory.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>03 · Maximum Subarray (Kadane's)</span><span class="diff med">MEDIUM</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Find the contiguous subarray with the largest sum.</p>
+      <h4>Pattern</h4><p>Greedy / 1-D DP. Maintain <code class="mono">cur = max(v, cur + v)</code>; track global max.</p>
+      <div class="insight">Kadane's is the canonical answer. The DP recurrence: dp[i] = max ending at i = max(arr[i], dp[i-1] + arr[i]). Mention the recurrence — interviewers love when you bridge greedy and DP.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>04 · 3Sum</span><span class="diff med">MEDIUM</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Find all unique triplets that sum to zero.</p>
+      <h4>Pattern</h4><p>Sort + two-pointer. Fix <code class="mono">i</code>, then two-pointer the rest. Skip duplicates carefully.</p>
+      <div class="insight">The duplicate-skipping is where most candidates fumble. Skip <code class="mono">i</code> if <code class="mono">arr[i]==arr[i-1]</code>; skip <code class="mono">l</code> after success while <code class="mono">arr[l]==arr[l+1]</code>; skip <code class="mono">r</code> similarly. Three skips. Drill them.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>05 · Container With Most Water</span><span class="diff med">MEDIUM</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Pick two heights forming the container holding the most water.</p>
+      <h4>Pattern</h4><p>Two pointers. Always move the shorter side inward.</p>
+      <div class="insight">The proof: moving the taller side cannot improve area (height capped by shorter, width decreases). Articulate this — it's the senior-level insight.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>06 · Trapping Rain Water</span><span class="diff hard">HARD</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Given heights, compute total trapped rainwater.</p>
+      <h4>Pattern</h4><p>Two pointers + max-from-each-side reasoning. O(n)/O(1).</p>
+      <div class="insight">Three valid approaches — DP arrays (O(n)/O(n)), monotonic stack (O(n)/O(n)), two-pointer (O(n)/O(1)). Walk through all three; deliver two-pointer. That's a staff-level signal.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>07 · Product of Array Except Self</span><span class="diff med">MEDIUM</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Return array where ans[i] = product of all elements except arr[i]. No division.</p>
+      <h4>Pattern</h4><p>Prefix product + suffix product, fused into two passes with O(1) extra.</p>
+      <div class="insight">First pass: store left-products in ans. Second pass: multiply by running right-product. The "no division" constraint is what makes this elegant.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>08 · Subarray Sum Equals K</span><span class="diff med">MEDIUM</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Count contiguous subarrays whose sum equals k.</p>
+      <h4>Pattern</h4><p>Prefix sum + hashmap. Count how often <code class="mono">running_sum − k</code> has appeared.</p>
+      <div class="insight">The "+1 for the empty prefix" initialization (<code class="mono">seen = {0: 1}</code>) is the bug everyone hits. It accounts for subarrays starting from index 0.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>09 · Search in Rotated Sorted Array</span><span class="diff med">MEDIUM</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> A sorted array, rotated at unknown pivot. Search for target in O(log n).</p>
+      <h4>Pattern</h4><p>Modified binary search. Determine which half is sorted at each step; check whether target lies in that half.</p>
+      <div class="insight">The boundary condition <code class="mono">arr[l] &lt;= arr[m]</code> (not <code class="mono">&lt;</code>) handles duplicates and the case where l == m. Easy to get wrong; rehearse it.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>10 · Longest Substring Without Repeating Characters</span><span class="diff med">MEDIUM</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Length of longest substring with all distinct characters.</p>
+      <h4>Pattern</h4><p>Sliding window + hashmap of last-seen index.</p>
+      <div class="insight">Use last-seen index, not boolean. When you see a duplicate, jump <code class="mono">left</code> to <code class="mono">last_seen + 1</code> — but only if <code class="mono">last_seen ≥ left</code> (otherwise it's outside the current window).</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>11 · Median of Two Sorted Arrays</span><span class="diff hard">HARD</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Find the median of two sorted arrays in O(log(min(m,n))).</p>
+      <h4>Pattern</h4><p>Binary search on the smaller array's partition. Hard to derive; expected for L5+ at FAANG.</p>
+      <div class="insight">Most interviewers accept O(m+n) merge as a baseline. The log solution requires partitioning so left halves combined have ⌈(m+n)/2⌉ elements. If you can articulate the partition invariant, you're at staff level.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>12 · First Missing Positive</span><span class="diff hard">HARD</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Given an unsorted array, find the smallest missing positive integer in O(n) / O(1).</p>
+      <h4>Pattern</h4><p>Cyclic sort / index-as-hash. Place each value <code class="mono">v</code> in [1..n] at index <code class="mono">v−1</code>. Then scan for first index where <code class="mono">arr[i] != i+1</code>.</p>
+      <div class="insight">The constraint forces O(1) extra space — no hashmap, no extra array. The trick is realizing the answer is always in [1..n+1], so values outside that range are noise.</div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 10 — CHEAT SHEET -->
+<section id="cheatsheet">
+  <div class="sec-num">§10 · The Night-Before Cheat Sheet</div>
+  <h2>If you forget <em>everything</em> else — remember this page.</h2>
+
+  <div class="cheat">
+    <div class="cheat-cell"><h5>Always ask</h5><div class="big" style="font-size:20px">"Sorted?"</div><p>Sorted unlocks binary search and two-pointer. Always confirm.</p></div>
+    <div class="cheat-cell"><h5>Index discipline</h5><div class="big" style="font-size:20px">Name them</div><p><code>l</code>, <code>r</code>, <code>slow</code>, <code>fast</code>. Never <code>i, j, k</code> alone — they hide intent.</p></div>
+    <div class="cheat-cell"><h5>Test inputs</h5><div class="big" style="font-size:20px">[] · [x] · sorted · dupes</div><p>Empty. One element. Already solved. Has duplicates. Run all four.</p></div>
+    <div class="cheat-cell"><h5>Off-by-one</h5><div class="big" style="font-size:20px">P[r+1] − P[l]</div><p>Prefix sums use n+1 length. Memorize the +1.</p></div>
+  </div>
+
+  <h3>Pattern → trigger words</h3>
+  <div class="cheat">
+    <div class="cheat-cell"><h5>"pair / triplet"</h5><div class="big" style="font-size:20px">Hash or 2P</div></div>
+    <div class="cheat-cell"><h5>"contiguous"</h5><div class="big" style="font-size:20px">Window or Prefix</div></div>
+    <div class="cheat-cell"><h5>"sorted, find"</h5><div class="big" style="font-size:20px">Binary Search</div></div>
+    <div class="cheat-cell"><h5>"longest / shortest"</h5><div class="big" style="font-size:20px">Sliding Window</div></div>
+    <div class="cheat-cell"><h5>"max sum so far"</h5><div class="big" style="font-size:20px">Kadane / Greedy</div></div>
+    <div class="cheat-cell"><h5>"in [1..n], O(1) space"</h5><div class="big" style="font-size:20px">Cyclic Sort</div></div>
+  </div>
+
+  <h3>Complexity at a glance</h3>
+  <div class="cheat">
+    <div class="cheat-cell"><h5>Random access</h5><div class="big">O(1)</div></div>
+    <div class="cheat-cell"><h5>Linear scan</h5><div class="big">O(n)</div></div>
+    <div class="cheat-cell"><h5>Sort</h5><div class="big">O(n log n)</div></div>
+    <div class="cheat-cell"><h5>Binary search</h5><div class="big">O(log n)</div></div>
+    <div class="cheat-cell"><h5>Two-pointer</h5><div class="big">O(n)</div></div>
+    <div class="cheat-cell"><h5>Sliding window</h5><div class="big">O(n)</div></div>
+  </div>
+
+  <h3>The reversal-rotation trick — write this from memory tonight:</h3>
+<pre><span class="c"># Rotate array right by k — three reverses, O(1) extra space</span>
+<span class="k">def</span> <span class="f">rotate</span>(arr, k):
+    n = len(arr); k %= n
+    arr.reverse()                  <span class="c"># whole array</span>
+    arr[:k] = reversed(arr[:k])    <span class="c"># first k</span>
+    arr[k:] = reversed(arr[k:])    <span class="c"># rest</span></pre>
+
+  <div class="insight" style="margin-top:40px"><strong>The final unlock:</strong> in the interview, before writing code, draw the array on paper and label every index with a meaning. Say out loud: <em>"l is the start of the unprocessed region. r is the next element to consider. Everything left of l is sorted."</em> Interviewers write down invariants. Candidates who speak invariants get hired.</div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="inner">
+    <div>
+      <h3>Chapter Two, <em>complete.</em></h3>
+      <p style="margin-top:16px">Continue the Codex: Chapter 03 — Strings &amp; Hashing. Chapter 07 — Linked Lists. Chapter 08 — Trees. The compounding compensation of systematic study.</p>
+    </div>
+    <div class="stamp">VOL.III · CH.02 · ED. MMXXVI</div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   Utility helpers
+   ============================================================ */
+function setStatus(id, text){
+  const tag = text.match(/^\[([^\]]+)\]/);
+  const rest = text.replace(/^\[[^\]]+\]\s*/,'');
+  document.getElementById(id).innerHTML = `<span class="tag">[${tag?tag[1]:'INFO'}]</span> ${rest}`;
+}
+function makeCell(x, y, val, idx, klass='cell-box', w=80, h=70){
+  return `<g transform="translate(${x},${y})">
+    <rect width="${w}" height="${h}" class="${klass}"/>
+    <text x="${w/2}" y="${h/2 - 4}" class="cell-val">${val}</text>
+    ${idx !== null ? `<text x="${w/2}" y="${h + 16}" class="cell-idx">[${idx}]</text>` : ''}
+  </g>`;
+}
+function makePointer(x, y, label, color, dir='down'){
+  if(dir === 'down'){
+    return `<g transform="translate(${x},${y})">
+      <path d="M 0 -10 L -8 6 L 8 6 Z" fill="${color}"/>
+      <text x="0" y="24" class="cell-label" style="fill:${color};font-size:13px;font-weight:800">${label}</text>
+    </g>`;
+  } else {
+    return `<g transform="translate(${x},${y})">
+      <path d="M 0 10 L -8 -6 L 8 -6 Z" fill="${color}"/>
+      <text x="0" y="-14" class="cell-label" style="fill:${color};font-size:13px;font-weight:800">${label}</text>
+    </g>`;
+  }
+}
+
+/* ============================================================
+   OPS VIZ — array primitives
+   ============================================================ */
+let opsArr = [3, 7, 2, 9, 4, 6];
+function ops_render(){
+  const svg = document.getElementById('opsCells');
+  let html = '';
+  const n = opsArr.length;
+  const totalW = Math.min(900, n * 90);
+  const cellW = totalW / n - 4;
+  const startX = (900 - n * (cellW + 4)) / 2;
+  opsArr.forEach((v, i) => {
+    html += makeCell(startX + i * (cellW + 4), 30, v, i, 'cell-box', cellW, 70);
+  });
+  svg.innerHTML = html;
+}
+function ops_insertAt(){
+  const idx = parseInt(document.getElementById('opsIdx').value, 10);
+  const val = parseInt(document.getElementById('opsVal').value, 10);
+  if(idx < 0 || idx > opsArr.length){ setStatus('opsStatus', '[ERROR] Index out of bounds.'); return; }
+  opsArr.splice(idx, 0, val);
+  setStatus('opsStatus', `[INSERT] arr[${idx}]=${val}. Shifted ${opsArr.length - idx - 1} element(s) right. O(n).`);
+  ops_render();
+}
+function ops_deleteAt(){
+  const idx = parseInt(document.getElementById('opsIdx').value, 10);
+  if(idx < 0 || idx >= opsArr.length){ setStatus('opsStatus', '[ERROR] Index out of bounds.'); return; }
+  const v = opsArr.splice(idx, 1)[0];
+  setStatus('opsStatus', `[DELETE] Removed arr[${idx}]=${v}. Shifted ${opsArr.length - idx} element(s) left. O(n).`);
+  ops_render();
+}
+function ops_append(){
+  const val = parseInt(document.getElementById('opsVal').value, 10);
+  opsArr.push(val);
+  setStatus('opsStatus', `[APPEND] Pushed ${val} at idx ${opsArr.length-1}. O(1) amortized.`);
+  ops_render();
+}
+function ops_swap(){
+  if(opsArr.length < 2){ setStatus('opsStatus', '[ERROR] Need at least 2 elements.'); return; }
+  const last = opsArr.length - 1;
+  [opsArr[0], opsArr[last]] = [opsArr[last], opsArr[0]];
+  setStatus('opsStatus', `[SWAP] arr[0] ⇄ arr[${last}]. O(1).`);
+  ops_render();
+}
+function ops_reverse(){
+  opsArr.reverse();
+  setStatus('opsStatus', `[REVERSE] In-place reversal. O(n) time, O(1) space.`);
+  ops_render();
+}
+function ops_reset(){
+  opsArr = [3, 7, 2, 9, 4, 6];
+  ops_render();
+  setStatus('opsStatus', '[RESET] Array of 6 elements.');
+}
+
+/* ============================================================
+   TWO POINTER VIZ — Two Sum on Sorted
+   ============================================================ */
+const tpArr = [1, 3, 5, 8, 11, 14, 17, 20];
+let tpL = 0, tpR = tpArr.length - 1, tpDone = false, tpTimer = null;
+function tp_render(){
+  const svg = document.getElementById('tpCells');
+  let html = '';
+  const n = tpArr.length;
+  const startX = 40, cellW = 100, gap = 6, y = 60;
+  tpArr.forEach((v, i) => {
+    let klass = 'cell-box';
+    if(i === tpL && i === tpR) klass = 'cell-box matched';
+    else if(i === tpL) klass = 'cell-box left';
+    else if(i === tpR) klass = 'cell-box right';
+    else if(i < tpL || i > tpR) klass = 'cell-box dim';
+    const valKlass = (i === tpL || i === tpR) ? 'cell-val light' : 'cell-val';
+    html += `<g transform="translate(${startX + i * (cellW + gap)},${y})">
+      <rect width="${cellW}" height="60" class="${klass}"/>
+      <text x="${cellW/2}" y="30" class="${valKlass}">${v}</text>
+      <text x="${cellW/2}" y="78" class="cell-idx">[${i}]</text>
+    </g>`;
+  });
+  if(tpL <= tpR){
+    html += makePointer(startX + tpL * (cellW + gap) + cellW/2, y - 4, 'L', '#0066ff', 'up');
+    html += makePointer(startX + tpR * (cellW + gap) + cellW/2, y + 60 + 32, 'R', '#ff3366', 'down');
+  }
+  // Sum display
+  if(tpL < tpR){
+    const sum = tpArr[tpL] + tpArr[tpR];
+    html += `<text x="450" y="190" class="cell-label" style="font-size:14px;fill:#0d1117">arr[L] + arr[R] = ${tpArr[tpL]} + ${tpArr[tpR]} = ${sum}</text>`;
+  }
+  svg.innerHTML = html;
+}
+function tp_step(){
+  if(tpDone) return;
+  const target = parseInt(document.getElementById('tpTarget').value, 10);
+  if(tpL >= tpR){
+    setStatus('tpStatus', `[NOT FOUND] Pointers crossed. No pair sums to ${target}.`);
+    tpDone = true;
+    if(tpTimer){clearInterval(tpTimer); tpTimer=null; document.getElementById('tpPlayBtn').textContent='Auto-play';}
+    return;
+  }
+  const sum = tpArr[tpL] + tpArr[tpR];
+  if(sum === target){
+    setStatus('tpStatus', `[FOUND] arr[${tpL}] + arr[${tpR}] = ${tpArr[tpL]} + ${tpArr[tpR]} = ${target}. Pair indices: [${tpL}, ${tpR}].`);
+    tpDone = true;
+    if(tpTimer){clearInterval(tpTimer); tpTimer=null; document.getElementById('tpPlayBtn').textContent='Auto-play';}
+    tp_render();
+    return;
+  }
+  if(sum < target){
+    setStatus('tpStatus', `Sum ${sum} < target ${target} → advance L from ${tpL} to ${tpL+1}.`);
+    tpL++;
+  } else {
+    setStatus('tpStatus', `Sum ${sum} > target ${target} → retreat R from ${tpR} to ${tpR-1}.`);
+    tpR--;
+  }
+  tp_render();
+}
+function tp_play(){
+  if(tpTimer){clearInterval(tpTimer); tpTimer=null; document.getElementById('tpPlayBtn').textContent='Auto-play'; return;}
+  document.getElementById('tpPlayBtn').textContent='Pause';
+  tpTimer = setInterval(tp_step, 900);
+}
+function tp_reset(){
+  tpL = 0; tpR = tpArr.length - 1; tpDone = false;
+  if(tpTimer){clearInterval(tpTimer); tpTimer=null; document.getElementById('tpPlayBtn').textContent='Auto-play';}
+  setStatus('tpStatus', '[INIT] Sorted array. L=0, R=n−1. Find pair summing to target.');
+  tp_render();
+}
+
+/* ============================================================
+   SLIDING WINDOW VIZ — longest unique substring
+   ============================================================ */
+const swStr = "abcabcbb";
+let swL = 0, swR = 0, swSeen = {}, swBest = 0, swDone = false, swTimer = null;
+function sw_render(){
+  const svg = document.getElementById('swCells');
+  let html = '';
+  const startX = 80, cellW = 80, gap = 6, y = 50;
+  for(let i = 0; i < swStr.length; i++){
+    let klass = 'cell-box';
+    if(i >= swL && i < swR) klass = 'cell-box window';
+    else if(i < swL) klass = 'cell-box dim';
+    const valKlass = (i >= swL && i < swR) ? 'cell-val light' : 'cell-val';
+    html += `<g transform="translate(${startX + i * (cellW + gap)},${y})">
+      <rect width="${cellW}" height="60" class="${klass}"/>
+      <text x="${cellW/2}" y="30" class="${valKlass}">${swStr[i]}</text>
+      <text x="${cellW/2}" y="78" class="cell-idx">[${i}]</text>
+    </g>`;
+  }
+  // L pointer
+  if(swL < swStr.length){
+    html += makePointer(startX + swL * (cellW + gap) + cellW/2, y - 4, 'L', '#0066ff', 'up');
+  }
+  // R pointer
+  if(swR <= swStr.length){
+    const rIdx = Math.min(swR, swStr.length);
+    html += makePointer(startX + rIdx * (cellW + gap) - gap/2, y + 60 + 32, 'R', '#ff3366', 'down');
+  }
+  // best display
+  html += `<text x="450" y="180" class="cell-label" style="font-size:14px">window: "${swStr.substring(swL, swR)}"  ·  best so far: ${swBest}</text>`;
+  svg.innerHTML = html;
+}
+function sw_step(){
+  if(swDone) return;
+  if(swR >= swStr.length){
+    setStatus('swStatus', `[DONE] Walked the whole string. Longest unique substring length = ${swBest}.`);
+    swDone = true;
+    if(swTimer){clearInterval(swTimer); swTimer=null; document.getElementById('swPlayBtn').textContent='Auto-play';}
+    return;
+  }
+  const ch = swStr[swR];
+  if(ch in swSeen && swSeen[ch] >= swL){
+    setStatus('swStatus', `Saw '${ch}' before at idx ${swSeen[ch]} (inside window) → jump L to ${swSeen[ch]+1}.`);
+    swL = swSeen[ch] + 1;
+  } else {
+    setStatus('swStatus', `'${ch}' is new in window → window = "${swStr.substring(swL, swR+1)}", length = ${swR - swL + 1}.`);
+  }
+  swSeen[ch] = swR;
+  swR++;
+  swBest = Math.max(swBest, swR - swL);
+  sw_render();
+}
+function sw_play(){
+  if(swTimer){clearInterval(swTimer); swTimer=null; document.getElementById('swPlayBtn').textContent='Auto-play'; return;}
+  document.getElementById('swPlayBtn').textContent='Pause';
+  swTimer = setInterval(sw_step, 1000);
+}
+function sw_reset(){
+  swL = 0; swR = 0; swSeen = {}; swBest = 0; swDone = false;
+  if(swTimer){clearInterval(swTimer); swTimer=null; document.getElementById('swPlayBtn').textContent='Auto-play';}
+  setStatus('swStatus', '[INIT] String "abcabcbb". Window expands right; shrinks left when duplicate found.');
+  sw_render();
+}
+
+/* ============================================================
+   PREFIX SUM VIZ
+   ============================================================ */
+const psArr = [3, 1, 4, 1, 5, 9, 2, 6];
+let psP = [0];
+for(let i = 0; i < psArr.length; i++) psP.push(psP[i] + psArr[i]);
+let psHighlightL = -1, psHighlightR = -1;
+function ps_render(){
+  const svg = document.getElementById('psCells');
+  let html = '';
+  const startX = 40, cellW = 90, gap = 6;
+  // Original array
+  html += `<text x="20" y="20" class="cell-label" style="text-anchor:start;font-size:13px;fill:#0066ff">arr (input)</text>`;
+  for(let i = 0; i < psArr.length; i++){
+    let klass = 'cell-box';
+    if(psHighlightL >= 0 && i >= psHighlightL && i <= psHighlightR) klass = 'cell-box active';
+    html += `<g transform="translate(${startX + i*(cellW+gap)},30)">
+      <rect width="${cellW}" height="55" class="${klass}"/>
+      <text x="${cellW/2}" y="30" class="cell-val">${psArr[i]}</text>
+      <text x="${cellW/2}" y="72" class="cell-idx">[${i}]</text>
+    </g>`;
+  }
+  // Prefix array
+  html += `<text x="20" y="125" class="cell-label" style="text-anchor:start;font-size:13px;fill:#ff3366">P (prefix sum)</text>`;
+  for(let i = 0; i <= psArr.length; i++){
+    let klass = 'cell-box';
+    if(psHighlightL >= 0 && (i === psHighlightL || i === psHighlightR + 1)) klass = 'cell-box right';
+    const valKlass = (psHighlightL >= 0 && (i === psHighlightL || i === psHighlightR + 1)) ? 'cell-val light' : 'cell-val';
+    const xOff = i === 0 ? 0 : -gap/2; // align nicely (P has n+1 cells)
+    const w = i === 0 ? cellW * 0.5 : cellW;
+    html += `<g transform="translate(${startX + i * (cellW * 0.95) - 20},135)">
+      <rect width="${cellW * 0.85}" height="50" class="${klass}"/>
+      <text x="${cellW * 0.425}" y="27" class="${valKlass}">${psP[i]}</text>
+      <text x="${cellW * 0.425}" y="68" class="cell-idx">P[${i}]</text>
+    </g>`;
+  }
+  svg.innerHTML = html;
+}
+function ps_query(){
+  const l = parseInt(document.getElementById('psL').value, 10);
+  const r = parseInt(document.getElementById('psR').value, 10);
+  if(l < 0 || r >= psArr.length || l > r){ setStatus('psStatus', '[ERROR] Invalid l, r.'); return; }
+  const sum = psP[r+1] - psP[l];
+  psHighlightL = l; psHighlightR = r;
+  setStatus('psStatus', `Range sum arr[${l}..${r}] = P[${r+1}] − P[${l}] = ${psP[r+1]} − ${psP[l]} = ${sum}. (O(1) query!)`);
+  ps_render();
+}
+function ps_reset(){
+  psHighlightL = -1; psHighlightR = -1;
+  setStatus('psStatus', '[READY] Pick l and r, then "Query Range" to see P[r+1] − P[l] in action.');
+  ps_render();
+}
+
+/* ============================================================
+   BINARY SEARCH VIZ
+   ============================================================ */
+const bsArr = [2, 5, 8, 12, 16, 23, 38, 56, 72, 91];
+let bsL = 0, bsR = bsArr.length - 1, bsDone = false, bsTimer = null, bsLastM = -1;
+function bs_render(){
+  const svg = document.getElementById('bsCells');
+  let html = '';
+  const startX = 30, cellW = 80, gap = 6, y = 50;
+  const m = (bsL + bsR) >> 1;
+  for(let i = 0; i < bsArr.length; i++){
+    let klass = 'cell-box';
+    if(bsDone){
+      if(i === bsLastM) klass = 'cell-box matched';
+      else if(i < bsL || i > bsR) klass = 'cell-box dim';
+    } else {
+      if(i < bsL || i > bsR) klass = 'cell-box dim';
+      else if(i === m) klass = 'cell-box active';
+    }
+    html += `<g transform="translate(${startX + i*(cellW+gap)},${y})">
+      <rect width="${cellW}" height="60" class="${klass}"/>
+      <text x="${cellW/2}" y="30" class="cell-val">${bsArr[i]}</text>
+      <text x="${cellW/2}" y="78" class="cell-idx">[${i}]</text>
+    </g>`;
+  }
+  if(!bsDone && bsL <= bsR){
+    html += makePointer(startX + bsL * (cellW+gap) + cellW/2, y - 4, 'L', '#0066ff', 'up');
+    html += makePointer(startX + bsR * (cellW+gap) + cellW/2, y - 4, 'R', '#ff3366', 'up');
+    html += makePointer(startX + m * (cellW+gap) + cellW/2, y + 60 + 32, 'M', '#00c896', 'down');
+  }
+  svg.innerHTML = html;
+}
+function bs_step(){
+  if(bsDone) return;
+  const target = parseInt(document.getElementById('bsTarget').value, 10);
+  if(bsL > bsR){
+    setStatus('bsStatus', `[NOT FOUND] L > R. Target ${target} not in array.`);
+    bsDone = true;
+    if(bsTimer){clearInterval(bsTimer); bsTimer=null; document.getElementById('bsPlayBtn').textContent='Auto-play';}
+    return;
+  }
+  const m = (bsL + bsR) >> 1;
+  bsLastM = m;
+  if(bsArr[m] === target){
+    setStatus('bsStatus', `[FOUND] arr[${m}] = ${bsArr[m]} = target. Returned index ${m}.`);
+    bsDone = true;
+    if(bsTimer){clearInterval(bsTimer); bsTimer=null; document.getElementById('bsPlayBtn').textContent='Auto-play';}
+    bs_render();
+    return;
+  }
+  if(bsArr[m] < target){
+    setStatus('bsStatus', `arr[${m}]=${bsArr[m]} < ${target} → discard left half. L = ${m+1}.`);
+    bsL = m + 1;
+  } else {
+    setStatus('bsStatus', `arr[${m}]=${bsArr[m]} > ${target} → discard right half. R = ${m-1}.`);
+    bsR = m - 1;
+  }
+  bs_render();
+}
+function bs_play(){
+  if(bsTimer){clearInterval(bsTimer); bsTimer=null; document.getElementById('bsPlayBtn').textContent='Auto-play'; return;}
+  document.getElementById('bsPlayBtn').textContent='Pause';
+  bsTimer = setInterval(bs_step, 900);
+}
+function bs_reset(){
+  bsL = 0; bsR = bsArr.length - 1; bsDone = false; bsLastM = -1;
+  if(bsTimer){clearInterval(bsTimer); bsTimer=null; document.getElementById('bsPlayBtn').textContent='Auto-play';}
+  setStatus('bsStatus', '[INIT] Sorted array. l=0, r=n−1. Each step halves the search space.');
+  bs_render();
+}
+
+/* ---------- Initial renders ---------- */
+ops_render();
+tp_render();
+sw_render();
+ps_render();
+bs_render();
+</script>
+</body>
+</html>
