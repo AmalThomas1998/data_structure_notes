@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Stacks &amp; Queues · The Interview Codex</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,400&family=JetBrains+Mono:wght@400;600;800&family=Archivo:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1a1a1a;
+    --paper:#f5f1e8;
+    --paper-2:#e8e1d0;
+    --paper-3:#d8cfb8;
+    --accent:#d62828;          /* deep red */
+    --accent-2:#003049;        /* deep navy */
+    --accent-3:#f77f00;        /* warm orange */
+    --accent-4:#588157;        /* sage green */
+    --code-bg:#1a1a1a;
+    --code-ink:#f5f1e8;
+    --muted:#6b6358;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Fraunces',Georgia,serif;
+    font-size:18px;
+    line-height:1.6;
+    overflow-x:hidden;
+  }
+  /* Subtle vertical line texture, like newsprint */
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+    background-image:repeating-linear-gradient(90deg,transparent 0,transparent 80px,rgba(26,26,26,.018) 80px,rgba(26,26,26,.018) 81px);
+  }
+  .mono{font-family:'JetBrains Mono',monospace}
+  .display{font-family:'Archivo',sans-serif}
+
+  /* ===== MASTHEAD ===== */
+  .masthead{
+    border-bottom:6px double var(--ink);
+    padding:16px 40px;
+    display:flex;align-items:center;justify-content:space-between;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+    position:relative;z-index:2;
+    background:var(--paper);
+  }
+  .masthead .edition{display:flex;gap:24px}
+  .masthead .edition span{border-left:1px solid #1a1a1a33;padding-left:24px}
+  .masthead .edition span:first-child{border-left:none;padding-left:0}
+  .masthead .logo{
+    color:var(--accent);font-weight:800;
+    background:var(--ink);padding:6px 12px;color:var(--paper);
+  }
+
+  /* ===== HERO ===== */
+  .hero{
+    padding:80px 40px 60px;
+    max-width:1400px;margin:0 auto;
+    position:relative;z-index:2;
+  }
+  .hero .kicker{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;letter-spacing:.3em;text-transform:uppercase;
+    color:var(--accent);font-weight:700;margin-bottom:24px;
+    display:flex;align-items:center;gap:16px;
+  }
+  .hero .kicker::before{content:"";height:14px;width:14px;background:var(--accent);transform:rotate(45deg)}
+  .hero .kicker::after{content:"";height:1px;background:var(--accent);flex:1}
+  .hero h1{
+    font-family:'Archivo',sans-serif;
+    font-weight:900;
+    font-size:clamp(60px,12vw,200px);
+    line-height:.85;letter-spacing:-.045em;
+    margin-bottom:30px;
+    text-transform:uppercase;
+  }
+  .hero h1 .amp{
+    font-family:'Fraunces',serif;font-style:italic;font-weight:400;
+    color:var(--accent);text-transform:lowercase;font-size:.7em;
+  }
+  .hero h1 .second{color:var(--accent-2);display:block}
+  .hero .sub{
+    font-size:22px;max-width:780px;font-style:italic;
+    color:#3a3a3a;border-left:6px solid var(--accent);padding-left:24px;
+    margin-top:30px;
+  }
+  .hero .meta{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:30px;margin-top:50px;padding-top:30px;
+    border-top:1px solid #1a1a1a22;
+    font-family:'JetBrains Mono',monospace;font-size:12px;
+  }
+  .hero .meta div strong{display:block;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .hero .meta div span{font-weight:700;color:var(--accent-2);font-size:14px}
+
+  /* ===== TOC ===== */
+  .toc{
+    position:sticky;top:0;z-index:20;
+    background:var(--ink);color:var(--paper);
+    padding:14px 40px;
+    display:flex;gap:28px;overflow-x:auto;
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;letter-spacing:.1em;text-transform:uppercase;
+    border-bottom:3px solid var(--accent-3);
+  }
+  .toc::-webkit-scrollbar{height:4px}
+  .toc::-webkit-scrollbar-thumb{background:var(--accent-3)}
+  .toc a{color:var(--paper);text-decoration:none;white-space:nowrap;opacity:.6;transition:opacity .2s}
+  .toc a:hover{opacity:1;color:var(--accent-3)}
+  .toc .num{color:var(--accent-3);margin-right:6px}
+
+  /* ===== SECTIONS ===== */
+  section{
+    padding:80px 40px;
+    max-width:1400px;margin:0 auto;
+    position:relative;z-index:2;
+  }
+  .sec-num{
+    font-family:'JetBrains Mono',monospace;font-weight:700;
+    font-size:13px;color:var(--accent);letter-spacing:.2em;text-transform:uppercase;
+    display:flex;align-items:center;gap:14px;margin-bottom:20px;
+  }
+  .sec-num::before{
+    content:"";display:inline-block;width:24px;height:24px;
+    background:var(--accent-3);transform:rotate(45deg);
+    box-shadow:inset 0 0 0 4px var(--paper);
+  }
+  h2{
+    font-family:'Archivo',sans-serif;font-weight:900;
+    font-size:clamp(40px,6vw,80px);line-height:.95;letter-spacing:-.03em;
+    margin-bottom:40px;max-width:1000px;
+    text-transform:uppercase;
+  }
+  h2 em{font-family:'Fraunces',serif;font-style:italic;color:var(--accent);font-weight:400;text-transform:none}
+  h3{
+    font-family:'Fraunces',serif;font-weight:600;
+    font-size:32px;line-height:1.1;letter-spacing:-.02em;margin:40px 0 20px;
+  }
+  h4{
+    font-family:'JetBrains Mono',monospace;font-weight:700;
+    font-size:13px;letter-spacing:.15em;text-transform:uppercase;
+    margin:30px 0 14px;color:var(--accent);
+  }
+  p{margin-bottom:18px;max-width:75ch}
+  p strong{background:linear-gradient(180deg,transparent 60%,#f77f0055 60%);padding:0 2px;font-weight:700}
+  em{font-style:italic}
+  code.mono{background:#1a1a1a11;padding:2px 6px;border-radius:2px;font-size:.9em}
+
+  /* ===== TWO COL & SIDE NOTE ===== */
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start}
+  .side-note{
+    background:var(--accent-2);color:var(--paper);
+    padding:32px;
+    font-family:'Fraunces',serif;font-size:16.5px;line-height:1.6;
+    position:relative;
+    border-bottom:6px solid var(--accent-3);
+  }
+  .side-note::before{
+    content:"※";position:absolute;top:-22px;left:24px;
+    background:var(--accent-3);color:var(--ink);
+    width:42px;height:42px;display:grid;place-items:center;
+    font-size:24px;font-weight:800;
+  }
+  .side-note h4{margin-top:0;color:var(--accent-3)}
+  .side-note p{color:#e0d6c2;margin-bottom:0;max-width:none;font-style:italic}
+
+  /* ===== INTUITION GRID ===== */
+  .intuition-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:0;margin:30px 0;border:3px solid var(--ink)}
+  .intuition-card{
+    padding:30px;background:var(--paper);
+    position:relative;
+    border-right:1px solid var(--ink);border-bottom:1px solid var(--ink);
+    transition:background .2s;
+  }
+  .intuition-card:hover{background:var(--paper-2)}
+  .intuition-card .num{
+    font-family:'Archivo',sans-serif;font-weight:900;font-size:48px;
+    color:var(--accent);line-height:1;margin-bottom:14px;
+    display:inline-block;
+  }
+  .intuition-card h4{margin:0 0 8px;color:var(--ink);font-size:14px}
+  .intuition-card p{font-family:'Fraunces',serif;font-size:15.5px;margin:0;line-height:1.55}
+
+  /* ===== VIZ ===== */
+  .viz{
+    background:var(--paper);
+    border:3px solid var(--ink);
+    padding:30px;margin:40px 0;
+    position:relative;
+    box-shadow:8px 8px 0 var(--accent-2);
+  }
+  .viz-caption{
+    font-family:'JetBrains Mono',monospace;font-size:11px;
+    letter-spacing:.15em;text-transform:uppercase;color:var(--muted);
+    margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;
+    border-bottom:2px solid var(--ink);padding-bottom:12px;
+  }
+  .viz-caption .label{color:var(--accent);font-weight:800}
+  .viz-controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px;align-items:center}
+  .viz-controls button{
+    font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;
+    letter-spacing:.1em;text-transform:uppercase;
+    background:var(--ink);color:var(--paper);border:2px solid var(--ink);
+    padding:10px 16px;cursor:pointer;transition:all .15s;
+  }
+  .viz-controls button:hover{background:var(--accent);border-color:var(--accent)}
+  .viz-controls button:disabled{opacity:.4;cursor:not-allowed}
+  .viz-controls .secondary{background:transparent;color:var(--ink)}
+  .viz-controls .secondary:hover{background:var(--ink);color:var(--paper)}
+  .viz-controls .accent-btn{background:var(--accent);border-color:var(--accent)}
+  .viz-controls .accent-btn:hover{background:var(--accent-3);border-color:var(--accent-3)}
+  .viz-controls input[type="number"], .viz-controls input[type="text"]{
+    font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;
+    border:2px solid var(--ink);padding:8px 10px;width:70px;
+    background:var(--paper);
+  }
+  .viz-controls label{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+  .viz svg{width:100%;height:auto;display:block}
+  .viz-status{
+    font-family:'JetBrains Mono',monospace;font-size:13px;
+    padding:14px 18px;background:var(--ink);color:var(--paper);
+    margin-top:16px;min-height:46px;border-left:6px solid var(--accent-3);
+  }
+  .viz-status .tag{color:var(--accent-3);font-weight:800;margin-right:8px}
+
+  /* ===== CODE ===== */
+  pre{
+    background:var(--code-bg);color:var(--code-ink);
+    padding:24px;overflow-x:auto;border:3px solid var(--ink);
+    font-family:'JetBrains Mono',monospace;font-size:13.5px;line-height:1.7;
+    margin:20px 0;position:relative;
+  }
+  pre::before{
+    content:"";position:absolute;top:0;left:0;bottom:0;width:6px;background:var(--accent-3);
+  }
+  pre .k{color:#ff79c6}
+  pre .s{color:#f1fa8c}
+  pre .c{color:#7c8499;font-style:italic}
+  pre .f{color:#8be9fd}
+  pre .n{color:#bd93f9}
+  pre .t{color:#50fa7b;font-weight:700}
+  pre .num{color:#ffb86c}
+
+  /* ===== PATTERN LIST ===== */
+  .pattern-list{margin:30px 0;border-top:3px solid var(--ink)}
+  .pattern-item{
+    display:grid;grid-template-columns:90px 1fr 220px;
+    border-bottom:1px solid var(--ink);padding:28px 0;gap:30px;align-items:start;
+    transition:all .2s;
+  }
+  .pattern-item:hover{background:var(--paper-2);padding-left:14px}
+  .pattern-item .pat-num{
+    font-family:'Archivo',sans-serif;font-weight:900;font-size:42px;
+    color:var(--accent);line-height:1;
+  }
+  .pattern-item h4{margin:0 0 8px;font-family:'Fraunces',serif;font-size:24px;letter-spacing:normal;text-transform:none;font-weight:600;color:var(--ink)}
+  .pattern-item p{font-family:'Fraunces',serif;font-size:16px;margin:0;color:#2a2a2a}
+  .pattern-item .tag{
+    font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;
+    letter-spacing:.1em;text-transform:uppercase;
+    display:inline-block;padding:4px 10px;background:var(--ink);color:var(--paper);
+    margin-top:10px;margin-right:6px;
+  }
+  .pattern-item .tag.alt{background:var(--accent);color:var(--paper)}
+  .pattern-item .complexity{
+    font-family:'JetBrains Mono',monospace;font-size:11px;text-align:right;
+    color:var(--muted);
+  }
+  .pattern-item .complexity strong{color:var(--accent-4);display:block;font-size:20px;margin-bottom:2px}
+
+  /* ===== PROBLEM CARDS ===== */
+  .problem-card{
+    border:3px solid var(--ink);margin:30px 0;
+    background:var(--paper);
+  }
+  .problem-card header{
+    background:var(--ink);color:var(--paper);
+    padding:18px 26px;display:flex;justify-content:space-between;align-items:center;
+    font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.1em;font-weight:700;
+  }
+  .problem-card header .diff{
+    padding:5px 12px;font-size:10px;letter-spacing:.2em;font-weight:800;
+  }
+  .problem-card header .diff.easy{background:var(--accent-4);color:var(--paper)}
+  .problem-card header .diff.med{background:var(--accent-3);color:var(--ink)}
+  .problem-card header .diff.hard{background:var(--accent);color:var(--paper)}
+  .problem-card .body{padding:28px}
+  .problem-card h4{margin-top:0}
+  .insight{
+    border-left:6px solid var(--accent);padding:14px 20px;
+    background:var(--paper-2);margin:18px 0;font-style:italic;font-size:15.5px;
+    font-family:'Fraunces',serif;
+  }
+  .insight strong{font-style:normal}
+
+  /* ===== PULL QUOTE ===== */
+  .pullquote{
+    padding:80px 40px;text-align:center;max-width:1100px;margin:40px auto;
+    border-top:6px double var(--ink);border-bottom:6px double var(--ink);
+    position:relative;
+  }
+  .pullquote blockquote{
+    font-family:'Archivo',sans-serif;font-style:normal;font-weight:900;
+    font-size:clamp(28px,4.2vw,52px);line-height:1.05;letter-spacing:-.025em;
+    text-transform:uppercase;
+  }
+  .pullquote blockquote em{font-family:'Fraunces',serif;font-style:italic;font-weight:400;color:var(--accent);text-transform:none}
+  .pullquote cite{
+    display:block;margin-top:30px;font-family:'JetBrains Mono',monospace;
+    font-style:normal;font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--muted);
+  }
+
+  /* ===== CHEAT GRID ===== */
+  .cheat{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0;border:3px solid var(--ink);margin:30px 0}
+  .cheat-cell{padding:24px;border-right:1px solid var(--ink);border-bottom:1px solid var(--ink);background:var(--paper)}
+  .cheat-cell h5{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;font-weight:800}
+  .cheat-cell .big{font-family:'Archivo',sans-serif;font-size:36px;font-weight:900;line-height:1;color:var(--ink)}
+  .cheat-cell p{font-family:'Fraunces',serif;font-size:14px;margin-top:10px;color:#3a3a3a}
+
+  /* ===== FOOTER ===== */
+  footer{
+    background:var(--ink);color:var(--paper);
+    padding:60px 40px 40px;margin-top:80px;position:relative;z-index:2;
+    border-top:8px solid var(--accent);
+  }
+  footer .inner{max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:40px}
+  footer h3{font-family:'Archivo',sans-serif;font-size:48px;line-height:1;margin:0;font-weight:900;text-transform:uppercase}
+  footer h3 em{color:var(--accent-3);font-style:italic;font-weight:400;font-family:'Fraunces',serif;text-transform:none}
+  footer p{font-family:'Fraunces',serif;font-size:15px;color:#aaa;max-width:420px;margin:0;line-height:1.6;font-style:italic}
+  footer .stamp{
+    border:3px solid var(--accent-3);padding:14px 22px;
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--accent-3);font-weight:700;
+  }
+
+  /* ===== SVG NODE STYLES ===== */
+  .cell-box{fill:var(--paper);stroke:var(--ink);stroke-width:2.5}
+  .cell-box.active{fill:var(--accent-3);stroke:var(--ink)}
+  .cell-box.matched{fill:#9be7ff;stroke:var(--ink)}
+  .cell-box.popped{fill:var(--accent);stroke:var(--ink)}
+  .cell-box.pushed{fill:var(--accent-4);stroke:var(--ink)}
+  .cell-box.dim{fill:var(--paper-3);stroke:#aaa;opacity:.5}
+  .cell-box.target{fill:var(--accent-2);stroke:var(--ink)}
+  .cell-val{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:800;fill:var(--ink);text-anchor:middle;dominant-baseline:central}
+  .cell-val.light{fill:var(--paper)}
+  .cell-idx{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;text-anchor:middle;fill:var(--muted)}
+  .cell-label{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;text-anchor:middle;fill:var(--ink)}
+  .arrow{stroke:var(--ink);stroke-width:2;fill:none;marker-end:url(#arrowMain)}
+  .arrow.flow{stroke:var(--accent);stroke-width:3}
+
+  /* responsive */
+  @media(max-width:900px){
+    .two-col{grid-template-columns:1fr}
+    .pattern-item{grid-template-columns:60px 1fr;gap:18px}
+    .pattern-item .complexity{grid-column:2;text-align:left}
+    .hero{padding:50px 24px}
+    .hero .meta{grid-template-columns:repeat(2,1fr);gap:20px}
+    section{padding:60px 24px}
+    .masthead{padding:14px 20px;font-size:10px}
+    .masthead .edition{display:none}
+  }
+</style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<div class="masthead">
+  <div class="logo">[ THE INTERVIEW CODEX // VOL.III ]</div>
+  <div class="edition">
+    <span>Chapter 04</span>
+    <span>Stacks &amp; Queues</span>
+    <span>Senior Track</span>
+  </div>
+</div>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="kicker">Data Structures · Chapter Four</div>
+  <h1>Stacks <span class="amp">&amp;</span><br/><span class="second">Queues.</span></h1>
+  <p class="sub">A field manual on the two simplest containers in computing — and why they crack monotonic-stack problems, BFS traversals, and the LRU-cache class of questions that decide senior offers.</p>
+  <div class="meta">
+    <div><strong>Difficulty</strong><span>Foundational → Senior</span></div>
+    <div><strong>Loop Tier</strong><span>FAANG / HFT / Unicorns</span></div>
+    <div><strong>Comp Band</strong><span>$220k – $750k+ TC</span></div>
+    <div><strong>Mastery Time</strong><span>~10 hours focused</span></div>
+  </div>
+</header>
+
+<!-- TOC -->
+<nav class="toc">
+  <a href="#intuition"><span class="num">01</span>Intuition</a>
+  <a href="#stack"><span class="num">02</span>Stack Anatomy</a>
+  <a href="#queue"><span class="num">03</span>Queue Anatomy</a>
+  <a href="#patterns"><span class="num">04</span>Eight Patterns</a>
+  <a href="#monotonic"><span class="num">05</span>Monotonic Stack</a>
+  <a href="#parens"><span class="num">06</span>Parentheses</a>
+  <a href="#bfs"><span class="num">07</span>BFS / Queue</a>
+  <a href="#deque"><span class="num">08</span>Deque Window</a>
+  <a href="#problems"><span class="num">09</span>Interview Problems</a>
+  <a href="#cheatsheet"><span class="num">10</span>Cheat Sheet</a>
+</nav>
+
+<!-- SECTION 01 — INTUITION -->
+<section id="intuition">
+  <div class="sec-num">§01 · The Mental Model</div>
+  <h2>Two policies. <em>One memory.</em></h2>
+
+  <div class="two-col">
+    <div>
+      <p>Stacks and queues are not data structures. They are <strong>discipline</strong>. Underneath, both are arrays (or linked lists). What separates them is a single rule about <em>which end you're allowed to touch</em>.</p>
+      <p>A <strong>stack</strong> says: <em>last in, first out</em>. The most recent thing you saved is the only thing you can retrieve. It is the structure of recursion, of undo, of "what was I doing before this?"</p>
+      <p>A <strong>queue</strong> says: <em>first in, first out</em>. The oldest thing waiting gets served next. It is the structure of fairness, of breadth-first exploration, of buffering.</p>
+      <p>Interviewers ask about them because the discipline itself — the recognition that "I should only ever look at the top" or "I should drain from the front" — is the test. The data structure is trivial; the <strong>seeing of when to use it</strong> is the senior signal.</p>
+    </div>
+    <aside class="side-note">
+      <h4>Why they appear together</h4>
+      <p>Stacks and queues are duals. Whatever recursion does (DFS, depth-first), an explicit stack can do iteratively. Whatever level-order does (BFS, breadth-first), a queue powers. Master both and you can convert any tree or graph traversal between recursive and iterative — a request that comes up in nearly every senior loop.</p>
+    </aside>
+  </div>
+
+  <div class="intuition-grid">
+    <div class="intuition-card">
+      <div class="num">i.</div>
+      <h4>LIFO is About Memory of Now</h4>
+      <p>A stack remembers what's "still open" — open brackets, function calls in flight, partial expressions. Pop = "I'm done with the most recent thing."</p>
+    </div>
+    <div class="intuition-card">
+      <div class="num">ii.</div>
+      <h4>FIFO is About Order of Then</h4>
+      <p>A queue preserves arrival order. It is the only DS that gives you "process things in the order they showed up" without sorting.</p>
+    </div>
+    <div class="intuition-card">
+      <div class="num">iii.</div>
+      <h4>Both Are O(1) at Their Active End</h4>
+      <p>Push, pop, peek, enqueue, dequeue — every primitive is constant time. This is why they show up in tight inner loops where everything else would be too slow.</p>
+    </div>
+    <div class="intuition-card">
+      <div class="num">iv.</div>
+      <h4>The Hidden Pattern is "Pending"</h4>
+      <p>Both structures hold things that are <em>not yet resolved</em>. Stack: "I haven't found this open bracket's match." Queue: "I haven't visited this neighbor yet." Once you see "pending," you see the structure.</p>
+    </div>
+  </div>
+
+  <!-- VIZ: Stack vs Queue side by side -->
+  <div class="viz">
+    <div class="viz-caption"><span class="label">FIG. 01</span><span>Stack (LIFO) vs Queue (FIFO) — side by side</span></div>
+    <svg viewBox="0 0 900 300" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrowMain" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="#1a1a1a"/>
+        </marker>
+        <marker id="arrowFlow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="#d62828"/>
+        </marker>
+      </defs>
+      <!-- STACK -->
+      <text x="180" y="30" class="cell-label" style="font-size:14px;fill:#d62828">STACK · LIFO</text>
+      <g>
+        <rect x="120" y="50" width="140" height="50" class="cell-box"/>
+        <text x="190" y="75" class="cell-val">D</text>
+        <text x="280" y="80" class="cell-label" style="text-anchor:start;fill:#d62828;font-weight:800">← TOP</text>
+        <rect x="120" y="100" width="140" height="50" class="cell-box"/>
+        <text x="190" y="125" class="cell-val">C</text>
+        <rect x="120" y="150" width="140" height="50" class="cell-box"/>
+        <text x="190" y="175" class="cell-val">B</text>
+        <rect x="120" y="200" width="140" height="50" class="cell-box"/>
+        <text x="190" y="225" class="cell-val">A</text>
+        <text x="280" y="230" class="cell-label" style="text-anchor:start;fill:#7c8499;">bottom</text>
+        <line x1="100" y1="50" x2="100" y2="250" stroke="#1a1a1a" stroke-width="3"/>
+        <line x1="280" y1="50" x2="280" y2="250" stroke="#1a1a1a" stroke-width="3"/>
+        <line x1="100" y1="250" x2="280" y2="250" stroke="#1a1a1a" stroke-width="3"/>
+        <!-- push/pop arrows -->
+        <path d="M 190 30 L 190 50" class="arrow flow" marker-end="url(#arrowFlow)"/>
+        <text x="190" y="20" class="cell-label" style="fill:#d62828;font-weight:800">push</text>
+        <path d="M 190 50 L 190 30" class="arrow flow" marker-end="url(#arrowFlow)" transform="translate(50, 0)"/>
+        <text x="240" y="20" class="cell-label" style="fill:#d62828;font-weight:800">pop</text>
+      </g>
+      <!-- QUEUE -->
+      <text x="600" y="30" class="cell-label" style="font-size:14px;fill:#003049">QUEUE · FIFO</text>
+      <g>
+        <rect x="450" y="120" width="60" height="60" class="cell-box"/>
+        <text x="480" y="150" class="cell-val">A</text>
+        <rect x="510" y="120" width="60" height="60" class="cell-box"/>
+        <text x="540" y="150" class="cell-val">B</text>
+        <rect x="570" y="120" width="60" height="60" class="cell-box"/>
+        <text x="600" y="150" class="cell-val">C</text>
+        <rect x="630" y="120" width="60" height="60" class="cell-box"/>
+        <text x="660" y="150" class="cell-val">D</text>
+        <rect x="690" y="120" width="60" height="60" class="cell-box"/>
+        <text x="720" y="150" class="cell-val">E</text>
+        <text x="480" y="200" class="cell-label" style="fill:#003049;font-weight:800">FRONT</text>
+        <text x="720" y="200" class="cell-label" style="fill:#003049;font-weight:800">REAR</text>
+        <!-- enqueue arrow on right -->
+        <path d="M 800 150 L 760 150" class="arrow flow" marker-end="url(#arrowFlow)"/>
+        <text x="820" y="155" class="cell-label" style="text-anchor:start;fill:#d62828;font-weight:800">enq</text>
+        <!-- dequeue arrow on left -->
+        <path d="M 440 150 L 400 150" class="arrow flow" marker-end="url(#arrowFlow)"/>
+        <text x="395" y="155" class="cell-label" style="text-anchor:end;fill:#d62828;font-weight:800">deq</text>
+      </g>
+      <text x="190" y="280" class="cell-label" style="font-size:12px">"D was last in — D is first out."</text>
+      <text x="600" y="280" class="cell-label" style="font-size:12px">"A was first in — A is first out."</text>
+    </svg>
+  </div>
+
+  <div class="cheat">
+    <div class="cheat-cell"><h5>Stack push</h5><div class="big">O(1)</div><p>Append to end of array.</p></div>
+    <div class="cheat-cell"><h5>Stack pop</h5><div class="big">O(1)</div><p>Remove from end.</p></div>
+    <div class="cheat-cell"><h5>Queue enqueue</h5><div class="big">O(1)</div><p>Append to rear (linked list or ring buffer).</p></div>
+    <div class="cheat-cell"><h5>Queue dequeue</h5><div class="big">O(1)</div><p>Remove from front. Naive array = O(n)!</p></div>
+    <div class="cheat-cell"><h5>Search</h5><div class="big">O(n)</div><p>Both. You aren't supposed to search — that's why they're disciplined.</p></div>
+  </div>
+</section>
+
+<!-- SECTION 02 — STACK ANATOMY -->
+<section id="stack">
+  <div class="sec-num">§02 · Anatomy of a Stack</div>
+  <h2>The simplest <em>powerful</em> container.</h2>
+
+  <p>A stack is an array with two methods removed. You can <code class="mono">push</code> on the top and <code class="mono">pop</code> from the top. That's the entire interface. The mental image is a stack of plates — you only ever touch the topmost one.</p>
+
+<pre><span class="c"># In Python, a list IS a stack. No special class needed.</span>
+stack = []
+stack.append(<span class="num">1</span>)         <span class="c"># push        → [1]</span>
+stack.append(<span class="num">2</span>)         <span class="c"># push        → [1, 2]</span>
+stack.append(<span class="num">3</span>)         <span class="c"># push        → [1, 2, 3]</span>
+top = stack[-<span class="num">1</span>]        <span class="c"># peek (3)    no mutation</span>
+val = stack.pop()       <span class="c"># pop  (3)    → [1, 2]</span>
+empty = <span class="k">not</span> stack       <span class="c"># True if []</span>
+
+<span class="c"># Common idiom: process while non-empty</span>
+<span class="k">while</span> stack:
+    item = stack.pop()
+    <span class="c"># ... do work, possibly push new items back ...</span></pre>
+
+  <h3>Stack as memory-of-pending — the unifying intuition</h3>
+  <div class="two-col">
+    <div>
+      <p>Every great stack algorithm shares a structure: <strong>"I keep things on the stack until I find the thing that resolves them, then I pop and process."</strong></p>
+      <p>For parentheses, you keep open brackets until you see their match. For Next Greater Element, you keep candidates that haven't found a "greater" yet. For function calls, you keep frames until they return.</p>
+      <p>If you can identify "what does the stack hold, and what triggers a pop?" you have solved 90% of stack problems.</p>
+    </div>
+    <aside class="side-note">
+      <h4>The stack-of-indices trick</h4>
+      <p>For monotonic-stack problems, store <em>indices</em>, not values. The index lets you compute distances ("how far back was the previous greater element?"), retrieve the value via <code style="color:var(--accent-3)">arr[i]</code>, <em>and</em> remember position simultaneously. Storing values throws information away. <strong>Senior candidates store indices by default.</strong></p>
+    </aside>
+  </div>
+
+  <!-- VIZ: Interactive Stack -->
+  <div class="viz">
+    <div class="viz-caption"><span class="label">FIG. 02 · INTERACTIVE</span><span>Push / pop / peek on a live stack</span></div>
+    <svg id="stackViz" viewBox="0 0 900 320" xmlns="http://www.w3.org/2000/svg">
+      <g id="stackCells"></g>
+    </svg>
+    <div class="viz-controls">
+      <label>val:</label>
+      <input type="number" id="stackVal" value="42" min="0" max="999">
+      <button onclick="stk_push()">Push</button>
+      <button onclick="stk_pop()">Pop</button>
+      <button onclick="stk_peek()">Peek</button>
+      <button class="secondary" onclick="stk_reset()">Reset</button>
+    </div>
+    <div class="viz-status" id="stackStatus"><span class="tag">[READY]</span>Stack: bottom-up. Top is the next-out element.</div>
+  </div>
+</section>
+
+<!-- SECTION 03 — QUEUE ANATOMY -->
+<section id="queue">
+  <div class="sec-num">§03 · Anatomy of a Queue</div>
+  <h2>The <em>fairness</em> structure.</h2>
+
+  <p>A queue admits at one end and serves from the other. The implementation is where it gets interesting: a naive list-based queue with <code class="mono">arr.pop(0)</code> is O(n), because every dequeue shifts every remaining element. The interview-correct implementation uses either a <strong>linked list</strong> with head/tail pointers or a <strong>ring buffer</strong> with two indices.</p>
+
+<pre><span class="c"># NEVER do this in production — pop(0) is O(n)</span>
+queue = []
+queue.append(<span class="num">1</span>)
+queue.pop(<span class="num">0</span>)              <span class="c"># O(n) — shifts everything left</span>
+
+<span class="c"># DO use collections.deque — O(1) on both ends</span>
+<span class="k">from</span> collections <span class="k">import</span> deque
+q = deque()
+q.append(<span class="num">1</span>)             <span class="c"># enqueue at rear, O(1)</span>
+q.append(<span class="num">2</span>)
+val = q.popleft()        <span class="c"># dequeue from front, O(1)</span>
+
+<span class="c"># Common BFS skeleton</span>
+<span class="k">def</span> <span class="f">bfs</span>(start):
+    q = deque([start])
+    seen = {start}
+    <span class="k">while</span> q:
+        node = q.popleft()
+        <span class="k">for</span> nb <span class="k">in</span> neighbors(node):
+            <span class="k">if</span> nb <span class="k">not</span> <span class="k">in</span> seen:
+                seen.add(nb)
+                q.append(nb)</pre>
+
+  <h3>The three queue variants you must know</h3>
+  <div class="intuition-grid">
+    <div class="intuition-card">
+      <div class="num">A</div>
+      <h4>Plain Queue</h4>
+      <p>FIFO. Enqueue rear, dequeue front. The workhorse of BFS. Implemented with <code class="mono">collections.deque</code>.</p>
+    </div>
+    <div class="intuition-card">
+      <div class="num">B</div>
+      <h4>Deque (Double-Ended)</h4>
+      <p>Push and pop on <em>both</em> ends. The secret weapon for sliding-window-maximum, palindrome checks, and any "monotonic queue" problem.</p>
+    </div>
+    <div class="intuition-card">
+      <div class="num">C</div>
+      <h4>Priority Queue (Heap)</h4>
+      <p>Highest- (or lowest-) priority element comes out first, regardless of insertion order. Powers Dijkstra, A*, K-way merge, top-K. <em>This is a different structure — covered in the heap chapter.</em></p>
+    </div>
+  </div>
+
+  <!-- VIZ: Interactive Queue -->
+  <div class="viz">
+    <div class="viz-caption"><span class="label">FIG. 03 · INTERACTIVE</span><span>Enqueue / dequeue on a live queue</span></div>
+    <svg id="queueViz" viewBox="0 0 900 220" xmlns="http://www.w3.org/2000/svg">
+      <g id="queueCells"></g>
+    </svg>
+    <div class="viz-controls">
+      <label>val:</label>
+      <input type="number" id="queueVal" value="7" min="0" max="999">
+      <button onclick="q_enqueue()">Enqueue</button>
+      <button onclick="q_dequeue()">Dequeue</button>
+      <button onclick="q_peek()">Peek Front</button>
+      <button class="secondary" onclick="q_reset()">Reset</button>
+    </div>
+    <div class="viz-status" id="queueStatus"><span class="tag">[READY]</span>Queue: front on the left, rear on the right. Items flow left-to-right.</div>
+  </div>
+</section>
+
+<!-- PULL QUOTE -->
+<div class="pullquote">
+  <blockquote>The candidate who recognizes <em>"this is a monotonic-stack problem"</em> in the first 30 seconds saves themselves twenty minutes of failure. The pattern is the prize.</blockquote>
+  <cite>— from a Meta E5 interview debrief, 2024</cite>
+</div>
+
+<!-- SECTION 04 — PATTERNS -->
+<section id="patterns">
+  <div class="sec-num">§04 · Problem Patterns</div>
+  <h2>Eight patterns. <em>Almost every</em> stack/queue problem you'll be asked.</h2>
+
+  <p>The patterns below are not "tricks" — they are recognition templates. When the interviewer reads the problem, your first question to yourself is: <strong>which of these eight is this?</strong></p>
+
+  <div class="pattern-list">
+    <div class="pattern-item">
+      <div class="pat-num">01</div>
+      <div>
+        <h4>Matching / Balancing (Stack)</h4>
+        <p>Anything with brackets, tags, nested structures. Push openers; on a closer, pop and verify match. The canonical "easy" stack problem — but the variants (min-removals, longest valid) are medium-to-hard.</p>
+        <span class="tag">Valid Parens</span><span class="tag">Min Removals</span><span class="tag">Longest Valid</span>
+      </div>
+      <div class="complexity"><strong>O(n) / O(n)</strong>time / space</div>
+    </div>
+
+    <div class="pattern-item">
+      <div class="pat-num">02</div>
+      <div>
+        <h4>Monotonic Stack</h4>
+        <p>A stack where elements (or their values) are kept in monotonic order. Enables "next greater element," "previous smaller element," "largest rectangle in histogram," "trapping rain water" — all in O(n).</p>
+        <span class="tag">Next Greater</span><span class="tag">Histogram</span><span class="tag">Trap Rain</span><span class="tag alt">Senior</span>
+      </div>
+      <div class="complexity"><strong>O(n) / O(n)</strong>time / space</div>
+    </div>
+
+    <div class="pattern-item">
+      <div class="pat-num">03</div>
+      <div>
+        <h4>Expression Evaluation</h4>
+        <p>Parse and evaluate arithmetic, RPN, calculator strings. Two-stack technique (operands + operators), or shunting-yard for precedence. Always asked at HFTs.</p>
+        <span class="tag">Eval RPN</span><span class="tag">Basic Calculator</span><span class="tag">Decode String</span>
+      </div>
+      <div class="complexity"><strong>O(n) / O(n)</strong>time / space</div>
+    </div>
+
+    <div class="pattern-item">
+      <div class="pat-num">04</div>
+      <div>
+        <h4>Stack-Simulated Recursion</h4>
+        <p>Convert a recursive DFS into an iterative version using an explicit stack. Useful for inorder/preorder/postorder iteration, and for "depth without blowing the call stack" production code.</p>
+        <span class="tag">Iterative DFS</span><span class="tag">Inorder</span>
+      </div>
+      <div class="complexity"><strong>O(n) / O(h)</strong>time / space</div>
+    </div>
+
+    <div class="pattern-item">
+      <div class="pat-num">05</div>
+      <div>
+        <h4>BFS / Level-Order (Queue)</h4>
+        <p>Visit a graph or tree breadth-first. Dequeue a node, enqueue its children, repeat. The foundation of "shortest path on unweighted graph," "rotting oranges," "word ladder," "level-order traversal."</p>
+        <span class="tag">Level Order</span><span class="tag">Rotting Oranges</span><span class="tag">Word Ladder</span>
+      </div>
+      <div class="complexity"><strong>O(V+E) / O(V)</strong>time / space</div>
+    </div>
+
+    <div class="pattern-item">
+      <div class="pat-num">06</div>
+      <div>
+        <h4>Monotonic Deque (Sliding Window Max/Min)</h4>
+        <p>A deque where elements are kept in monotonic order — the front always holds the answer for the current window. Solves sliding-window-max in O(n) where heap-based is O(n log k).</p>
+        <span class="tag">Window Max</span><span class="tag">Shortest Subarray Sum K</span><span class="tag alt">Senior</span>
+      </div>
+      <div class="complexity"><strong>O(n) / O(k)</strong>time / space</div>
+    </div>
+
+    <div class="pattern-item">
+      <div class="pat-num">07</div>
+      <div>
+        <h4>Two Stacks / Two Queues Composition</h4>
+        <p>Implement a queue with two stacks (in/out), or a stack with two queues. Tests your understanding of the abstractions. Also: min-stack (auxiliary stack tracking running min).</p>
+        <span class="tag">Queue from Stacks</span><span class="tag">Min Stack</span>
+      </div>
+      <div class="complexity"><strong>O(1) amortized</strong>per op</div>
+    </div>
+
+    <div class="pattern-item">
+      <div class="pat-num">08</div>
+      <div>
+        <h4>Multi-Source BFS / 0-1 BFS</h4>
+        <p>Seed the queue with all starting points at once (e.g., all rotten oranges). Or use a deque for graphs with edge weights ∈ {0,1} — push-front for 0-edges, push-back for 1-edges. Hard-tier signal.</p>
+        <span class="tag">Rotting Oranges</span><span class="tag">Walls and Gates</span><span class="tag alt">Senior</span>
+      </div>
+      <div class="complexity"><strong>O(V+E)</strong>same asymptotic</div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 05 — MONOTONIC STACK -->
+<section id="monotonic">
+  <div class="sec-num">§05 · Pattern Deep Dive — Monotonic Stack</div>
+  <h2>The pattern that crushes <em>quadratic</em> problems.</h2>
+
+  <div class="two-col">
+    <div>
+      <p>The monotonic stack is the most under-recognized pattern in coding interviews. It's the difference between O(n²) brute force and O(n) elegance on a wide class of "for each element, find some related element" problems.</p>
+      <p><strong>The rule:</strong> maintain a stack of indices such that the corresponding values are strictly increasing (or decreasing) from bottom to top. When a new element violates the monotonicity, pop until it doesn't — and at each pop, you have just discovered the popped element's "next greater" (or smaller).</p>
+      <p>The amortized argument: each index is pushed once and popped at most once, so the total work is O(n) — even though the inner pop-loop looks like it could be O(n²).</p>
+    </div>
+    <aside class="side-note">
+      <h4>The trigger phrase</h4>
+      <p>If a problem asks for <em>"the next/previous greater/smaller element"</em>, or <em>"the nearest taller building to the right"</em>, or <em>"largest rectangle"</em> — it is a monotonic stack problem. Pattern-match instantly. Don't even consider brute force.</p>
+    </aside>
+  </div>
+
+  <!-- VIZ: Monotonic Stack -->
+  <div class="viz">
+    <div class="viz-caption"><span class="label">FIG. 04 · ANIMATED</span><span>Next Greater Element — monotonic decreasing stack</span></div>
+    <svg id="msViz" viewBox="0 0 900 380" xmlns="http://www.w3.org/2000/svg">
+      <g id="msCells"></g>
+    </svg>
+    <div class="viz-controls">
+      <button onclick="ms_step()" id="msStepBtn">Step</button>
+      <button onclick="ms_play()" id="msPlayBtn">Auto-play</button>
+      <button class="secondary" onclick="ms_reset()">Reset</button>
+    </div>
+    <div class="viz-status" id="msStatus"><span class="tag">[INIT]</span>Array [2, 1, 4, 3, 5]. For each i, find the next greater element using a monotonic decreasing stack of indices.</div>
+  </div>
+
+<pre><span class="c"># Next Greater Element — for each i, find arr[j] > arr[i] with smallest j > i.</span>
+<span class="c"># Pattern: monotonic DECREASING stack of indices.</span>
+<span class="k">def</span> <span class="f">next_greater</span>(arr):
+    n = len(arr)
+    res = [-<span class="num">1</span>] * n
+    stack = []                                <span class="c"># stack of INDICES, values monotonically decreasing</span>
+    <span class="k">for</span> i, v <span class="k">in</span> enumerate(arr):
+        <span class="k">while</span> stack <span class="k">and</span> arr[stack[-<span class="num">1</span>]] &lt; v:
+            res[stack.pop()] = v              <span class="c"># v is the next greater for that popped idx</span>
+        stack.append(i)
+    <span class="k">return</span> res
+<span class="c"># [2, 1, 4, 3, 5]  →  [4, 4, 5, 5, -1]</span>
+
+<span class="c"># Largest Rectangle in Histogram — LeetCode 84. The boss-fight problem.</span>
+<span class="k">def</span> <span class="f">largest_rect</span>(heights):
+    stack = []          <span class="c"># indices, monotonically INCREASING heights</span>
+    best = <span class="num">0</span>
+    heights = heights + [<span class="num">0</span>]    <span class="c"># sentinel forces final flush</span>
+    <span class="k">for</span> i, h <span class="k">in</span> enumerate(heights):
+        <span class="k">while</span> stack <span class="k">and</span> heights[stack[-<span class="num">1</span>]] &gt; h:
+            top = stack.pop()
+            height = heights[top]
+            width = i <span class="k">if</span> <span class="k">not</span> stack <span class="k">else</span> i - stack[-<span class="num">1</span>] - <span class="num">1</span>
+            best = max(best, height * width)
+        stack.append(i)
+    <span class="k">return</span> best</pre>
+
+  <div class="insight"><strong>The width formula:</strong> when a bar at <code class="mono">top</code> is popped, its rectangle extends rightward to <code class="mono">i</code> (where height drops) and leftward to <code class="mono">stack[-1] + 1</code> (just past the next-smaller-on-the-left). Hence <code class="mono">width = i − stack[-1] − 1</code>. Internalize this — it's the heart of histogram problems.</div>
+</section>
+
+<!-- SECTION 06 — PARENS -->
+<section id="parens">
+  <div class="sec-num">§06 · Pattern Deep Dive — Parentheses</div>
+  <h2>The simplest <em>genuinely useful</em> stack pattern.</h2>
+
+  <p>Bracket-matching is the "Hello World" of stacks, but the variants — minimum removals, longest valid substring, generation of all valid combinations — quickly escalate to medium and hard. Master the base case, then extend.</p>
+
+  <!-- VIZ: Parens -->
+  <div class="viz">
+    <div class="viz-caption"><span class="label">FIG. 05 · ANIMATED</span><span>Valid Parentheses — push openers, pop on closers</span></div>
+    <svg id="parViz" viewBox="0 0 900 320" xmlns="http://www.w3.org/2000/svg">
+      <g id="parCells"></g>
+    </svg>
+    <div class="viz-controls">
+      <button onclick="par_step()" id="parStepBtn">Step</button>
+      <button onclick="par_play()" id="parPlayBtn">Auto-play</button>
+      <button class="secondary" onclick="par_reset()">Reset</button>
+    </div>
+    <div class="viz-status" id="parStatus"><span class="tag">[INIT]</span>Input "([{}])". Push openers; on a closer, pop and verify match.</div>
+  </div>
+
+<pre><span class="c"># Valid Parentheses — LeetCode 20</span>
+<span class="k">def</span> <span class="f">is_valid</span>(s):
+    pairs = {<span class="s">')'</span>: <span class="s">'('</span>, <span class="s">']'</span>: <span class="s">'['</span>, <span class="s">'}'</span>: <span class="s">'{'</span>}
+    stack = []
+    <span class="k">for</span> ch <span class="k">in</span> s:
+        <span class="k">if</span> ch <span class="k">in</span> pairs:                              <span class="c"># closer</span>
+            <span class="k">if</span> <span class="k">not</span> stack <span class="k">or</span> stack.pop() != pairs[ch]:
+                <span class="k">return</span> <span class="k">False</span>
+        <span class="k">else</span>:                                       <span class="c"># opener</span>
+            stack.append(ch)
+    <span class="k">return</span> <span class="k">not</span> stack                              <span class="c"># empty = perfectly balanced</span>
+
+<span class="c"># Longest Valid Parentheses — LeetCode 32. The hard variant.</span>
+<span class="c"># Trick: stack of INDICES, with sentinel -1 at the bottom.</span>
+<span class="k">def</span> <span class="f">longest_valid</span>(s):
+    stack = [-<span class="num">1</span>]                              <span class="c"># sentinel: "last unmatched closer"</span>
+    best = <span class="num">0</span>
+    <span class="k">for</span> i, ch <span class="k">in</span> enumerate(s):
+        <span class="k">if</span> ch == <span class="s">'('</span>:
+            stack.append(i)
+        <span class="k">else</span>:                                  <span class="c"># ')'</span>
+            stack.pop()
+            <span class="k">if</span> <span class="k">not</span> stack:
+                stack.append(i)                <span class="c"># reset the sentinel</span>
+            <span class="k">else</span>:
+                best = max(best, i - stack[-<span class="num">1</span>])
+    <span class="k">return</span> best</pre>
+</section>
+
+<!-- SECTION 07 — BFS -->
+<section id="bfs">
+  <div class="sec-num">§07 · Pattern Deep Dive — BFS / Queue</div>
+  <h2>Layer by layer. <em>Shortest</em> by construction.</h2>
+
+  <p>BFS using a queue is the unique algorithm that, on an unweighted graph, computes shortest distances in O(V+E) time. The reason: the queue guarantees you process nodes in order of distance from the source. Every node is dequeued exactly once at its true minimum distance.</p>
+
+  <!-- VIZ: BFS Grid -->
+  <div class="viz">
+    <div class="viz-caption"><span class="label">FIG. 06 · ANIMATED</span><span>BFS on a grid — wavefront expansion from the source</span></div>
+    <svg id="bfsViz" viewBox="0 0 900 380" xmlns="http://www.w3.org/2000/svg">
+      <g id="bfsCells"></g>
+    </svg>
+    <div class="viz-controls">
+      <button onclick="bfs_step()" id="bfsStepBtn">Step</button>
+      <button onclick="bfs_play()" id="bfsPlayBtn">Auto-play</button>
+      <button class="secondary" onclick="bfs_reset()">Reset</button>
+    </div>
+    <div class="viz-status" id="bfsStatus"><span class="tag">[INIT]</span>5×8 grid. Source at (0,0). Watch the wavefront expand outward, one layer per step.</div>
+  </div>
+
+<pre><span class="c"># BFS on a grid — shortest path from src to any cell</span>
+<span class="k">from</span> collections <span class="k">import</span> deque
+<span class="k">def</span> <span class="f">bfs_grid</span>(grid, src):
+    R, C = len(grid), len(grid[<span class="num">0</span>])
+    dist = [[-<span class="num">1</span>] * C <span class="k">for</span> _ <span class="k">in</span> range(R)]
+    q = deque([src])
+    dist[src[<span class="num">0</span>]][src[<span class="num">1</span>]] = <span class="num">0</span>
+    <span class="k">while</span> q:
+        r, c = q.popleft()
+        <span class="k">for</span> dr, dc <span class="k">in</span> [(-<span class="num">1</span>,<span class="num">0</span>),(<span class="num">1</span>,<span class="num">0</span>),(<span class="num">0</span>,-<span class="num">1</span>),(<span class="num">0</span>,<span class="num">1</span>)]:
+            nr, nc = r+dr, c+dc
+            <span class="k">if</span> <span class="num">0</span>&lt;=nr&lt;R <span class="k">and</span> <span class="num">0</span>&lt;=nc&lt;C <span class="k">and</span> dist[nr][nc]==-<span class="num">1</span> <span class="k">and</span> grid[nr][nc] != <span class="s">'#'</span>:
+                dist[nr][nc] = dist[r][c] + <span class="num">1</span>
+                q.append((nr, nc))
+    <span class="k">return</span> dist
+
+<span class="c"># Multi-source BFS — Rotting Oranges. Seed ALL rotten cells at once.</span>
+<span class="k">def</span> <span class="f">rotting_oranges</span>(grid):
+    R, C = len(grid), len(grid[<span class="num">0</span>])
+    q = deque()
+    fresh = <span class="num">0</span>
+    <span class="k">for</span> r <span class="k">in</span> range(R):
+        <span class="k">for</span> c <span class="k">in</span> range(C):
+            <span class="k">if</span> grid[r][c] == <span class="num">2</span>: q.append((r, c, <span class="num">0</span>))
+            <span class="k">elif</span> grid[r][c] == <span class="num">1</span>: fresh += <span class="num">1</span>
+    minutes = <span class="num">0</span>
+    <span class="k">while</span> q:
+        r, c, t = q.popleft()
+        minutes = max(minutes, t)
+        <span class="k">for</span> dr, dc <span class="k">in</span> [(-<span class="num">1</span>,<span class="num">0</span>),(<span class="num">1</span>,<span class="num">0</span>),(<span class="num">0</span>,-<span class="num">1</span>),(<span class="num">0</span>,<span class="num">1</span>)]:
+            nr, nc = r+dr, c+dc
+            <span class="k">if</span> <span class="num">0</span>&lt;=nr&lt;R <span class="k">and</span> <span class="num">0</span>&lt;=nc&lt;C <span class="k">and</span> grid[nr][nc] == <span class="num">1</span>:
+                grid[nr][nc] = <span class="num">2</span>
+                fresh -= <span class="num">1</span>
+                q.append((nr, nc, t + <span class="num">1</span>))
+    <span class="k">return</span> minutes <span class="k">if</span> fresh == <span class="num">0</span> <span class="k">else</span> -<span class="num">1</span></pre>
+
+  <div class="insight"><strong>Multi-source BFS</strong> is the elegant trick that converts what looks like N separate BFS runs into one. Seed the queue with all sources at distance 0. The wavefront naturally produces "minimum distance to <em>any</em> source" for free.</div>
+</section>
+
+<!-- SECTION 08 — DEQUE WINDOW -->
+<section id="deque">
+  <div class="sec-num">§08 · Pattern Deep Dive — Monotonic Deque</div>
+  <h2>The structure that <em>beats</em> the heap.</h2>
+
+  <p>For sliding-window-maximum, the obvious answer is a max-heap of size k — O(n log k). The senior answer is a <strong>monotonic deque</strong> — O(n). The deque holds indices in decreasing order of their values; the front is always the max of the current window.</p>
+
+  <!-- VIZ: Sliding Window Max -->
+  <div class="viz">
+    <div class="viz-caption"><span class="label">FIG. 07 · ANIMATED</span><span>Sliding Window Maximum — monotonic deque</span></div>
+    <svg id="dqViz" viewBox="0 0 900 320" xmlns="http://www.w3.org/2000/svg">
+      <g id="dqCells"></g>
+    </svg>
+    <div class="viz-controls">
+      <button onclick="dq_step()" id="dqStepBtn">Step</button>
+      <button onclick="dq_play()" id="dqPlayBtn">Auto-play</button>
+      <button class="secondary" onclick="dq_reset()">Reset</button>
+    </div>
+    <div class="viz-status" id="dqStatus"><span class="tag">[INIT]</span>Array [1,3,-1,-3,5,3,6,7], k=3. Deque keeps indices monotonically decreasing in value.</div>
+  </div>
+
+<pre><span class="c"># Sliding Window Maximum — LeetCode 239. O(n), beats the heap.</span>
+<span class="k">from</span> collections <span class="k">import</span> deque
+<span class="k">def</span> <span class="f">max_window</span>(arr, k):
+    dq = deque()         <span class="c"># indices, values monotonically DECREASING front-to-back</span>
+    res = []
+    <span class="k">for</span> i, v <span class="k">in</span> enumerate(arr):
+        <span class="c"># 1. evict indices outside the window</span>
+        <span class="k">while</span> dq <span class="k">and</span> dq[<span class="num">0</span>] &lt;= i - k:
+            dq.popleft()
+        <span class="c"># 2. maintain monotonicity from the back</span>
+        <span class="k">while</span> dq <span class="k">and</span> arr[dq[-<span class="num">1</span>]] &lt; v:
+            dq.pop()
+        <span class="c"># 3. append current</span>
+        dq.append(i)
+        <span class="c"># 4. record window max once we have k elements</span>
+        <span class="k">if</span> i &gt;= k - <span class="num">1</span>:
+            res.append(arr[dq[<span class="num">0</span>]])
+    <span class="k">return</span> res</pre>
+
+  <div class="insight"><strong>The amortized magic:</strong> each index is appended once and popped at most once, total work O(n). The heap version is O(n log k) — slower for large k. Mention this trade-off; it signals algorithmic maturity.</div>
+</section>
+
+<!-- SECTION 09 — PROBLEMS -->
+<section id="problems">
+  <div class="sec-num">§09 · The Canon</div>
+  <h2>Twelve problems. <em>Solve these cold, you are ready.</em></h2>
+
+  <div class="problem-card">
+    <header><span>01 · Valid Parentheses</span><span class="diff easy">EASY</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Determine if a string of brackets is balanced.</p>
+      <h4>Pattern</h4><p>Matching/balancing. Push openers; on closer, pop and verify match.</p>
+      <div class="insight">The most-asked easy stack question. Edge cases that trip candidates: empty string (valid), unmatched closer at start, unmatched opener at end. Always check that the stack is empty at the end.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>02 · Min Stack</span><span class="diff med">MEDIUM</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Design a stack with O(1) <code class="mono">push</code>, <code class="mono">pop</code>, <code class="mono">top</code>, and <code class="mono">getMin</code>.</p>
+      <h4>Pattern</h4><p>Auxiliary stack tracking running minimum.</p>
+      <div class="insight">Two solutions: (a) a parallel min-stack pushing the running min on every push; (b) a single stack storing (value, current_min) pairs. The second is more space-efficient if mins repeat. Mention both.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>03 · Implement Queue using Stacks</span><span class="diff easy">EASY</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Build a FIFO queue using only stack operations.</p>
+      <h4>Pattern</h4><p>Two stacks: <code class="mono">in</code> for enqueue, <code class="mono">out</code> for dequeue. Move from <code class="mono">in</code> → <code class="mono">out</code> only when <code class="mono">out</code> is empty.</p>
+      <div class="insight">The amortized argument: each element is pushed and popped at most twice — O(1) amortized per operation. Articulate this; interviewers love amortized analysis.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>04 · Daily Temperatures</span><span class="diff med">MEDIUM</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> For each day, how many days until a warmer day? 0 if no warmer day comes.</p>
+      <h4>Pattern</h4><p>Monotonic decreasing stack of indices.</p>
+      <div class="insight">Direct application of "next greater element." Storing indices (not values) is what lets you compute the day-distance.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>05 · Largest Rectangle in Histogram</span><span class="diff hard">HARD</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Given bar heights, find the area of the largest rectangle that fits.</p>
+      <h4>Pattern</h4><p>Monotonic increasing stack. Width formula: <code class="mono">i − stack[-1] − 1</code>.</p>
+      <div class="insight">Notoriously the gateway to senior-level loops. The sentinel trick (append a 0 height) flushes the stack at the end. Also extends to "Maximal Rectangle in 0/1 Matrix" — apply histogram row by row.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>06 · Trapping Rain Water</span><span class="diff hard">HARD</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Given heights, compute total trapped water.</p>
+      <h4>Pattern</h4><p>Three valid approaches: DP arrays, monotonic stack, two-pointer.</p>
+      <div class="insight">Monotonic-stack version: pop on each new bar, compute trapped water as <code class="mono">(min(left,right) − bottom) × width</code>. Two-pointer is O(1) space; mention it as the optimal. Walk through both — that's a staff-level signal.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>07 · Evaluate Reverse Polish Notation</span><span class="diff med">MEDIUM</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Evaluate an expression in postfix notation.</p>
+      <h4>Pattern</h4><p>Single stack of operands. On operator, pop two, apply, push result.</p>
+      <div class="insight">Watch the order of operands on subtraction and division: <code class="mono">b = pop(); a = pop(); push(a − b)</code>. Reversing this is the bug everyone hits.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>08 · Decode String</span><span class="diff med">MEDIUM</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Given <code class="mono">"3[a2[bc]]"</code>, return <code class="mono">"abcbcabcbcabcbc"</code>.</p>
+      <h4>Pattern</h4><p>Two stacks (count + string), pushed on <code class="mono">[</code>, popped and combined on <code class="mono">]</code>.</p>
+      <div class="insight">The clean version uses one stack of (count, current_string) tuples. On <code class="mono">[</code>, push and reset. On <code class="mono">]</code>, pop and prepend.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>09 · Sliding Window Maximum</span><span class="diff hard">HARD</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> For each window of size k, return the max.</p>
+      <h4>Pattern</h4><p>Monotonic deque. Front always holds current window max.</p>
+      <div class="insight">Heap solution is O(n log k); deque is O(n). Interviewers expect the deque solution at L5+. The three-step routine (evict out-of-window, maintain monotonicity, append) is worth memorizing verbatim.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>10 · Binary Tree Level-Order Traversal</span><span class="diff med">MEDIUM</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Return tree nodes level by level.</p>
+      <h4>Pattern</h4><p>BFS with queue. Process nodes in batches of <code class="mono">len(queue)</code> per level.</p>
+      <div class="insight">The "process by level" trick is to record <code class="mono">size = len(q)</code> at the start of each iteration, then dequeue exactly <code class="mono">size</code> nodes. This separates levels cleanly.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>11 · Rotting Oranges</span><span class="diff med">MEDIUM</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> A grid of oranges; rotten ones rot adjacent fresh ones each minute. Return total minutes, or -1 if impossible.</p>
+      <h4>Pattern</h4><p>Multi-source BFS. Seed all rotten cells at time 0.</p>
+      <div class="insight">The "seed all sources at once" insight is the senior key. Naively running BFS from each rotten orange is O(R·V); multi-source is O(V).</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>12 · Basic Calculator</span><span class="diff hard">HARD</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Evaluate <code class="mono">"(1+(4+5+2)-3)+(6+8)"</code> with parentheses, +, −, and integers.</p>
+      <h4>Pattern</h4><p>Stack of (running_result, sign) pairs, pushed at <code class="mono">(</code> and popped at <code class="mono">)</code>.</p>
+      <div class="insight">The clean trick: track <code class="mono">result</code>, <code class="mono">sign</code>, and a stack. On <code class="mono">(</code>, push (result, sign) and reset. On <code class="mono">)</code>, multiply current by previous sign and add to previous result. No recursion needed.</div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 10 — CHEAT SHEET -->
+<section id="cheatsheet">
+  <div class="sec-num">§10 · The Night-Before Cheat Sheet</div>
+  <h2>If you forget <em>everything</em> else — remember this page.</h2>
+
+  <div class="cheat">
+    <div class="cheat-cell"><h5>First reflex</h5><div class="big" style="font-size:20px">"What's pending?"</div><p>If something is unresolved, ask: stack (most recent) or queue (oldest first)?</p></div>
+    <div class="cheat-cell"><h5>Store indices</h5><div class="big" style="font-size:20px">Not values</div><p>Index gives you position, value, and distance. Default to indices in monotonic stacks.</p></div>
+    <div class="cheat-cell"><h5>Use deque</h5><div class="big" style="font-size:20px">Never list.pop(0)</div><p><code>deque</code> is O(1) front and back. Lists are O(n) at the front.</p></div>
+    <div class="cheat-cell"><h5>Sentinel trick</h5><div class="big" style="font-size:20px">Append 0 / -1</div><p>Sentinels flush the stack at end-of-array and remove special cases.</p></div>
+  </div>
+
+  <h3>Trigger words → pattern</h3>
+  <div class="cheat">
+    <div class="cheat-cell"><h5>"balanced", "matched"</h5><div class="big" style="font-size:18px">Bracket Stack</div></div>
+    <div class="cheat-cell"><h5>"next greater/smaller"</h5><div class="big" style="font-size:18px">Monotonic Stack</div></div>
+    <div class="cheat-cell"><h5>"shortest path on grid"</h5><div class="big" style="font-size:18px">BFS / Queue</div></div>
+    <div class="cheat-cell"><h5>"window of size k, max/min"</h5><div class="big" style="font-size:18px">Monotonic Deque</div></div>
+    <div class="cheat-cell"><h5>"evaluate expression"</h5><div class="big" style="font-size:18px">Two-Stack</div></div>
+    <div class="cheat-cell"><h5>"level-by-level"</h5><div class="big" style="font-size:18px">BFS, batch by len(q)</div></div>
+  </div>
+
+  <h3>Complexity at a glance</h3>
+  <div class="cheat">
+    <div class="cheat-cell"><h5>Stack push/pop</h5><div class="big">O(1)</div></div>
+    <div class="cheat-cell"><h5>Queue (deque) ops</h5><div class="big">O(1)</div></div>
+    <div class="cheat-cell"><h5>Monotonic stack</h5><div class="big">O(n)</div></div>
+    <div class="cheat-cell"><h5>BFS</h5><div class="big">O(V+E)</div></div>
+    <div class="cheat-cell"><h5>Sliding window max</h5><div class="big">O(n)</div></div>
+    <div class="cheat-cell"><h5>Min stack</h5><div class="big">O(1)</div></div>
+  </div>
+
+  <h3>The monotonic-stack template — write this from memory tonight:</h3>
+<pre><span class="k">def</span> <span class="f">monotonic_stack</span>(arr):
+    stack = []                     <span class="c"># indices</span>
+    res = [-<span class="num">1</span>] * len(arr)
+    <span class="k">for</span> i, v <span class="k">in</span> enumerate(arr):
+        <span class="k">while</span> stack <span class="k">and</span> arr[stack[-<span class="num">1</span>]] &lt; v:   <span class="c"># or > for the other variant</span>
+            res[stack.pop()] = v   <span class="c"># or i, or v - arr[..], depending on the question</span>
+        stack.append(i)
+    <span class="k">return</span> res</pre>
+
+  <div class="insight" style="margin-top:40px"><strong>The final unlock:</strong> in the interview, the moment you read "next greater," "previous smaller," "largest rectangle," or "shortest path on unweighted graph" — say the pattern out loud before you code. <em>"This is a monotonic stack of indices."</em> <em>"This is multi-source BFS."</em> Naming the pattern is half the score. Coding it correctly is the other half.</div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="inner">
+    <div>
+      <h3>Chapter Four, <em>complete.</em></h3>
+      <p style="margin-top:16px">Continue the Codex: Chapter 02 — Arrays. Chapter 07 — Linked Lists. Chapter 08 — Trees. Chapter 09 — Graphs. The compounding compensation of systematic study.</p>
+    </div>
+    <div class="stamp">VOL.III · CH.04 · ED. MMXXVI</div>
+  </div>
+</footer>
+
+<script>
+/* =========================================================
+   Helpers
+   ========================================================= */
+function setStatus(id, text){
+  const tag = text.match(/^\[([^\]]+)\]/);
+  const rest = text.replace(/^\[[^\]]+\]\s*/,'');
+  document.getElementById(id).innerHTML = `<span class="tag">[${tag?tag[1]:'INFO'}]</span> ${rest}`;
+}
+
+/* =========================================================
+   STACK VIZ
+   ========================================================= */
+let stkArr = [12, 7, 23];
+function stk_render(highlight){
+  const svg = document.getElementById('stackCells');
+  let html = '';
+  const baseY = 280;
+  const cellH = 50;
+  const cellW = 180;
+  const cx = 360;
+  // base line
+  html += `<line x1="${cx-cellW/2-20}" y1="${baseY}" x2="${cx+cellW/2+20}" y2="${baseY}" stroke="#1a1a1a" stroke-width="3"/>`;
+  html += `<line x1="${cx-cellW/2-20}" y1="${30}" x2="${cx-cellW/2-20}" y2="${baseY}" stroke="#1a1a1a" stroke-width="3"/>`;
+  html += `<line x1="${cx+cellW/2+20}" y1="${30}" x2="${cx+cellW/2+20}" y2="${baseY}" stroke="#1a1a1a" stroke-width="3"/>`;
+  stkArr.forEach((v, i) => {
+    const y = baseY - (i+1) * cellH;
+    let klass = 'cell-box';
+    if(highlight === 'top' && i === stkArr.length-1) klass = 'cell-box active';
+    if(highlight === 'pushed' && i === stkArr.length-1) klass = 'cell-box pushed';
+    const valKlass = (klass.includes('active') || klass.includes('pushed') || klass.includes('popped')) ? 'cell-val light' : 'cell-val';
+    html += `<rect x="${cx-cellW/2}" y="${y}" width="${cellW}" height="${cellH-2}" class="${klass}"/>`;
+    html += `<text x="${cx}" y="${y + (cellH-2)/2}" class="${valKlass}">${v}</text>`;
+    if(i === stkArr.length-1){
+      html += `<text x="${cx+cellW/2+30}" y="${y + cellH/2}" class="cell-label" style="text-anchor:start;fill:#d62828;font-weight:800;font-size:13px">← TOP</text>`;
+    }
+  });
+  if(stkArr.length === 0){
+    html += `<text x="${cx}" y="${baseY-30}" class="cell-label" style="font-style:italic;fill:#7c8499">(empty stack)</text>`;
+  }
+  // axis labels
+  html += `<text x="${cx-cellW/2-30}" y="${baseY+18}" class="cell-label" style="text-anchor:end;font-size:10px;fill:#7c8499">bottom</text>`;
+  svg.innerHTML = html;
+}
+function stk_push(){
+  const v = parseInt(document.getElementById('stackVal').value, 10);
+  if(stkArr.length >= 5){ setStatus('stackStatus', '[FULL] Stack at viz capacity. Pop or reset.'); return; }
+  stkArr.push(v);
+  setStatus('stackStatus', `[PUSH ${v}] Added to top. Size = ${stkArr.length}. O(1).`);
+  stk_render('pushed');
+}
+function stk_pop(){
+  if(stkArr.length === 0){ setStatus('stackStatus', '[ERROR] Empty — nothing to pop.'); return; }
+  const v = stkArr.pop();
+  setStatus('stackStatus', `[POP] Removed ${v} from top. Size = ${stkArr.length}. O(1).`);
+  stk_render();
+}
+function stk_peek(){
+  if(stkArr.length === 0){ setStatus('stackStatus', '[ERROR] Empty — nothing to peek.'); return; }
+  setStatus('stackStatus', `[PEEK] Top = ${stkArr[stkArr.length-1]}. No mutation.`);
+  stk_render('top');
+}
+function stk_reset(){
+  stkArr = [12, 7, 23];
+  setStatus('stackStatus', '[RESET] Stack with [12, 7, 23] (23 on top).');
+  stk_render();
+}
+
+/* =========================================================
+   QUEUE VIZ
+   ========================================================= */
+let qArr = [3, 8, 5];
+function q_render(highlight){
+  const svg = document.getElementById('queueCells');
+  let html = '';
+  const startX = 100, cellW = 90, gap = 4, y = 80;
+  const maxCells = 7;
+  qArr.forEach((v, i) => {
+    let klass = 'cell-box';
+    if(highlight === 'front' && i === 0) klass = 'cell-box active';
+    if(highlight === 'enq' && i === qArr.length-1) klass = 'cell-box pushed';
+    if(highlight === 'deq' && i === 0) klass = 'cell-box popped';
+    const valKlass = (klass !== 'cell-box') ? 'cell-val light' : 'cell-val';
+    html += `<rect x="${startX + i*(cellW+gap)}" y="${y}" width="${cellW}" height="60" class="${klass}"/>`;
+    html += `<text x="${startX + i*(cellW+gap) + cellW/2}" y="${y+30}" class="${valKlass}">${v}</text>`;
+  });
+  // labels
+  if(qArr.length > 0){
+    html += `<text x="${startX + cellW/2}" y="${y-12}" class="cell-label" style="fill:#003049;font-weight:800;font-size:12px">FRONT</text>`;
+    html += `<text x="${startX + (qArr.length-1)*(cellW+gap) + cellW/2}" y="${y+88}" class="cell-label" style="fill:#003049;font-weight:800;font-size:12px">REAR</text>`;
+  } else {
+    html += `<text x="${startX + cellW*2}" y="${y+30}" class="cell-label" style="font-style:italic;fill:#7c8499">(empty queue)</text>`;
+  }
+  // arrows
+  html += `<path d="M ${startX-50} ${y+30} L ${startX-10} ${y+30}" class="arrow flow" marker-end="url(#arrowFlow)"/>`;
+  html += `<text x="${startX-65}" y="${y+15}" class="cell-label" style="text-anchor:start;font-size:10px;fill:#d62828;font-weight:800">DEQ</text>`;
+  const rearEnd = startX + qArr.length*(cellW+gap);
+  html += `<path d="M ${rearEnd+50} ${y+30} L ${rearEnd+10} ${y+30}" class="arrow flow" marker-end="url(#arrowFlow)"/>`;
+  html += `<text x="${rearEnd+50}" y="${y+15}" class="cell-label" style="text-anchor:start;font-size:10px;fill:#d62828;font-weight:800">ENQ</text>`;
+  svg.innerHTML = html;
+}
+function q_enqueue(){
+  const v = parseInt(document.getElementById('queueVal').value, 10);
+  if(qArr.length >= 6){ setStatus('queueStatus', '[FULL] Queue at viz capacity. Dequeue or reset.'); return; }
+  qArr.push(v);
+  setStatus('queueStatus', `[ENQ ${v}] Added at rear. Size = ${qArr.length}. O(1).`);
+  q_render('enq');
+}
+function q_dequeue(){
+  if(qArr.length === 0){ setStatus('queueStatus', '[ERROR] Empty — nothing to dequeue.'); return; }
+  q_render('deq');
+  setTimeout(() => {
+    const v = qArr.shift();
+    setStatus('queueStatus', `[DEQ] Removed ${v} from front. Size = ${qArr.length}. O(1) (with deque).`);
+    q_render();
+  }, 350);
+}
+function q_peek(){
+  if(qArr.length === 0){ setStatus('queueStatus', '[ERROR] Empty.'); return; }
+  setStatus('queueStatus', `[PEEK] Front = ${qArr[0]}. No mutation.`);
+  q_render('front');
+}
+function q_reset(){
+  qArr = [3, 8, 5];
+  setStatus('queueStatus', '[RESET] Queue with [3, 8, 5] (3 at front).');
+  q_render();
+}
+
+/* =========================================================
+   MONOTONIC STACK VIZ — Next Greater Element
+   ========================================================= */
+const msArr = [2, 1, 4, 3, 5];
+let msState;
+function ms_initState(){
+  msState = { i: 0, stack: [], res: msArr.map(()=>-1), done: false, timer: null, popping: -1 };
+}
+ms_initState();
+function ms_render(){
+  const svg = document.getElementById('msCells');
+  let html = '';
+  const startX = 100, cellW = 100, gap = 8, y = 50;
+  // input array
+  html += `<text x="20" y="40" class="cell-label" style="text-anchor:start;font-size:13px;fill:#003049;font-weight:800">INPUT</text>`;
+  msArr.forEach((v, i) => {
+    let klass = 'cell-box';
+    if(i === msState.i && !msState.done) klass = 'cell-box active';
+    else if(msState.popping === i) klass = 'cell-box popped';
+    else if(msState.stack.includes(i)) klass = 'cell-box pushed';
+    else if(i < msState.i) klass = 'cell-box dim';
+    const vk = (klass !== 'cell-box' && klass !== 'cell-box dim') ? 'cell-val light' : 'cell-val';
+    html += `<rect x="${startX+i*(cellW+gap)}" y="${y}" width="${cellW}" height="60" class="${klass}"/>`;
+    html += `<text x="${startX+i*(cellW+gap)+cellW/2}" y="${y+30}" class="${vk}">${v}</text>`;
+    html += `<text x="${startX+i*(cellW+gap)+cellW/2}" y="${y+78}" class="cell-idx">[${i}]</text>`;
+  });
+  // stack visualization (vertical, on right)
+  const stackX = 720;
+  const stackBaseY = 320;
+  html += `<text x="${stackX+50}" y="40" class="cell-label" style="font-size:13px;fill:#d62828;font-weight:800">STACK (idx)</text>`;
+  html += `<line x1="${stackX-5}" y1="60" x2="${stackX-5}" y2="${stackBaseY}" stroke="#1a1a1a" stroke-width="2"/>`;
+  html += `<line x1="${stackX+105}" y1="60" x2="${stackX+105}" y2="${stackBaseY}" stroke="#1a1a1a" stroke-width="2"/>`;
+  html += `<line x1="${stackX-5}" y1="${stackBaseY}" x2="${stackX+105}" y2="${stackBaseY}" stroke="#1a1a1a" stroke-width="2"/>`;
+  msState.stack.forEach((idx, k) => {
+    const cy = stackBaseY - (k+1) * 50;
+    html += `<rect x="${stackX}" y="${cy}" width="100" height="46" class="cell-box pushed"/>`;
+    html += `<text x="${stackX+50}" y="${cy+23}" class="cell-val light">${msArr[idx]}</text>`;
+    html += `<text x="${stackX+50}" y="${cy+38}" class="cell-idx" style="fill:#f5f1e8">i=${idx}</text>`;
+  });
+  if(msState.stack.length === 0){
+    html += `<text x="${stackX+50}" y="${stackBaseY-20}" class="cell-label" style="font-style:italic;fill:#7c8499">(empty)</text>`;
+  }
+  // result row
+  html += `<text x="20" y="180" class="cell-label" style="text-anchor:start;font-size:13px;fill:#588157;font-weight:800">RESULT</text>`;
+  msState.res.forEach((v, i) => {
+    const klass = v === -1 ? 'cell-box' : 'cell-box matched';
+    html += `<rect x="${startX+i*(cellW+gap)}" y="190" width="${cellW}" height="50" class="${klass}"/>`;
+    html += `<text x="${startX+i*(cellW+gap)+cellW/2}" y="215" class="cell-val">${v}</text>`;
+  });
+  svg.innerHTML = html;
+}
+function ms_step(){
+  if(msState.done) return;
+  if(msState.popping >= 0){ msState.popping = -1; }
+  if(msState.i >= msArr.length){
+    msState.done = true;
+    setStatus('msStatus', `[DONE] Result: [${msState.res.join(', ')}]. Indices left in stack have no greater element → −1.`);
+    if(msState.timer){clearInterval(msState.timer); msState.timer=null; document.getElementById('msPlayBtn').textContent='Auto-play';}
+    ms_render();
+    return;
+  }
+  const v = msArr[msState.i];
+  // Pop while top < v
+  if(msState.stack.length && msArr[msState.stack[msState.stack.length-1]] < v){
+    const popped = msState.stack.pop();
+    msState.res[popped] = v;
+    msState.popping = popped;
+    setStatus('msStatus', `top of stack idx=${popped} (val=${msArr[popped]}) < ${v} → pop. arr[${popped}]'s next greater = ${v}.`);
+    ms_render();
+    return;
+  }
+  msState.stack.push(msState.i);
+  setStatus('msStatus', `Push idx=${msState.i} (val=${v}) onto stack. Stack maintains monotone-decreasing values.`);
+  msState.i++;
+  ms_render();
+}
+function ms_play(){
+  if(msState.timer){clearInterval(msState.timer); msState.timer=null; document.getElementById('msPlayBtn').textContent='Auto-play'; return;}
+  document.getElementById('msPlayBtn').textContent='Pause';
+  msState.timer = setInterval(ms_step, 1000);
+}
+function ms_reset(){
+  if(msState.timer){clearInterval(msState.timer); document.getElementById('msPlayBtn').textContent='Auto-play';}
+  ms_initState();
+  setStatus('msStatus', '[INIT] Array [2, 1, 4, 3, 5]. For each i, find the next greater element using a monotonic decreasing stack of indices.');
+  ms_render();
+}
+
+/* =========================================================
+   PARENS VIZ
+   ========================================================= */
+const parStr = "([{}])";
+let parState;
+function par_initState(){
+  parState = { i: 0, stack: [], done: false, valid: true, timer: null };
+}
+par_initState();
+function par_render(){
+  const svg = document.getElementById('parCells');
+  let html = '';
+  const startX = 200, cellW = 70, gap = 8, y = 50;
+  // input string
+  html += `<text x="80" y="80" class="cell-label" style="text-anchor:start;font-size:13px;fill:#003049;font-weight:800">INPUT</text>`;
+  for(let i = 0; i < parStr.length; i++){
+    let klass = 'cell-box';
+    if(i === parState.i && !parState.done) klass = 'cell-box active';
+    else if(i < parState.i) klass = 'cell-box dim';
+    const vk = (klass === 'cell-box active') ? 'cell-val light' : 'cell-val';
+    html += `<rect x="${startX+i*(cellW+gap)}" y="${y}" width="${cellW}" height="60" class="${klass}"/>`;
+    html += `<text x="${startX+i*(cellW+gap)+cellW/2}" y="${y+30}" class="${vk}" style="font-size:24px">${parStr[i]}</text>`;
+    html += `<text x="${startX+i*(cellW+gap)+cellW/2}" y="${y+78}" class="cell-idx">[${i}]</text>`;
+  }
+  // stack
+  const stackX = 320;
+  const stackBaseY = 290;
+  html += `<text x="${stackX+50}" y="160" class="cell-label" style="font-size:13px;fill:#d62828;font-weight:800">STACK</text>`;
+  html += `<line x1="${stackX-5}" y1="170" x2="${stackX-5}" y2="${stackBaseY}" stroke="#1a1a1a" stroke-width="2"/>`;
+  html += `<line x1="${stackX+105}" y1="170" x2="${stackX+105}" y2="${stackBaseY}" stroke="#1a1a1a" stroke-width="2"/>`;
+  html += `<line x1="${stackX-5}" y1="${stackBaseY}" x2="${stackX+105}" y2="${stackBaseY}" stroke="#1a1a1a" stroke-width="2"/>`;
+  parState.stack.forEach((ch, k) => {
+    const cy = stackBaseY - (k+1) * 36;
+    html += `<rect x="${stackX}" y="${cy}" width="100" height="32" class="cell-box pushed"/>`;
+    html += `<text x="${stackX+50}" y="${cy+16}" class="cell-val light" style="font-size:18px">${ch}</text>`;
+  });
+  if(parState.stack.length === 0){
+    html += `<text x="${stackX+50}" y="${stackBaseY-15}" class="cell-label" style="font-style:italic;fill:#7c8499">(empty)</text>`;
+  }
+  svg.innerHTML = html;
+}
+function par_step(){
+  if(parState.done) return;
+  if(parState.i >= parStr.length){
+    parState.done = true;
+    const ok = parState.valid && parState.stack.length === 0;
+    setStatus('parStatus', ok ? `[VALID ✓] Stack empty at end. The string is balanced.` : `[INVALID ✗] ${parState.stack.length>0?'Stack non-empty: unmatched openers.':'Mismatch occurred.'}`);
+    if(parState.timer){clearInterval(parState.timer); parState.timer=null; document.getElementById('parPlayBtn').textContent='Auto-play';}
+    return;
+  }
+  const ch = parStr[parState.i];
+  const pairs = {')': '(', ']': '[', '}': '{'};
+  if(ch in pairs){
+    if(parState.stack.length === 0 || parState.stack[parState.stack.length-1] !== pairs[ch]){
+      parState.valid = false;
+      parState.done = true;
+      setStatus('parStatus', `[INVALID] Closer '${ch}' but top is '${parState.stack[parState.stack.length-1] || 'empty'}' — mismatch.`);
+      if(parState.timer){clearInterval(parState.timer); parState.timer=null; document.getElementById('parPlayBtn').textContent='Auto-play';}
+      return;
+    }
+    const popped = parState.stack.pop();
+    setStatus('parStatus', `Closer '${ch}' matches top '${popped}' → pop. Stack size = ${parState.stack.length}.`);
+  } else {
+    parState.stack.push(ch);
+    setStatus('parStatus', `Opener '${ch}' → push onto stack. Stack size = ${parState.stack.length}.`);
+  }
+  parState.i++;
+  par_render();
+}
+function par_play(){
+  if(parState.timer){clearInterval(parState.timer); parState.timer=null; document.getElementById('parPlayBtn').textContent='Auto-play'; return;}
+  document.getElementById('parPlayBtn').textContent='Pause';
+  parState.timer = setInterval(par_step, 900);
+}
+function par_reset(){
+  if(parState.timer){clearInterval(parState.timer); document.getElementById('parPlayBtn').textContent='Auto-play';}
+  par_initState();
+  setStatus('parStatus', '[INIT] Input "([{}])". Push openers; on a closer, pop and verify match.');
+  par_render();
+}
+
+/* =========================================================
+   BFS VIZ — grid wavefront
+   ========================================================= */
+const bfsR = 5, bfsC = 8;
+const bfsWalls = new Set(['1,2','1,3','2,3','3,5','3,6']);
+let bfsState;
+function bfs_initState(){
+  const dist = Array.from({length: bfsR}, () => Array(bfsC).fill(-1));
+  dist[0][0] = 0;
+  bfsState = { dist, q: [[0,0]], step: 0, done: false, timer: null, just: new Set(['0,0']) };
+}
+bfs_initState();
+function bfs_render(){
+  const svg = document.getElementById('bfsCells');
+  let html = '';
+  const cellW = 70, gap = 4, startX = 130, startY = 40;
+  for(let r = 0; r < bfsR; r++){
+    for(let c = 0; c < bfsC; c++){
+      const x = startX + c * (cellW + gap);
+      const y = startY + r * (cellW + gap);
+      let klass = 'cell-box';
+      let label = '';
+      const key = r+','+c;
+      if(bfsWalls.has(key)){
+        klass = 'cell-box';
+        html += `<rect x="${x}" y="${y}" width="${cellW}" height="${cellW}" fill="#1a1a1a" stroke="#1a1a1a" stroke-width="2"/>`;
+        html += `<text x="${x+cellW/2}" y="${y+cellW/2}" class="cell-val light" style="font-size:24px">█</text>`;
+        continue;
+      }
+      const d = bfsState.dist[r][c];
+      if(d === -1) klass = 'cell-box';
+      else if(bfsState.just.has(key)) klass = 'cell-box active';
+      else if(d === 0) klass = 'cell-box target';
+      else klass = 'cell-box matched';
+      const vk = (klass.includes('active') || klass.includes('target')) ? 'cell-val light' : 'cell-val';
+      html += `<rect x="${x}" y="${y}" width="${cellW}" height="${cellW}" class="${klass}"/>`;
+      if(d >= 0){
+        html += `<text x="${x+cellW/2}" y="${y+cellW/2}" class="${vk}" style="font-size:22px">${d}</text>`;
+      }
+    }
+  }
+  svg.innerHTML = html;
+}
+function bfs_step(){
+  if(bfsState.done) return;
+  if(bfsState.q.length === 0){
+    bfsState.done = true;
+    const reached = bfsState.dist.flat().filter(d => d >= 0).length;
+    setStatus('bfsStatus', `[DONE] Wavefront complete. Reached ${reached} cells. Each number = shortest distance to (0,0).`);
+    if(bfsState.timer){clearInterval(bfsState.timer); bfsState.timer=null; document.getElementById('bfsPlayBtn').textContent='Auto-play';}
+    return;
+  }
+  bfsState.just = new Set();
+  const layerSize = bfsState.q.length;
+  for(let s = 0; s < layerSize; s++){
+    const [r, c] = bfsState.q.shift();
+    for(const [dr, dc] of [[-1,0],[1,0],[0,-1],[0,1]]){
+      const nr = r+dr, nc = c+dc;
+      if(nr<0||nr>=bfsR||nc<0||nc>=bfsC) continue;
+      if(bfsWalls.has(nr+','+nc)) continue;
+      if(bfsState.dist[nr][nc] !== -1) continue;
+      bfsState.dist[nr][nc] = bfsState.dist[r][c] + 1;
+      bfsState.q.push([nr, nc]);
+      bfsState.just.add(nr+','+nc);
+    }
+  }
+  bfsState.step++;
+  setStatus('bfsStatus', `Layer ${bfsState.step}: reached ${bfsState.just.size} new cell(s). Queue size = ${bfsState.q.length}.`);
+  bfs_render();
+  if(bfsState.q.length === 0) bfsState.done = true;
+}
+function bfs_play(){
+  if(bfsState.timer){clearInterval(bfsState.timer); bfsState.timer=null; document.getElementById('bfsPlayBtn').textContent='Auto-play'; return;}
+  document.getElementById('bfsPlayBtn').textContent='Pause';
+  bfsState.timer = setInterval(bfs_step, 800);
+}
+function bfs_reset(){
+  if(bfsState.timer){clearInterval(bfsState.timer); document.getElementById('bfsPlayBtn').textContent='Auto-play';}
+  bfs_initState();
+  setStatus('bfsStatus', '[INIT] 5×8 grid. Source at (0,0). Watch the wavefront expand outward, one layer per step.');
+  bfs_render();
+}
+
+/* =========================================================
+   DEQUE VIZ — Sliding Window Maximum
+   ========================================================= */
+const dqArr = [1, 3, -1, -3, 5, 3, 6, 7];
+const dqK = 3;
+let dqState;
+function dq_initState(){
+  dqState = { i: 0, dq: [], res: [], done: false, timer: null };
+}
+dq_initState();
+function dq_render(){
+  const svg = document.getElementById('dqCells');
+  let html = '';
+  const startX = 60, cellW = 80, gap = 8, y = 50;
+  // input array
+  html += `<text x="20" y="40" class="cell-label" style="text-anchor:start;font-size:12px;fill:#003049;font-weight:800">ARR</text>`;
+  dqArr.forEach((v, i) => {
+    let klass = 'cell-box';
+    if(i === dqState.i && !dqState.done) klass = 'cell-box active';
+    else if(dqState.dq.includes(i)) klass = 'cell-box pushed';
+    else if(i < dqState.i - dqK + 1 || (dqState.done && i >= dqArr.length)) klass = 'cell-box dim';
+    else if(i < dqState.i) klass = 'cell-box dim';
+    // window highlight
+    const inWindow = i >= dqState.i - dqK + 1 && i <= dqState.i && dqState.i >= dqK - 1;
+    const vk = (klass === 'cell-box active' || klass === 'cell-box pushed') ? 'cell-val light' : 'cell-val';
+    html += `<rect x="${startX+i*(cellW+gap)}" y="${y}" width="${cellW}" height="60" class="${klass}"/>`;
+    html += `<text x="${startX+i*(cellW+gap)+cellW/2}" y="${y+30}" class="${vk}">${v}</text>`;
+    html += `<text x="${startX+i*(cellW+gap)+cellW/2}" y="${y+78}" class="cell-idx">[${i}]</text>`;
+  });
+  // window bracket
+  if(dqState.i >= dqK - 1 && !dqState.done){
+    const lo = dqState.i - dqK + 1;
+    const x1 = startX + lo*(cellW+gap) - 4;
+    const x2 = startX + dqState.i*(cellW+gap) + cellW + 4;
+    html += `<line x1="${x1}" y1="${y-12}" x2="${x2}" y2="${y-12}" stroke="#d62828" stroke-width="3"/>`;
+    html += `<line x1="${x1}" y1="${y-12}" x2="${x1}" y2="${y-4}" stroke="#d62828" stroke-width="3"/>`;
+    html += `<line x1="${x2}" y1="${y-12}" x2="${x2}" y2="${y-4}" stroke="#d62828" stroke-width="3"/>`;
+    html += `<text x="${(x1+x2)/2}" y="${y-18}" class="cell-label" style="fill:#d62828;font-weight:800;font-size:11px">window k=${dqK}</text>`;
+  }
+  // deque visualization
+  html += `<text x="20" y="180" class="cell-label" style="text-anchor:start;font-size:12px;fill:#d62828;font-weight:800">DEQUE</text>`;
+  html += `<text x="60" y="180" class="cell-label" style="text-anchor:start;font-size:10px;fill:#7c8499">(front → rear, vals decreasing)</text>`;
+  dqState.dq.forEach((idx, k) => {
+    const x = startX + k * 90;
+    html += `<rect x="${x}" y="200" width="80" height="50" class="cell-box pushed"/>`;
+    html += `<text x="${x+40}" y="220" class="cell-val light">${dqArr[idx]}</text>`;
+    html += `<text x="${x+40}" y="237" class="cell-idx" style="fill:#f5f1e8">i=${idx}</text>`;
+  });
+  if(dqState.dq.length === 0){
+    html += `<text x="${startX+40}" y="225" class="cell-label" style="font-style:italic;fill:#7c8499">(empty)</text>`;
+  }
+  // result text
+  html += `<text x="700" y="220" class="cell-label" style="text-anchor:start;font-size:13px;fill:#588157;font-weight:800">MAXES:</text>`;
+  html += `<text x="700" y="240" class="cell-label" style="text-anchor:start;font-size:13px">[${dqState.res.join(', ')}]</text>`;
+  svg.innerHTML = html;
+}
+function dq_step(){
+  if(dqState.done) return;
+  if(dqState.i >= dqArr.length){
+    dqState.done = true;
+    setStatus('dqStatus', `[DONE] Window maxes: [${dqState.res.join(', ')}]. O(n) total — each index pushed/popped at most once.`);
+    if(dqState.timer){clearInterval(dqState.timer); dqState.timer=null; document.getElementById('dqPlayBtn').textContent='Auto-play';}
+    return;
+  }
+  const v = dqArr[dqState.i];
+  // 1) evict front if out of window
+  while(dqState.dq.length && dqState.dq[0] <= dqState.i - dqK){
+    const evicted = dqState.dq.shift();
+    setStatus('dqStatus', `Evict idx=${evicted} from front (out of window).`);
+  }
+  // 2) maintain monotonicity
+  while(dqState.dq.length && dqArr[dqState.dq[dqState.dq.length-1]] < v){
+    const popped = dqState.dq.pop();
+    setStatus('dqStatus', `arr[${popped}]=${dqArr[popped]} < ${v} → pop from back.`);
+  }
+  // 3) push current
+  dqState.dq.push(dqState.i);
+  // 4) record max if window full
+  if(dqState.i >= dqK - 1){
+    const maxv = dqArr[dqState.dq[0]];
+    dqState.res.push(maxv);
+    setStatus('dqStatus', `i=${dqState.i}: pushed; window max = arr[${dqState.dq[0]}] = ${maxv}.`);
+  } else {
+    setStatus('dqStatus', `i=${dqState.i}: pushed idx onto deque (window not full yet).`);
+  }
+  dqState.i++;
+  dq_render();
+}
+function dq_play(){
+  if(dqState.timer){clearInterval(dqState.timer); dqState.timer=null; document.getElementById('dqPlayBtn').textContent='Auto-play'; return;}
+  document.getElementById('dqPlayBtn').textContent='Pause';
+  dqState.timer = setInterval(dq_step, 950);
+}
+function dq_reset(){
+  if(dqState.timer){clearInterval(dqState.timer); document.getElementById('dqPlayBtn').textContent='Auto-play';}
+  dq_initState();
+  setStatus('dqStatus', '[INIT] Array [1,3,-1,-3,5,3,6,7], k=3. Deque keeps indices monotonically decreasing in value.');
+  dq_render();
+}
+
+/* ---------- Initial renders ---------- */
+stk_render();
+q_render();
+ms_render();
+par_render();
+bfs_render();
+dq_render();
+</script>
+</body>
+</html>
