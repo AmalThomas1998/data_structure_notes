@@ -1,0 +1,1427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Linked Lists · The Interview Codex</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,400&family=JetBrains+Mono:wght@400;600;800&family=Inter+Tight:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0a0a0a;
+    --paper:#f4efe6;
+    --paper-2:#ebe4d6;
+    --accent:#e63946;
+    --accent-2:#2a9d8f;
+    --accent-3:#f4a261;
+    --rule:#0a0a0a;
+    --muted:#6b6559;
+    --code-bg:#111110;
+    --code-ink:#e8e1d3;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Fraunces',Georgia,serif;
+    font-size:18px;
+    line-height:1.6;
+    overflow-x:hidden;
+  }
+  /* Paper grain */
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+    background-image:radial-gradient(rgba(0,0,0,.035) 1px, transparent 1px);
+    background-size:3px 3px;opacity:.6;mix-blend-mode:multiply;
+  }
+  .mono{font-family:'JetBrains Mono',monospace}
+  .sans{font-family:'Inter Tight',sans-serif}
+
+  /* ===== MASTHEAD ===== */
+  .masthead{
+    border-bottom:3px double var(--ink);
+    padding:18px 40px;
+    display:flex;align-items:center;justify-content:space-between;
+    font-family:'Inter Tight',sans-serif;
+    font-size:12px;letter-spacing:.18em;text-transform:uppercase;
+    position:relative;z-index:2;
+  }
+  .masthead .edition{display:flex;gap:24px}
+  .masthead .edition span{border-left:1px solid #0a0a0a33;padding-left:24px}
+  .masthead .edition span:first-child{border-left:none;padding-left:0}
+
+  /* ===== HERO ===== */
+  .hero{
+    padding:80px 40px 60px;
+    max-width:1400px;margin:0 auto;
+    position:relative;z-index:2;
+  }
+  .hero .kicker{
+    font-family:'Inter Tight',sans-serif;
+    font-size:13px;letter-spacing:.3em;text-transform:uppercase;
+    color:var(--accent);font-weight:700;margin-bottom:20px;
+    display:flex;align-items:center;gap:16px;
+  }
+  .hero .kicker::before,.hero .kicker::after{
+    content:"";height:1px;background:var(--accent);flex:0 0 60px;
+  }
+  .hero .kicker::after{flex:1}
+  .hero h1{
+    font-family:'Fraunces',serif;
+    font-weight:800;
+    font-size:clamp(60px,11vw,180px);
+    line-height:.88;letter-spacing:-.04em;
+    margin-bottom:30px;
+  }
+  .hero h1 em{font-style:italic;color:var(--accent);font-weight:400}
+  .hero .sub{
+    font-size:22px;max-width:720px;font-style:italic;
+    color:#3a3a3a;border-left:3px solid var(--ink);padding-left:20px;
+  }
+  .hero .meta{
+    display:flex;gap:50px;margin-top:50px;padding-top:30px;
+    border-top:1px solid #0a0a0a22;
+    font-family:'Inter Tight',sans-serif;font-size:13px;
+  }
+  .hero .meta div strong{display:block;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+
+  /* ===== NAV PILL ===== */
+  .toc{
+    position:sticky;top:0;z-index:20;
+    background:var(--ink);color:var(--paper);
+    border-top:1px solid var(--paper);border-bottom:1px solid var(--paper);
+    padding:14px 40px;
+    display:flex;gap:28px;overflow-x:auto;
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;letter-spacing:.1em;text-transform:uppercase;
+  }
+  .toc a{color:var(--paper);text-decoration:none;white-space:nowrap;opacity:.6;transition:opacity .2s}
+  .toc a:hover{opacity:1;color:var(--accent-3)}
+  .toc .num{color:var(--accent-3);margin-right:6px}
+
+  /* ===== SECTIONS ===== */
+  section{
+    padding:80px 40px;
+    max-width:1400px;margin:0 auto;
+    position:relative;z-index:2;
+  }
+  .sec-num{
+    font-family:'Fraunces',serif;font-style:italic;font-weight:400;
+    font-size:14px;color:var(--accent);letter-spacing:.2em;text-transform:uppercase;
+    display:flex;align-items:center;gap:14px;margin-bottom:20px;
+  }
+  .sec-num::before{content:"";width:40px;height:1px;background:var(--accent)}
+  h2{
+    font-family:'Fraunces',serif;font-weight:800;
+    font-size:clamp(40px,6vw,80px);line-height:.95;letter-spacing:-.03em;
+    margin-bottom:40px;max-width:900px;
+  }
+  h2 em{font-style:italic;color:var(--accent);font-weight:400}
+  h3{
+    font-family:'Fraunces',serif;font-weight:600;
+    font-size:32px;line-height:1.1;letter-spacing:-.02em;margin:40px 0 20px;
+  }
+  h4{
+    font-family:'Inter Tight',sans-serif;font-weight:700;
+    font-size:14px;letter-spacing:.15em;text-transform:uppercase;
+    margin:30px 0 14px;
+  }
+  p{margin-bottom:18px;max-width:75ch}
+  p strong{background:linear-gradient(180deg,transparent 60%,#f4a26155 60%);padding:0 2px}
+  em{font-style:italic}
+
+  /* ===== GRID LAYOUTS ===== */
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start}
+  .side-note{
+    background:var(--paper-2);
+    border:1px solid var(--ink);
+    padding:28px;
+    font-family:'Inter Tight',sans-serif;font-size:15px;line-height:1.55;
+    position:relative;
+  }
+  .side-note::before{
+    content:"※";position:absolute;top:-18px;left:20px;background:var(--paper);
+    padding:0 10px;font-size:22px;color:var(--accent);
+  }
+  .side-note h4{margin-top:0;color:var(--accent)}
+
+  /* ===== INTUITION CARDS ===== */
+  .intuition-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin:30px 0}
+  .intuition-card{
+    border:1px solid var(--ink);padding:28px;background:var(--paper-2);
+    position:relative;transition:transform .3s;
+  }
+  .intuition-card:hover{transform:translate(-4px,-4px);box-shadow:8px 8px 0 var(--ink)}
+  .intuition-card .num{
+    font-family:'Fraunces',serif;font-style:italic;font-size:56px;
+    color:var(--accent);line-height:1;margin-bottom:10px;
+  }
+  .intuition-card h4{margin-top:0}
+  .intuition-card p{font-family:'Inter Tight',sans-serif;font-size:14px;margin:0}
+
+  /* ===== VISUALIZATION CANVAS ===== */
+  .viz{
+    background:var(--paper-2);
+    border:2px solid var(--ink);
+    padding:30px;margin:30px 0;
+    box-shadow:10px 10px 0 var(--ink);
+  }
+  .viz-caption{
+    font-family:'Inter Tight',sans-serif;font-size:12px;
+    letter-spacing:.15em;text-transform:uppercase;color:var(--muted);
+    margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;
+  }
+  .viz-caption .label{color:var(--accent);font-weight:700}
+  .viz-controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+  .viz-controls button{
+    font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;
+    letter-spacing:.08em;text-transform:uppercase;
+    background:var(--ink);color:var(--paper);border:2px solid var(--ink);
+    padding:10px 18px;cursor:pointer;transition:all .15s;
+  }
+  .viz-controls button:hover{background:var(--accent);border-color:var(--accent)}
+  .viz-controls button:disabled{opacity:.4;cursor:not-allowed}
+  .viz-controls .secondary{background:transparent;color:var(--ink)}
+  .viz-controls .secondary:hover{background:var(--ink);color:var(--paper)}
+  .viz svg{width:100%;height:auto;display:block}
+  .viz-status{
+    font-family:'JetBrains Mono',monospace;font-size:13px;
+    padding:12px 16px;background:var(--ink);color:var(--paper);
+    margin-top:16px;min-height:44px;
+  }
+  .viz-status .tag{color:var(--accent-3);font-weight:700}
+
+  /* ===== CODE BLOCKS ===== */
+  pre{
+    background:var(--code-bg);color:var(--code-ink);
+    padding:24px;overflow-x:auto;border:1px solid var(--ink);
+    font-family:'JetBrains Mono',monospace;font-size:13.5px;line-height:1.6;
+    margin:20px 0;
+  }
+  pre .k{color:#ff6b9d}
+  pre .s{color:#ffd166}
+  pre .c{color:#6b6559;font-style:italic}
+  pre .f{color:#8ecae6}
+  pre .n{color:#c77dff}
+  pre .t{color:#e8e1d3;font-weight:700}
+
+  /* ===== PATTERN TABLE ===== */
+  .pattern-list{margin:30px 0;border-top:2px solid var(--ink)}
+  .pattern-item{
+    display:grid;grid-template-columns:80px 1fr 200px;
+    border-bottom:1px solid var(--ink);padding:24px 0;gap:30px;align-items:start;
+    transition:background .2s;
+  }
+  .pattern-item:hover{background:var(--paper-2)}
+  .pattern-item .pat-num{
+    font-family:'Fraunces',serif;font-style:italic;font-size:40px;
+    color:var(--accent);line-height:1;
+  }
+  .pattern-item h4{margin:0 0 8px;font-family:'Fraunces',serif;font-size:22px;letter-spacing:normal;text-transform:none;font-weight:600}
+  .pattern-item p{font-family:'Inter Tight',sans-serif;font-size:14.5px;margin:0;color:#2a2a2a}
+  .pattern-item .tag{
+    font-family:'JetBrains Mono',monospace;font-size:11px;
+    letter-spacing:.1em;text-transform:uppercase;
+    display:inline-block;padding:4px 10px;background:var(--ink);color:var(--paper);
+    margin-top:8px;margin-right:6px;
+  }
+  .pattern-item .complexity{
+    font-family:'JetBrains Mono',monospace;font-size:12px;text-align:right;
+    color:var(--muted);
+  }
+  .pattern-item .complexity strong{color:var(--accent-2);display:block;font-size:18px;margin-bottom:2px}
+
+  /* ===== PROBLEM CARDS ===== */
+  .problem-card{
+    border:2px solid var(--ink);margin:30px 0;
+    background:var(--paper);
+  }
+  .problem-card header{
+    background:var(--ink);color:var(--paper);
+    padding:18px 26px;display:flex;justify-content:space-between;align-items:center;
+    font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.1em;
+  }
+  .problem-card header .diff{
+    padding:4px 10px;border:1px solid var(--paper);font-size:10px;letter-spacing:.2em;
+  }
+  .problem-card header .diff.easy{background:var(--accent-2);border-color:var(--accent-2)}
+  .problem-card header .diff.med{background:var(--accent-3);color:var(--ink);border-color:var(--accent-3)}
+  .problem-card header .diff.hard{background:var(--accent);border-color:var(--accent)}
+  .problem-card .body{padding:26px}
+  .problem-card h4{margin-top:0}
+  .insight{
+    border-left:4px solid var(--accent);padding:10px 18px;
+    background:var(--paper-2);margin:16px 0;font-style:italic;
+  }
+
+  /* ===== BIG PULL QUOTE ===== */
+  .pullquote{
+    padding:80px 40px;text-align:center;max-width:1000px;margin:40px auto;
+    border-top:3px double var(--ink);border-bottom:3px double var(--ink);
+  }
+  .pullquote blockquote{
+    font-family:'Fraunces',serif;font-style:italic;font-weight:400;
+    font-size:clamp(28px,4vw,48px);line-height:1.15;letter-spacing:-.02em;
+  }
+  .pullquote blockquote::before{content:"“";font-size:120px;color:var(--accent);line-height:.5;vertical-align:-30px;margin-right:6px}
+  .pullquote cite{
+    display:block;margin-top:30px;font-family:'Inter Tight',sans-serif;
+    font-style:normal;font-size:12px;letter-spacing:.25em;text-transform:uppercase;color:var(--muted);
+  }
+
+  /* ===== CHEAT STRIP ===== */
+  .cheat{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0;border:2px solid var(--ink);margin:30px 0}
+  .cheat-cell{padding:22px;border-right:1px solid var(--ink);border-bottom:1px solid var(--ink)}
+  .cheat-cell:last-child{border-right:none}
+  .cheat-cell h5{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+  .cheat-cell .big{font-family:'Fraunces',serif;font-size:36px;font-weight:600;line-height:1}
+  .cheat-cell p{font-family:'Inter Tight',sans-serif;font-size:13px;margin-top:8px}
+
+  /* ===== FOOTER ===== */
+  footer{
+    background:var(--ink);color:var(--paper);
+    padding:60px 40px 40px;margin-top:80px;position:relative;z-index:2;
+  }
+  footer .inner{max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:40px}
+  footer h3{font-family:'Fraunces',serif;font-size:40px;line-height:1;margin:0}
+  footer h3 em{color:var(--accent-3)}
+  footer p{font-family:'Inter Tight',sans-serif;font-size:13px;color:#aaa;max-width:400px;margin:0}
+  footer .stamp{
+    border:2px solid var(--accent-3);padding:14px 20px;
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--accent-3);
+  }
+
+  /* ===== NODE BOX STYLE (for SVG) ===== */
+  .node-box{fill:var(--paper);stroke:var(--ink);stroke-width:2}
+  .node-box.active{fill:var(--accent-3);stroke:var(--ink)}
+  .node-box.slow{fill:var(--accent-2);stroke:var(--paper)}
+  .node-box.fast{fill:var(--accent);stroke:var(--paper)}
+  .node-box.prev{fill:#c77dff}
+  .node-val{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;fill:var(--ink);text-anchor:middle;dominant-baseline:central}
+  .node-val.light{fill:var(--paper)}
+  .node-label{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;text-anchor:middle;fill:var(--ink)}
+  .arrow{stroke:var(--ink);stroke-width:2;fill:none;marker-end:url(#arrow)}
+  .arrow.dim{stroke:#aaa;stroke-dasharray:4,3}
+  .arrow.new{stroke:var(--accent);stroke-width:3}
+
+  /* responsive */
+  @media(max-width:900px){
+    .two-col{grid-template-columns:1fr}
+    .pattern-item{grid-template-columns:60px 1fr;gap:18px}
+    .pattern-item .complexity{grid-column:2;text-align:left}
+    .hero{padding:50px 24px}
+    section{padding:60px 24px}
+    .masthead{padding:14px 24px;font-size:10px}
+    .masthead .edition span{padding-left:14px}
+  }
+</style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<div class="masthead">
+  <div class="logo">The Interview Codex · Vol. III</div>
+  <div class="edition">
+    <span>Chapter 07</span>
+    <span>Linked Lists</span>
+    <span>For Senior Engineers</span>
+  </div>
+</div>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="kicker">Data Structures · Chapter Seven</div>
+  <h1>The <em>Linked</em><br/>List, Dissected.</h1>
+  <p class="sub">A deep field guide to the one data structure interviewers refuse to retire — from pointer intuition to the six patterns that crack 90% of problems at FAANG, HFTs, and unicorn startups.</p>
+  <div class="meta">
+    <div><strong>Difficulty</strong>Foundational → Senior</div>
+    <div><strong>Target</strong>Staff / Sr. SWE Loops</div>
+    <div><strong>Compensation Band</strong>$250k – $700k+ TC</div>
+    <div><strong>Time To Master</strong>~12 hours focused study</div>
+  </div>
+</header>
+
+<!-- TOC -->
+<nav class="toc">
+  <a href="#intuition"><span class="num">01</span>Intuition</a>
+  <a href="#anatomy"><span class="num">02</span>Anatomy</a>
+  <a href="#operations"><span class="num">03</span>Operations</a>
+  <a href="#patterns"><span class="num">04</span>The Six Patterns</a>
+  <a href="#twopointer"><span class="num">05</span>Two Pointers</a>
+  <a href="#reversal"><span class="num">06</span>Reversal</a>
+  <a href="#cycle"><span class="num">07</span>Cycle Detection</a>
+  <a href="#merging"><span class="num">08</span>Merging</a>
+  <a href="#problems"><span class="num">09</span>Interview Problems</a>
+  <a href="#cheatsheet"><span class="num">10</span>Cheat Sheet</a>
+</nav>
+
+<!-- SECTION 01 — INTUITION -->
+<section id="intuition">
+  <div class="sec-num">§01 · The Mental Model</div>
+  <h2>Arrays are <em>where</em>.<br/>Linked lists are <em>next</em>.</h2>
+
+  <div class="two-col">
+    <div>
+      <p>An <strong>array</strong> is a street of townhouses — every home has a number, and if you want #47, you walk straight there. The cost of knowing "where" is paid upfront: memory must be contiguous, and inserting a new house between #3 and #4 requires shoving every subsequent house one plot over.</p>
+
+      <p>A <strong>linked list</strong> is a treasure hunt. Each clue tells you only <em>where the next clue is</em>. You cannot teleport to the 47th clue — you must walk. But you can splice a new clue between any two, instantly, for the price of rewriting two arrows.</p>
+
+      <p>Interviewers love linked lists not because they appear in production (they rarely do outside of kernels and allocators), but because the data structure <strong>forces you to think in pointers</strong> — and pointer manipulation is the crucible in which systems thinking is tested.</p>
+    </div>
+
+    <aside class="side-note">
+      <h4>Why interviewers ask this</h4>
+      <p>Linked-list questions test four things at once: <em>reference semantics</em>, <em>edge-case discipline</em> (empty, one node, two nodes, cycles), <em>in-place mutation without aux memory</em>, and the ability to <em>draw on a whiteboard faster than you can code</em>. A candidate who can reverse a list in-place while narrating invariants is signaling senior-level control.</p>
+    </aside>
+  </div>
+
+  <div class="intuition-grid">
+    <div class="intuition-card">
+      <div class="num">i.</div>
+      <h4>Node = Value + Arrow</h4>
+      <p>Every node carries its payload and a single reference to "what comes next." That's it. The structure is defined entirely by a chain of these arrows.</p>
+    </div>
+    <div class="intuition-card">
+      <div class="num">ii.</div>
+      <h4>The Head Owns the List</h4>
+      <p>Lose the head pointer, lose the list — garbage collectors will reap everything. The head is the sole handle on the structure.</p>
+    </div>
+    <div class="intuition-card">
+      <div class="num">iii.</div>
+      <h4>Null is the Period</h4>
+      <p>A <code class="mono">null</code> next pointer is the terminal sentence. Any algorithm must answer: "what happens at null?" before it is correct.</p>
+    </div>
+    <div class="intuition-card">
+      <div class="num">iv.</div>
+      <h4>You Never Have the Previous</h4>
+      <p>In a singly linked list, knowing node <code class="mono">X</code> gives you no way back. This asymmetry is the source of <em>every</em> clever algorithm on this page.</p>
+    </div>
+  </div>
+
+  <!-- VIZ: Array vs Linked List -->
+  <div class="viz">
+    <div class="viz-caption"><span class="label">FIG. 01</span><span>Array vs. Linked List — memory model</span></div>
+    <svg viewBox="0 0 900 320" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="#0a0a0a"/>
+        </marker>
+      </defs>
+      <text x="20" y="30" class="node-label" style="text-anchor:start;font-size:13px">ARRAY — contiguous, indexed</text>
+      <g>
+        <rect x="20" y="50" width="60" height="60" class="node-box"/>
+        <rect x="80" y="50" width="60" height="60" class="node-box"/>
+        <rect x="140" y="50" width="60" height="60" class="node-box"/>
+        <rect x="200" y="50" width="60" height="60" class="node-box"/>
+        <rect x="260" y="50" width="60" height="60" class="node-box"/>
+        <text x="50" y="80" class="node-val">7</text>
+        <text x="110" y="80" class="node-val">3</text>
+        <text x="170" y="80" class="node-val">9</text>
+        <text x="230" y="80" class="node-val">1</text>
+        <text x="290" y="80" class="node-val">5</text>
+        <text x="50" y="130" class="node-label">[0]</text>
+        <text x="110" y="130" class="node-label">[1]</text>
+        <text x="170" y="130" class="node-label">[2]</text>
+        <text x="230" y="130" class="node-label">[3]</text>
+        <text x="290" y="130" class="node-label">[4]</text>
+        <text x="50" y="150" class="node-label" style="fill:#6b6559">0x100</text>
+        <text x="110" y="150" class="node-label" style="fill:#6b6559">0x104</text>
+        <text x="170" y="150" class="node-label" style="fill:#6b6559">0x108</text>
+        <text x="230" y="150" class="node-label" style="fill:#6b6559">0x10C</text>
+        <text x="290" y="150" class="node-label" style="fill:#6b6559">0x110</text>
+      </g>
+      <text x="20" y="200" class="node-label" style="text-anchor:start;font-size:13px">LINKED LIST — scattered, linked</text>
+      <g>
+        <rect x="20" y="220" width="80" height="60" class="node-box"/>
+        <line x1="70" y1="220" x2="70" y2="280" stroke="#0a0a0a" stroke-width="1"/>
+        <text x="45" y="250" class="node-val">7</text>
+        <text x="85" y="254" class="node-label" style="font-size:14px">→</text>
+        <rect x="180" y="220" width="80" height="60" class="node-box"/>
+        <line x1="230" y1="220" x2="230" y2="280" stroke="#0a0a0a" stroke-width="1"/>
+        <text x="205" y="250" class="node-val">3</text>
+        <text x="245" y="254" class="node-label" style="font-size:14px">→</text>
+        <rect x="380" y="220" width="80" height="60" class="node-box"/>
+        <line x1="430" y1="220" x2="430" y2="280" stroke="#0a0a0a" stroke-width="1"/>
+        <text x="405" y="250" class="node-val">9</text>
+        <text x="445" y="254" class="node-label" style="font-size:14px">→</text>
+        <rect x="600" y="220" width="80" height="60" class="node-box"/>
+        <line x1="650" y1="220" x2="650" y2="280" stroke="#0a0a0a" stroke-width="1"/>
+        <text x="625" y="250" class="node-val">1</text>
+        <text x="665" y="254" class="node-label" style="font-size:14px">→</text>
+        <rect x="780" y="220" width="80" height="60" class="node-box"/>
+        <line x1="830" y1="220" x2="830" y2="280" stroke="#0a0a0a" stroke-width="1"/>
+        <text x="805" y="250" class="node-val">5</text>
+        <text x="845" y="254" class="node-label" style="font-size:12px">∅</text>
+
+        <path d="M 100 250 Q 140 240 180 250" class="arrow"/>
+        <path d="M 260 250 Q 320 230 380 250" class="arrow"/>
+        <path d="M 460 250 Q 530 270 600 250" class="arrow"/>
+        <path d="M 680 250 Q 730 240 780 250" class="arrow"/>
+
+        <text x="60" y="305" class="node-label" style="fill:#6b6559">0x204</text>
+        <text x="220" y="305" class="node-label" style="fill:#6b6559">0xFA0</text>
+        <text x="420" y="305" class="node-label" style="fill:#6b6559">0x3E8</text>
+        <text x="640" y="305" class="node-label" style="fill:#6b6559">0x7C2</text>
+        <text x="820" y="305" class="node-label" style="fill:#6b6559">0x90A</text>
+      </g>
+    </svg>
+  </div>
+
+  <div class="cheat">
+    <div class="cheat-cell"><h5>Random access</h5><div class="big">O(1)</div><p>Array wins. Index arithmetic.</p></div>
+    <div class="cheat-cell"><h5>Sequential walk</h5><div class="big">O(n)</div><p>Both equal — cache favors array.</p></div>
+    <div class="cheat-cell"><h5>Insert at head</h5><div class="big">O(1)</div><p>Linked list wins. No shifting.</p></div>
+    <div class="cheat-cell"><h5>Insert middle (known node)</h5><div class="big">O(1)</div><p>Linked list wins. Rewire 2 arrows.</p></div>
+    <div class="cheat-cell"><h5>Extra memory</h5><div class="big">+ptr</div><p>Each node pays 8B for the link.</p></div>
+  </div>
+</section>
+
+<!-- SECTION 02 — ANATOMY -->
+<section id="anatomy">
+  <div class="sec-num">§02 · Anatomy of a Node</div>
+  <h2>Two fields. <em>Infinite</em> consequences.</h2>
+
+  <p>Every algorithm in this codex is, at its heart, a choreography of which arrows to rewrite and in what order. Before you solve a single problem, you must be able to draw a node without thinking about it.</p>
+
+<pre><span class="c"># Singly linked list — the canonical definition</span>
+<span class="k">class</span> <span class="t">ListNode</span>:
+    <span class="k">def</span> <span class="f">__init__</span>(<span class="n">self</span>, val=0, next=None):
+        <span class="n">self</span>.val  = val    <span class="c"># the payload</span>
+        <span class="n">self</span>.next = next   <span class="c"># pointer to the NEXT node, or None</span>
+
+<span class="c"># Doubly linked list — adds a back-pointer (O(1) removal given a node ref)</span>
+<span class="k">class</span> <span class="t">DListNode</span>:
+    <span class="k">def</span> <span class="f">__init__</span>(<span class="n">self</span>, val=0):
+        <span class="n">self</span>.val  = val
+        <span class="n">self</span>.next = <span class="k">None</span>
+        <span class="n">self</span>.prev = <span class="k">None</span>   <span class="c"># the game-changer for LRU caches, deques</span></pre>
+
+  <h3>The three flavors you must recognize on sight</h3>
+  <div class="intuition-grid">
+    <div class="intuition-card">
+      <div class="num">A</div>
+      <h4>Singly Linked</h4>
+      <p>One arrow forward. The default. Most interview problems assume this. Memory efficient, but you can never look back.</p>
+    </div>
+    <div class="intuition-card">
+      <div class="num">B</div>
+      <h4>Doubly Linked</h4>
+      <p>Arrows both ways. The secret ingredient in <strong>LRU Cache</strong> (the most-asked OOD question at Meta/Amazon/Uber). Enables O(1) removal when given a node.</p>
+    </div>
+    <div class="intuition-card">
+      <div class="num">C</div>
+      <h4>Circular</h4>
+      <p>Tail points back to head. Used in round-robin schedulers, Josephus problems, and any "next player" logic. Cycle detection becomes mandatory.</p>
+    </div>
+  </div>
+
+  <div class="side-note" style="margin-top:40px">
+    <h4>The dummy node trick — write this in your sleep</h4>
+    <p>Roughly 70% of linked-list algorithms become shorter and bug-free when you prepend a <code class="mono">dummy</code> node before the real head. Why? It removes the special case "what if I'm inserting before the first element?" because there is always something before the first element. <strong>Return <code class="mono">dummy.next</code> instead of <code class="mono">head</code>.</strong> This one trick eliminates an entire class of off-by-one errors.</p>
+  </div>
+</section>
+
+<!-- SECTION 03 — OPERATIONS -->
+<section id="operations">
+  <div class="sec-num">§03 · Core Operations</div>
+  <h2>The five moves that everything is built from.</h2>
+
+  <p>Before patterns, master primitives. If you can't insert and delete from any position with your eyes closed, pattern-based problems will collapse on you mid-interview. Below: an interactive node you can manipulate.</p>
+
+  <!-- VIZ: Interactive Linked List -->
+  <div class="viz">
+    <div class="viz-caption"><span class="label">FIG. 02 · INTERACTIVE</span><span>Insert / delete primitives</span></div>
+    <svg id="opsViz" viewBox="0 0 900 180" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="#0a0a0a"/>
+        </marker>
+        <marker id="arrowRed" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="#e63946"/>
+        </marker>
+      </defs>
+      <g id="opsNodes"></g>
+    </svg>
+    <div class="viz-controls">
+      <button onclick="ops_insertHead()">Insert @ Head</button>
+      <button onclick="ops_insertTail()">Insert @ Tail</button>
+      <button onclick="ops_deleteHead()">Delete Head</button>
+      <button onclick="ops_deleteTail()">Delete Tail</button>
+      <button class="secondary" onclick="ops_reset()">Reset</button>
+    </div>
+    <div class="viz-status" id="opsStatus"><span class="tag">[READY]</span> List of 4 nodes. Try each operation.</div>
+  </div>
+
+  <h3>Operation cheat sheet</h3>
+<pre><span class="c"># 1. INSERT AT HEAD — O(1)</span>
+<span class="k">def</span> <span class="f">insert_head</span>(head, val):
+    node = <span class="t">ListNode</span>(val)
+    node.next = head
+    <span class="k">return</span> node  <span class="c"># new head</span>
+
+<span class="c"># 2. INSERT AFTER A GIVEN NODE — O(1)</span>
+<span class="k">def</span> <span class="f">insert_after</span>(prev, val):
+    node = <span class="t">ListNode</span>(val)
+    node.next = prev.next
+    prev.next = node          <span class="c"># order matters! write next first, then link</span>
+
+<span class="c"># 3. DELETE A GIVEN NODE (with only that node, no prev) — O(1) trick</span>
+<span class="k">def</span> <span class="f">delete_node</span>(node):
+    node.val  = node.next.val     <span class="c"># copy next's value into yourself</span>
+    node.next = node.next.next    <span class="c"># then skip next. You become next.</span>
+
+<span class="c"># 4. FIND LENGTH — O(n)</span>
+<span class="k">def</span> <span class="f">length</span>(head):
+    n = 0
+    <span class="k">while</span> head:
+        n += 1
+        head = head.next
+    <span class="k">return</span> n
+
+<span class="c"># 5. REVERSE IN PLACE — O(n) time, O(1) space. The most-asked 1-liner.</span>
+<span class="k">def</span> <span class="f">reverse</span>(head):
+    prev, curr = <span class="k">None</span>, head
+    <span class="k">while</span> curr:
+        nxt = curr.next      <span class="c"># stash</span>
+        curr.next = prev     <span class="c"># flip</span>
+        prev = curr          <span class="c"># advance prev</span>
+        curr = nxt           <span class="c"># advance curr</span>
+    <span class="k">return</span> prev             <span class="c"># new head</span></pre>
+</section>
+
+<!-- PULL QUOTE -->
+<div class="pullquote">
+  <blockquote>If you can reverse a linked list in place, on a whiteboard, while explaining your invariants out loud — you will pass the data-structures bar at any company on earth.</blockquote>
+  <cite>— paraphrased from a Google L5 hiring committee memo</cite>
+</div>
+
+<!-- SECTION 04 — THE SIX PATTERNS -->
+<section id="patterns">
+  <div class="sec-num">§04 · Problem Patterns</div>
+  <h2>Six patterns. <em>Ninety percent</em> of all linked-list problems.</h2>
+
+  <p>This is the master key. When a linked-list question is put in front of you, your first job is not to code — it is to <strong>classify</strong>. Every problem ever asked falls into one (or a composition of two) of these six buckets.</p>
+
+  <div class="pattern-list">
+    <div class="pattern-item">
+      <div class="pat-num">01</div>
+      <div>
+        <h4>Fast &amp; Slow Pointers (Tortoise &amp; Hare)</h4>
+        <p>Two pointers moving at different speeds. Detects cycles, finds middle, locates nth-from-end, and checks palindromes — all in one pass, O(1) space.</p>
+        <span class="tag">Cycle Detection</span><span class="tag">Middle Node</span><span class="tag">Nth From End</span>
+      </div>
+      <div class="complexity"><strong>O(n) / O(1)</strong>time / space</div>
+    </div>
+
+    <div class="pattern-item">
+      <div class="pat-num">02</div>
+      <div>
+        <h4>In-Place Reversal</h4>
+        <p>Rewire next-pointers sublist by sublist. Foundation for "reverse k-group," "rotate list," "palindrome check," and any problem ending in "…in place with O(1) memory."</p>
+        <span class="tag">Reverse II</span><span class="tag">K-Group</span><span class="tag">Rotate</span>
+      </div>
+      <div class="complexity"><strong>O(n) / O(1)</strong>time / space</div>
+    </div>
+
+    <div class="pattern-item">
+      <div class="pat-num">03</div>
+      <div>
+        <h4>Merge &amp; Sort</h4>
+        <p>Two sorted lists become one. Extends to k-lists via min-heap or divide-and-conquer. The engine behind merge-sort on lists, which is preferred over quicksort here because no random access is needed.</p>
+        <span class="tag">Merge 2 Sorted</span><span class="tag">Merge K Sorted</span><span class="tag">Sort List</span>
+      </div>
+      <div class="complexity"><strong>O(n log k)</strong>for k lists</div>
+    </div>
+
+    <div class="pattern-item">
+      <div class="pat-num">04</div>
+      <div>
+        <h4>Dummy Head &amp; Two Walkers</h4>
+        <p>A sentinel node removes edge cases. Combined with "prev" and "curr" walkers, enables clean deletion by value, removal of duplicates, and partitioning.</p>
+        <span class="tag">Remove Nth</span><span class="tag">Partition</span><span class="tag">Remove Duplicates</span>
+      </div>
+      <div class="complexity"><strong>O(n) / O(1)</strong>time / space</div>
+    </div>
+
+    <div class="pattern-item">
+      <div class="pat-num">05</div>
+      <div>
+        <h4>Hash &amp; Point (Random Pointer)</h4>
+        <p>When nodes have arbitrary extra pointers, a hashmap <code class="mono">{old → new}</code> lets you clone in two passes. The clever variant threads the clones in-place and splits them back out, achieving O(1) extra.</p>
+        <span class="tag">Deep Copy</span><span class="tag">Intersection</span>
+      </div>
+      <div class="complexity"><strong>O(n) / O(1)</strong>or O(n) space</div>
+    </div>
+
+    <div class="pattern-item">
+      <div class="pat-num">06</div>
+      <div>
+        <h4>Linked List + Hybrid DS</h4>
+        <p>Linked list marries a hashmap (LRU) or a heap (merge-k). The structure is chosen for its O(1) splice; the other DS provides O(1) lookup or O(log n) min/max.</p>
+        <span class="tag">LRU Cache</span><span class="tag">LFU Cache</span><span class="tag">Merge K Lists</span>
+      </div>
+      <div class="complexity"><strong>O(1) ops</strong>amortized</div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 05 — TWO POINTERS DEEP DIVE -->
+<section id="twopointer">
+  <div class="sec-num">§05 · Pattern Deep Dive — Fast &amp; Slow</div>
+  <h2>One pass. Two speeds. <em>Every</em> middle, end, and cycle.</h2>
+
+  <div class="two-col">
+    <div>
+      <p>The tortoise-and-hare pattern is the single highest-leverage technique in linked-list interviews. <strong>Master it and four separate classes of questions collapse into one.</strong></p>
+      <p>Slow moves 1 step, fast moves 2 steps. When fast reaches the end, slow is at the middle. If they ever meet, a cycle exists. Offset fast by k steps and you find the k-th node from the end in one pass.</p>
+    </div>
+    <aside class="side-note">
+      <h4>The mathematical punchline</h4>
+      <p>If there is a cycle, fast gains one step on slow per iteration. Over any finite loop of length L, fast will overtake slow within L steps of slow entering the cycle. Meeting is <em>guaranteed</em>. The proof is pure modular arithmetic, and interviewers love a candidate who can gesture at it.</p>
+    </aside>
+  </div>
+
+  <!-- VIZ: Fast & Slow -->
+  <div class="viz">
+    <div class="viz-caption"><span class="label">FIG. 03 · ANIMATED</span><span>Fast &amp; slow pointers — find the middle</span></div>
+    <svg id="fsViz" viewBox="0 0 900 200" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow3" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="#0a0a0a"/>
+        </marker>
+      </defs>
+      <g id="fsNodes"></g>
+    </svg>
+    <div class="viz-controls">
+      <button onclick="fs_step()" id="fsStepBtn">Step</button>
+      <button onclick="fs_play()" id="fsPlayBtn">Auto-play</button>
+      <button class="secondary" onclick="fs_reset()">Reset</button>
+    </div>
+    <div class="viz-status" id="fsStatus"><span class="tag">[INIT]</span> slow=0, fast=0. Press Step to advance.</div>
+  </div>
+
+<pre><span class="c"># Find the middle of a linked list — O(n), O(1)</span>
+<span class="k">def</span> <span class="f">middle</span>(head):
+    slow = fast = head
+    <span class="k">while</span> fast <span class="k">and</span> fast.next:
+        slow = slow.next
+        fast = fast.next.next
+    <span class="k">return</span> slow  <span class="c"># for even length, returns the SECOND middle</span>
+
+<span class="c"># Detect cycle — O(n), O(1). Floyd's classic.</span>
+<span class="k">def</span> <span class="f">has_cycle</span>(head):
+    slow = fast = head
+    <span class="k">while</span> fast <span class="k">and</span> fast.next:
+        slow = slow.next
+        fast = fast.next.next
+        <span class="k">if</span> slow <span class="k">is</span> fast: <span class="k">return</span> <span class="k">True</span>
+    <span class="k">return</span> <span class="k">False</span>
+
+<span class="c"># Nth from end in ONE pass — offset fast by n, then walk together.</span>
+<span class="k">def</span> <span class="f">nth_from_end</span>(head, n):
+    fast = head
+    <span class="k">for</span> _ <span class="k">in</span> range(n): fast = fast.next
+    slow = head
+    <span class="k">while</span> fast:
+        slow, fast = slow.next, fast.next
+    <span class="k">return</span> slow</pre>
+</section>
+
+<!-- SECTION 06 — REVERSAL DEEP DIVE -->
+<section id="reversal">
+  <div class="sec-num">§06 · Pattern Deep Dive — Reversal</div>
+  <h2>Three pointers. <em>Nothing else.</em></h2>
+
+  <p>Reversal is the other foundational pattern. The entire algorithm is three named variables — <code class="mono">prev</code>, <code class="mono">curr</code>, <code class="mono">next</code> — and a four-line loop. Once it is in your bones, the harder variants (reverse between positions <code class="mono">m..n</code>, reverse in groups of <code class="mono">k</code>) are just this loop with a wrapper.</p>
+
+  <!-- VIZ: Reversal animated -->
+  <div class="viz">
+    <div class="viz-caption"><span class="label">FIG. 04 · ANIMATED</span><span>In-place reversal — three pointer ballet</span></div>
+    <svg id="revViz" viewBox="0 0 900 240" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow4" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="#0a0a0a"/>
+        </marker>
+        <marker id="arrowAcc" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="#e63946"/>
+        </marker>
+      </defs>
+      <g id="revNodes"></g>
+    </svg>
+    <div class="viz-controls">
+      <button onclick="rev_step()" id="revStepBtn">Step</button>
+      <button onclick="rev_play()" id="revPlayBtn">Auto-play</button>
+      <button class="secondary" onclick="rev_reset()">Reset</button>
+    </div>
+    <div class="viz-status" id="revStatus"><span class="tag">[INIT]</span> prev=null, curr=head. We'll flip every arrow.</div>
+  </div>
+
+<pre><span class="c"># The canonical iterative reversal. Memorize this.</span>
+<span class="k">def</span> <span class="f">reverse</span>(head):
+    prev, curr = <span class="k">None</span>, head
+    <span class="k">while</span> curr:
+        nxt       = curr.next    <span class="c"># 1. save what's ahead</span>
+        curr.next = prev         <span class="c"># 2. flip the arrow backward</span>
+        prev      = curr         <span class="c"># 3. prev crawls forward</span>
+        curr      = nxt          <span class="c"># 4. curr crawls forward</span>
+    <span class="k">return</span> prev                 <span class="c"># prev is the new head when curr=None</span>
+
+<span class="c"># Reverse nodes in k-groups — a FAANG favorite. Hard.</span>
+<span class="k">def</span> <span class="f">reverse_k_group</span>(head, k):
+    dummy = <span class="t">ListNode</span>(0, head)
+    group_prev = dummy
+    <span class="k">while</span> <span class="k">True</span>:
+        kth = group_prev
+        <span class="k">for</span> _ <span class="k">in</span> range(k):
+            kth = kth.next
+            <span class="k">if</span> <span class="k">not</span> kth: <span class="k">return</span> dummy.next
+        group_next = kth.next
+        <span class="c"># reverse the segment (group_prev.next ... kth)</span>
+        prev, curr = group_next, group_prev.next
+        <span class="k">while</span> curr <span class="k">is</span> <span class="k">not</span> group_next:
+            nxt = curr.next
+            curr.next = prev
+            prev = curr
+            curr = nxt
+        tmp = group_prev.next
+        group_prev.next = kth
+        group_prev = tmp</pre>
+
+  <div class="insight"><strong>Senior insight:</strong> recursion for reversal is elegant but uses O(n) stack — mention it, but deliver the iterative version. Interviewers reward candidates who explicitly reason about stack vs heap.</div>
+</section>
+
+<!-- SECTION 07 — CYCLE DETECTION -->
+<section id="cycle">
+  <div class="sec-num">§07 · Pattern Deep Dive — Floyd's Cycle</div>
+  <h2>A cycle begins where math says it must.</h2>
+
+  <p>Once you know a cycle exists, the follow-up question — "<em>find the node where the cycle begins</em>" — is a classic. The trick is counter-intuitive and deeply beautiful.</p>
+
+  <div class="two-col">
+    <div>
+      <h4>The two-phase algorithm</h4>
+      <p><strong>Phase 1:</strong> Detect — slow and fast meet inside the cycle.</p>
+      <p><strong>Phase 2:</strong> Reset slow to the head. Move both one step at a time. Where they meet is the cycle's entry node.</p>
+    </div>
+    <aside class="side-note">
+      <h4>The proof, in one line</h4>
+      <p>Let <code class="mono">F</code> = distance from head to cycle start, <code class="mono">a</code> = distance from cycle start to meeting point, <code class="mono">b</code> = remaining cycle. Then <code class="mono">2(F+a) = F+a+b+a ⟹ F = b</code>. Walking <code class="mono">F</code> steps from head and <code class="mono">b</code> from meeting point arrives at the same node.</p>
+    </aside>
+  </div>
+
+  <!-- VIZ: Cycle -->
+  <div class="viz">
+    <div class="viz-caption"><span class="label">FIG. 05 · ANIMATED</span><span>Floyd's cycle detection — tortoise catches hare</span></div>
+    <svg id="cycleViz" viewBox="0 0 900 280" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow5" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="#0a0a0a"/>
+        </marker>
+      </defs>
+      <g id="cycleNodes"></g>
+    </svg>
+    <div class="viz-controls">
+      <button onclick="cycle_step()" id="cycleStepBtn">Step</button>
+      <button onclick="cycle_play()" id="cyclePlayBtn">Auto-play</button>
+      <button class="secondary" onclick="cycle_reset()">Reset</button>
+    </div>
+    <div class="viz-status" id="cycleStatus"><span class="tag">[INIT]</span> Both pointers at head. Watch for the meeting.</div>
+  </div>
+
+<pre><span class="c"># Find where the cycle begins — LeetCode 142</span>
+<span class="k">def</span> <span class="f">detect_cycle</span>(head):
+    <span class="c"># Phase 1: meet inside the cycle</span>
+    slow = fast = head
+    <span class="k">while</span> fast <span class="k">and</span> fast.next:
+        slow = slow.next
+        fast = fast.next.next
+        <span class="k">if</span> slow <span class="k">is</span> fast: <span class="k">break</span>
+    <span class="k">else</span>:
+        <span class="k">return</span> <span class="k">None</span>          <span class="c"># no cycle</span>
+    <span class="c"># Phase 2: reset slow, walk in lockstep</span>
+    slow = head
+    <span class="k">while</span> slow <span class="k">is</span> <span class="k">not</span> fast:
+        slow = slow.next
+        fast = fast.next
+    <span class="k">return</span> slow                <span class="c"># cycle entry</span></pre>
+</section>
+
+<!-- SECTION 08 — MERGING -->
+<section id="merging">
+  <div class="sec-num">§08 · Pattern Deep Dive — Merging</div>
+  <h2>Two streams, one river.</h2>
+
+  <p>Merging two sorted lists is the quiet workhorse of this topic. It's the building block for merge-sort on a list, for the k-list merge (via min-heap), and a staple of "combine two data feeds" system-design questions.</p>
+
+  <!-- VIZ: merging -->
+  <div class="viz">
+    <div class="viz-caption"><span class="label">FIG. 06 · ANIMATED</span><span>Merging two sorted lists with a dummy head</span></div>
+    <svg id="mergeViz" viewBox="0 0 900 280" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow6" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="#0a0a0a"/>
+        </marker>
+      </defs>
+      <g id="mergeNodes"></g>
+    </svg>
+    <div class="viz-controls">
+      <button onclick="merge_step()" id="mergeStepBtn">Step</button>
+      <button onclick="merge_play()" id="mergePlayBtn">Auto-play</button>
+      <button class="secondary" onclick="merge_reset()">Reset</button>
+    </div>
+    <div class="viz-status" id="mergeStatus"><span class="tag">[INIT]</span> Two sorted lists. Dummy node prepares the merged output.</div>
+  </div>
+
+<pre><span class="c"># Merge two sorted lists — O(n+m), O(1)</span>
+<span class="k">def</span> <span class="f">merge_two</span>(l1, l2):
+    dummy = tail = <span class="t">ListNode</span>()
+    <span class="k">while</span> l1 <span class="k">and</span> l2:
+        <span class="k">if</span> l1.val &lt;= l2.val:
+            tail.next, l1 = l1, l1.next
+        <span class="k">else</span>:
+            tail.next, l2 = l2, l2.next
+        tail = tail.next
+    tail.next = l1 <span class="k">or</span> l2      <span class="c"># attach whatever remains</span>
+    <span class="k">return</span> dummy.next
+
+<span class="c"># Merge K sorted lists — O(N log k) using a min-heap</span>
+<span class="k">import</span> heapq
+<span class="k">def</span> <span class="f">merge_k</span>(lists):
+    heap = []
+    <span class="k">for</span> i, node <span class="k">in</span> enumerate(lists):
+        <span class="k">if</span> node: heapq.heappush(heap, (node.val, i, node))
+    dummy = tail = <span class="t">ListNode</span>()
+    <span class="k">while</span> heap:
+        _, i, node = heapq.heappop(heap)
+        tail.next = node
+        tail = tail.next
+        <span class="k">if</span> node.next: heapq.heappush(heap, (node.next.val, i, node.next))
+    <span class="k">return</span> dummy.next</pre>
+</section>
+
+<!-- SECTION 09 — INTERVIEW PROBLEMS -->
+<section id="problems">
+  <div class="sec-num">§09 · The Canon</div>
+  <h2>Ten problems. <em>If you can solve these cold, you are ready.</em></h2>
+
+  <div class="problem-card">
+    <header><span>Problem 01 · Reverse a Linked List</span><span class="diff easy">EASY</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Given the head of a singly linked list, reverse it and return the new head.</p>
+      <h4>Pattern</h4><p>In-place reversal (§06). Three-pointer loop.</p>
+      <div class="insight">Interviewer will almost certainly follow up: "now do it recursively." Be ready with both. Then: "what's the stack cost?" Answer: O(n).</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>Problem 02 · Linked List Cycle II (Find Entry)</span><span class="diff med">MEDIUM</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Return the node where the cycle begins. If there is no cycle, return null.</p>
+      <h4>Pattern</h4><p>Fast &amp; slow, two-phase (§07).</p>
+      <div class="insight">The fact that F = b is what makes the two-phase trick work. Draw it. The mathematical elegance wins points.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>Problem 03 · Remove Nth Node From End</span><span class="diff med">MEDIUM</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Remove the n-th node from the end of the list in one pass.</p>
+      <h4>Pattern</h4><p>Dummy head + two walkers with an offset of n.</p>
+      <div class="insight">The dummy node handles the case where you remove the actual head. Without it, you need special-case code. With it, the algorithm is seven lines.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>Problem 04 · Merge K Sorted Lists</span><span class="diff hard">HARD</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Given k sorted linked lists, merge them into one sorted list.</p>
+      <h4>Pattern</h4><p>Hybrid: linked list + min-heap, or divide-and-conquer pairwise merge.</p>
+      <div class="insight">State both approaches. Heap is O(N log k) time, O(k) space. Divide-and-conquer is O(N log k) time, O(1) extra (plus recursion). If the interviewer says "what if a list is a stream?" — heap wins, because divide-and-conquer requires all heads upfront.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>Problem 05 · Copy List with Random Pointer</span><span class="diff med">MEDIUM</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Each node has a <code class="mono">next</code> and a <code class="mono">random</code> pointer. Deep-copy the list.</p>
+      <h4>Pattern</h4><p>Hash &amp; point (§04, pattern 5). Two-pass with a dict, or three-pass in-place weaving.</p>
+      <div class="insight">The "O(1) extra space" version weaves clones into the original list (A → A' → B → B' …), sets random pointers via <code class="mono">cur.random.next</code>, then un-weaves. A genuinely clever trick that signals senior level.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>Problem 06 · LRU Cache</span><span class="diff med">MEDIUM</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Design a data structure with O(1) <code class="mono">get</code> and <code class="mono">put</code> that evicts the least-recently-used key when capacity is reached.</p>
+      <h4>Pattern</h4><p>Hybrid: hashmap (key → node) + doubly linked list (ordering by recency).</p>
+      <div class="insight">This is the most-asked OOD question at large tech companies. The hashmap gives O(1) lookup. The doubly linked list gives O(1) move-to-front and O(1) eviction-from-tail. Use a <strong>sentinel head and tail</strong> to eliminate null checks.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>Problem 07 · Reorder List</span><span class="diff med">MEDIUM</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> L<sub>0</sub>→L<sub>1</sub>→...→L<sub>n</sub> becomes L<sub>0</sub>→L<sub>n</sub>→L<sub>1</sub>→L<sub>n-1</sub>→...</p>
+      <h4>Pattern</h4><p>Composition: find middle (fast/slow) → reverse second half → merge two halves alternately.</p>
+      <div class="insight">The test is whether you can stitch three patterns together in one problem. Every sub-step is a named primitive you should have memorized.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>Problem 08 · Palindrome Linked List</span><span class="diff easy">EASY</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Determine if a linked list is a palindrome in O(n) time, O(1) space.</p>
+      <h4>Pattern</h4><p>Find middle → reverse second half → walk both halves comparing.</p>
+      <div class="insight">O(n) / O(1) is the trick. Naive is push to array and two-pointer — which is O(n) / O(n) and won't earn the full grade.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>Problem 09 · Reverse Nodes in K-Group</span><span class="diff hard">HARD</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Reverse every k consecutive nodes. Left-over tail stays as is.</p>
+      <h4>Pattern</h4><p>In-place reversal applied in blocks, with boundary rewiring via a dummy.</p>
+      <div class="insight">This is the gateway problem between "knows reversal" and "masters reversal." Expect it for L5+ at Google, senior at Meta. Draw the boundary pointers before you write a line of code.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>Problem 10 · Intersection of Two Linked Lists</span><span class="diff easy">EASY</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Two lists may merge. Find the node of intersection in O(1) space.</p>
+      <h4>Pattern</h4><p>Two-pointer trick: when a reaches null, send it to headB; when b reaches null, send it to headA. They align because each pointer walks len(A) + len(B) total.</p>
+      <div class="insight">A candidate who derives this without hints is signaling mathematical maturity. The "swap heads at null" insight is the whole problem.</div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 10 — CHEAT SHEET -->
+<section id="cheatsheet">
+  <div class="sec-num">§10 · The Night-Before Cheat Sheet</div>
+  <h2>If you forget <em>everything</em> else — remember this page.</h2>
+
+  <div class="cheat">
+    <div class="cheat-cell"><h5>Invariant mantra</h5><div class="big" style="font-size:20px">"Stash next first"</div><p>Before flipping any arrow, save what's next. Breaking this rule loses half the list.</p></div>
+    <div class="cheat-cell"><h5>Dummy node</h5><div class="big" style="font-size:20px">Always</div><p>Whenever head can change or be deleted, prepend dummy. Return <code class="mono">dummy.next</code>.</p></div>
+    <div class="cheat-cell"><h5>Test list</h5><div class="big" style="font-size:20px">0 · 1 · 2 · n</div><p>Empty. Single. Two. General. Four cases, in this order, every time.</p></div>
+    <div class="cheat-cell"><h5>Trace on paper</h5><div class="big" style="font-size:20px">Before code</div><p>Draw 4–5 nodes. Run through. Fingers before fingers-on-keyboard.</p></div>
+  </div>
+
+  <h3>Complexity cheatsheet</h3>
+  <div class="cheat">
+    <div class="cheat-cell"><h5>Access by index</h5><div class="big">O(n)</div></div>
+    <div class="cheat-cell"><h5>Search</h5><div class="big">O(n)</div></div>
+    <div class="cheat-cell"><h5>Insert at head</h5><div class="big">O(1)</div></div>
+    <div class="cheat-cell"><h5>Insert at tail *</h5><div class="big">O(1) / O(n)</div><p>O(1) with tail pointer, else O(n).</p></div>
+    <div class="cheat-cell"><h5>Delete given node</h5><div class="big">O(1)</div></div>
+    <div class="cheat-cell"><h5>Reverse</h5><div class="big">O(n)</div></div>
+  </div>
+
+  <h3>The three-pointer reversal — one more time, write it from memory tonight:</h3>
+<pre>prev, curr = <span class="k">None</span>, head
+<span class="k">while</span> curr:
+    nxt = curr.next
+    curr.next = prev
+    prev = curr
+    curr = nxt
+<span class="k">return</span> prev</pre>
+
+  <div class="insight" style="margin-top:40px"><strong>The final unlock:</strong> in the interview, narrate your invariants. "At the top of this loop, every node left of <code class="mono">curr</code> points backward; every node at or right of <code class="mono">curr</code> still points forward." Interviewers write down invariants. Candidates who speak them get hired.</div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="inner">
+    <div>
+      <h3>Chapter Seven, <em>complete.</em></h3>
+      <p style="margin-top:16px">Continue the Codex: Chapter 08 — Binary Trees. Chapter 09 — Graphs. Chapter 10 — Dynamic Programming. The compounding compensation of systematic study.</p>
+    </div>
+    <div class="stamp">VOL.III · CH.07 · ED. MMXXVI</div>
+  </div>
+</footer>
+
+<script>
+/* ---------- Utility: build a node in SVG ---------- */
+function makeNode(svgId, id, x, y, val, klass='node-box', w=70, h=50){
+  return `<g transform="translate(${x},${y})">
+    <rect width="${w}" height="${h}" class="${klass}" data-id="${id}"/>
+    <text x="${w/2}" y="${h/2}" class="node-val ${klass==='node-box fast'||klass==='node-box slow'||klass==='node-box prev'?'light':''}">${val}</text>
+  </g>`;
+}
+function makeArrow(x1,y1,x2,y2,markerId='arrow2',klass='arrow'){
+  return `<path d="M ${x1} ${y1} L ${x2} ${y2}" class="${klass}" marker-end="url(#${markerId})"/>`;
+}
+function makePointer(x, y, label, color){
+  return `<g transform="translate(${x},${y})">
+    <path d="M 0 -20 L -8 -4 L 8 -4 Z" fill="${color}"/>
+    <text x="0" y="-28" class="node-label" style="fill:${color};font-size:13px;font-weight:800">${label}</text>
+  </g>`;
+}
+
+/* ============================================================
+   OPS VIZ — insert/delete
+   ============================================================ */
+let opsData = [3,7,2,9];
+function ops_render(){
+  const svg = document.getElementById('opsNodes');
+  let html = '';
+  const startX = 50, gap = 110, y = 60, w = 70, h = 50;
+  opsData.forEach((v,i)=>{
+    html += makeNode('ops', i, startX+i*gap, y, v);
+    if(i < opsData.length-1){
+      html += makeArrow(startX+i*gap+w, y+h/2, startX+(i+1)*gap, y+h/2);
+    } else {
+      html += `<text x="${startX+i*gap+w+20}" y="${y+h/2+5}" class="node-label" style="font-size:16px">∅</text>`;
+    }
+  });
+  svg.innerHTML = html;
+}
+function ops_insertHead(){
+  const v = Math.floor(Math.random()*90)+1;
+  opsData.unshift(v);
+  setStatus('opsStatus', `[INSERT HEAD] Created node(${v}), pointed it to old head. O(1).`);
+  ops_render();
+}
+function ops_insertTail(){
+  const v = Math.floor(Math.random()*90)+1;
+  opsData.push(v);
+  setStatus('opsStatus', `[INSERT TAIL] Walked to tail, appended node(${v}). O(n) without tail ptr.`);
+  ops_render();
+}
+function ops_deleteHead(){
+  if(!opsData.length){ setStatus('opsStatus','[ERROR] Empty list.'); return; }
+  const v = opsData.shift();
+  setStatus('opsStatus', `[DELETE HEAD] Removed node(${v}). New head is next. O(1).`);
+  ops_render();
+}
+function ops_deleteTail(){
+  if(!opsData.length){ setStatus('opsStatus','[ERROR] Empty list.'); return; }
+  const v = opsData.pop();
+  setStatus('opsStatus', `[DELETE TAIL] Walked to 2nd-last, set .next=None. Removed node(${v}). O(n).`);
+  ops_render();
+}
+function ops_reset(){
+  opsData = [3,7,2,9];
+  ops_render();
+  setStatus('opsStatus','[RESET] List of 4 nodes.');
+}
+function setStatus(id, text){
+  const tag = text.match(/^\[([^\]]+)\]/);
+  const rest = text.replace(/^\[[^\]]+\]\s*/,'');
+  document.getElementById(id).innerHTML = `<span class="tag">[${tag?tag[1]:'INFO'}]</span> ${rest}`;
+}
+
+/* ============================================================
+   FAST & SLOW VIZ
+   ============================================================ */
+const fsList = [1,2,3,4,5,6,7];
+let fsSlow = 0, fsFast = 0, fsDone = false, fsTimer = null;
+function fs_render(){
+  const svg = document.getElementById('fsNodes');
+  let html = '';
+  const startX = 40, gap = 110, y = 90, w = 70, h = 50;
+  fsList.forEach((v,i)=>{
+    html += makeNode('fs', i, startX+i*gap, y, v);
+    if(i < fsList.length-1){
+      html += makeArrow(startX+i*gap+w, y+h/2, startX+(i+1)*gap, y+h/2);
+    } else {
+      html += `<text x="${startX+i*gap+w+20}" y="${y+h/2+5}" class="node-label" style="font-size:16px">∅</text>`;
+    }
+  });
+  // slow pointer below
+  if(fsSlow < fsList.length){
+    const sx = startX + fsSlow*gap + w/2;
+    html += `<g transform="translate(${sx},${y+h+30})">
+      <path d="M 0 -10 L -8 6 L 8 6 Z" fill="#2a9d8f"/>
+      <text x="0" y="24" class="node-label" style="fill:#2a9d8f;font-size:13px;font-weight:800">slow</text>
+    </g>`;
+  }
+  // fast pointer above
+  if(fsFast < fsList.length){
+    const fx = startX + fsFast*gap + w/2;
+    html += `<g transform="translate(${fx},${y-10})">
+      <path d="M 0 10 L -8 -6 L 8 -6 Z" fill="#e63946"/>
+      <text x="0" y="-14" class="node-label" style="fill:#e63946;font-size:13px;font-weight:800">fast</text>
+    </g>`;
+  }
+  svg.innerHTML = html;
+}
+function fs_step(){
+  if(fsDone) return;
+  if(fsFast >= fsList.length-1 || fsFast >= fsList.length){
+    setStatus('fsStatus', `[DONE] fast reached end. slow sits at index ${fsSlow} (value=${fsList[fsSlow]}) — the MIDDLE.`);
+    fsDone = true;
+    clearInterval(fsTimer);
+    return;
+  }
+  fsSlow += 1;
+  fsFast += 2;
+  if(fsFast > fsList.length-1) fsFast = fsList.length; // off-end marker
+  setStatus('fsStatus', `slow → idx ${fsSlow} (val ${fsList[fsSlow]||'∅'}), fast → idx ${Math.min(fsFast, fsList.length)} (val ${fsList[fsFast]||'∅'})`);
+  fs_render();
+  if(fsFast >= fsList.length-1){
+    setTimeout(()=>{
+      setStatus('fsStatus', `[DONE] fast hit end. slow landed at index ${fsSlow} (value=${fsList[fsSlow]}) — the middle node.`);
+      fsDone = true;
+      clearInterval(fsTimer);
+    }, 600);
+  }
+}
+function fs_play(){
+  if(fsTimer){ clearInterval(fsTimer); fsTimer=null; document.getElementById('fsPlayBtn').textContent='Auto-play'; return;}
+  document.getElementById('fsPlayBtn').textContent='Pause';
+  fsTimer = setInterval(fs_step, 900);
+}
+function fs_reset(){
+  fsSlow=0; fsFast=0; fsDone=false;
+  if(fsTimer){clearInterval(fsTimer); fsTimer=null; document.getElementById('fsPlayBtn').textContent='Auto-play';}
+  setStatus('fsStatus','[INIT] slow=0, fast=0. Press Step to advance.');
+  fs_render();
+}
+
+/* ============================================================
+   REVERSAL VIZ
+   ============================================================ */
+const revList = [1,2,3,4,5];
+let revState = { prev:-1, curr:0, flipped: new Set(), done:false, timer:null };
+function rev_render(){
+  const svg = document.getElementById('revNodes');
+  let html = '';
+  const startX = 60, gap = 130, y = 100, w = 70, h = 50;
+  // draw nodes
+  revList.forEach((v,i)=>{
+    html += makeNode('rev', i, startX+i*gap, y, v);
+  });
+  // draw arrows — flipped go backward (red), unflipped go forward (black)
+  revList.forEach((v,i)=>{
+    if(revState.flipped.has(i)){
+      // this node's arrow points backward (to i-1) or null if i==0
+      if(i > 0){
+        html += makeArrow(startX+i*gap, y+h/2+6, startX+(i-1)*gap+w, y+h/2+6, 'arrowAcc', 'arrow new');
+      } else {
+        // arrow to null on left
+        html += `<text x="${startX-20}" y="${y+h/2+10}" class="node-label" style="font-size:16px;fill:#e63946">∅</text>`;
+        html += makeArrow(startX, y+h/2+6, startX-14, y+h/2+6, 'arrowAcc', 'arrow new');
+      }
+    } else {
+      // forward arrow
+      if(i < revList.length-1){
+        html += makeArrow(startX+i*gap+w, y+h/2, startX+(i+1)*gap, y+h/2);
+      } else {
+        html += `<text x="${startX+i*gap+w+14}" y="${y+h/2+5}" class="node-label" style="font-size:16px">∅</text>`;
+      }
+    }
+  });
+  // prev pointer
+  const prevX = revState.prev < 0 ? startX - 60 : startX + revState.prev*gap + w/2;
+  html += `<g transform="translate(${prevX},${y-10})">
+    <path d="M 0 10 L -8 -6 L 8 -6 Z" fill="#c77dff"/>
+    <text x="0" y="-14" class="node-label" style="fill:#c77dff;font-size:13px;font-weight:800">prev</text>
+  </g>`;
+  // curr pointer
+  if(revState.curr < revList.length){
+    const cx = startX + revState.curr*gap + w/2;
+    html += `<g transform="translate(${cx},${y+h+28})">
+      <path d="M 0 -10 L -8 6 L 8 6 Z" fill="#f4a261"/>
+      <text x="0" y="24" class="node-label" style="fill:#f4a261;font-size:13px;font-weight:800">curr</text>
+    </g>`;
+  } else {
+    html += `<g transform="translate(${startX + revList.length*gap + 20},${y+h+28})">
+      <path d="M 0 -10 L -8 6 L 8 6 Z" fill="#f4a261"/>
+      <text x="0" y="24" class="node-label" style="fill:#f4a261;font-size:13px;font-weight:800">curr=∅</text>
+    </g>`;
+  }
+  svg.innerHTML = html;
+}
+function rev_step(){
+  if(revState.done) return;
+  if(revState.curr >= revList.length){
+    setStatus('revStatus', `[DONE] curr is null. prev points at value=${revList[revState.prev]} — the NEW HEAD. List is fully reversed.`);
+    revState.done = true;
+    if(revState.timer){clearInterval(revState.timer); revState.timer=null; document.getElementById('revPlayBtn').textContent='Auto-play';}
+    return;
+  }
+  const c = revState.curr;
+  revState.flipped.add(c);
+  setStatus('revStatus', `Flipped node(${revList[c]}).next to point at ${revState.prev < 0 ? 'null' : 'node('+revList[revState.prev]+')'}. Advance prev & curr.`);
+  revState.prev = c;
+  revState.curr = c + 1;
+  rev_render();
+  if(revState.curr >= revList.length){
+    setTimeout(()=>{
+      setStatus('revStatus', `[DONE] curr=null. prev at node(${revList[revState.prev]}) is the new head.`);
+      revState.done = true;
+      if(revState.timer){clearInterval(revState.timer); revState.timer=null; document.getElementById('revPlayBtn').textContent='Auto-play';}
+    }, 500);
+  }
+}
+function rev_play(){
+  if(revState.timer){clearInterval(revState.timer); revState.timer=null; document.getElementById('revPlayBtn').textContent='Auto-play'; return;}
+  document.getElementById('revPlayBtn').textContent='Pause';
+  revState.timer = setInterval(rev_step, 1000);
+}
+function rev_reset(){
+  revState = { prev:-1, curr:0, flipped:new Set(), done:false, timer:null };
+  setStatus('revStatus','[INIT] prev=null, curr=head. We\'ll flip every arrow.');
+  rev_render();
+}
+
+/* ============================================================
+   CYCLE VIZ
+   ============================================================ */
+// Layout: 4 nodes in straight line, then 4 in a loop. Tail loops back to node 3.
+const cycleNodes = [
+  {v:1, x:60,  y:120},
+  {v:2, x:170, y:120},
+  {v:3, x:280, y:120},
+  {v:4, x:420, y:60},
+  {v:5, x:560, y:60},
+  {v:6, x:640, y:180},
+  {v:7, x:500, y:220},
+  {v:8, x:380, y:180}
+];
+// edges: 0→1→2→3→4→5→6→7→3 (loop back to idx 3)
+const cycleEdges = [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,3]];
+let cState = { slow:0, fast:0, step:0, met:false, done:false, timer:null };
+function cycle_render(){
+  const svg = document.getElementById('cycleNodes');
+  let html = '';
+  const w=50,h=40;
+  // edges first
+  cycleEdges.forEach(([a,b])=>{
+    const n1 = cycleNodes[a], n2 = cycleNodes[b];
+    html += makeArrow(n1.x+w/2, n1.y+h/2, n2.x-w/2+2, n2.y+h/2, 'arrow5');
+  });
+  // nodes
+  cycleNodes.forEach((n,i)=>{
+    html += `<g transform="translate(${n.x-w/2},${n.y})"><rect width="${w}" height="${h}" class="node-box"/><text x="${w/2}" y="${h/2}" class="node-val">${n.v}</text></g>`;
+  });
+  // slow pointer
+  const s = cycleNodes[cState.slow];
+  html += `<g transform="translate(${s.x},${s.y-14})">
+    <path d="M 0 10 L -8 -6 L 8 -6 Z" fill="#2a9d8f"/>
+    <text x="0" y="-14" class="node-label" style="fill:#2a9d8f;font-size:12px;font-weight:800">slow</text>
+  </g>`;
+  // fast pointer
+  const f = cycleNodes[cState.fast];
+  html += `<g transform="translate(${f.x},${f.y+h+18})">
+    <path d="M 0 -10 L -8 6 L 8 6 Z" fill="#e63946"/>
+    <text x="0" y="24" class="node-label" style="fill:#e63946;font-size:12px;font-weight:800">fast</text>
+  </g>`;
+  svg.innerHTML = html;
+}
+function nextCycleIdx(i){
+  const e = cycleEdges.find(([a,_])=>a===i);
+  return e ? e[1] : i;
+}
+function cycle_step(){
+  if(cState.done) return;
+  cState.slow = nextCycleIdx(cState.slow);
+  cState.fast = nextCycleIdx(nextCycleIdx(cState.fast));
+  cState.step++;
+  cycle_render();
+  if(cState.slow === cState.fast){
+    setStatus('cycleStatus', `[MEETING] After ${cState.step} steps, slow and fast met at node(${cycleNodes[cState.slow].v}). Cycle confirmed. Phase 2 would reset slow to head.`);
+    cState.done = true;
+    if(cState.timer){clearInterval(cState.timer); cState.timer=null; document.getElementById('cyclePlayBtn').textContent='Auto-play';}
+    return;
+  }
+  setStatus('cycleStatus', `Step ${cState.step}: slow=${cycleNodes[cState.slow].v}, fast=${cycleNodes[cState.fast].v}`);
+}
+function cycle_play(){
+  if(cState.timer){clearInterval(cState.timer); cState.timer=null; document.getElementById('cyclePlayBtn').textContent='Auto-play'; return;}
+  document.getElementById('cyclePlayBtn').textContent='Pause';
+  cState.timer = setInterval(cycle_step, 800);
+}
+function cycle_reset(){
+  cState = { slow:0, fast:0, step:0, met:false, done:false, timer:null };
+  setStatus('cycleStatus','[INIT] Both pointers at head. Watch for the meeting.');
+  cycle_render();
+}
+
+/* ============================================================
+   MERGE VIZ
+   ============================================================ */
+const mergeL1 = [1,4,7,9];
+const mergeL2 = [2,3,8,10];
+let mState = { i:0, j:0, out:[], done:false, timer:null };
+function merge_render(){
+  const svg = document.getElementById('mergeNodes');
+  let html = '';
+  const startX = 40, gap = 85, w = 60, h = 42;
+  // L1 at y=20
+  html += `<text x="10" y="18" class="node-label" style="text-anchor:start;font-size:13px">L1:</text>`;
+  mergeL1.forEach((v,idx)=>{
+    const klass = idx === mState.i && !mState.done ? 'node-box active' : (idx < mState.i ? 'node-box' : 'node-box');
+    const opacity = idx < mState.i ? 0.25 : 1;
+    html += `<g transform="translate(${startX+idx*gap},30)" opacity="${opacity}"><rect width="${w}" height="${h}" class="${klass}"/><text x="${w/2}" y="${h/2}" class="node-val">${v}</text></g>`;
+    if(idx < mergeL1.length-1) html += `<path d="M ${startX+idx*gap+w} ${30+h/2} L ${startX+(idx+1)*gap} ${30+h/2}" class="arrow ${idx < mState.i ? 'dim' : ''}" marker-end="url(#arrow6)" opacity="${idx < mState.i ? 0.3 : 1}"/>`;
+  });
+  // L2 at y=110
+  html += `<text x="10" y="128" class="node-label" style="text-anchor:start;font-size:13px">L2:</text>`;
+  mergeL2.forEach((v,idx)=>{
+    const klass = idx === mState.j && !mState.done ? 'node-box active' : 'node-box';
+    const opacity = idx < mState.j ? 0.25 : 1;
+    html += `<g transform="translate(${startX+idx*gap},140)" opacity="${opacity}"><rect width="${w}" height="${h}" class="${klass}"/><text x="${w/2}" y="${h/2}" class="node-val">${v}</text></g>`;
+    if(idx < mergeL2.length-1) html += `<path d="M ${startX+idx*gap+w} ${140+h/2} L ${startX+(idx+1)*gap} ${140+h/2}" class="arrow ${idx < mState.j ? 'dim' : ''}" marker-end="url(#arrow6)" opacity="${idx < mState.j ? 0.3 : 1}"/>`;
+  });
+  // Output row at y=225
+  html += `<text x="10" y="243" class="node-label" style="text-anchor:start;font-size:13px;fill:#e63946">OUT:</text>`;
+  // dummy
+  html += `<g transform="translate(${startX},230)"><rect width="${w}" height="${h}" class="node-box" style="stroke-dasharray:3 3"/><text x="${w/2}" y="${h/2}" class="node-val" style="fill:#6b6559">D</text></g>`;
+  mState.out.forEach((v,idx)=>{
+    const xx = startX + (idx+1)*gap;
+    html += `<g transform="translate(${xx},230)"><rect width="${w}" height="${h}" class="node-box" style="fill:#e63946;stroke:#0a0a0a"/><text x="${w/2}" y="${h/2}" class="node-val light">${v}</text></g>`;
+    const prevX = startX + idx*gap;
+    html += `<path d="M ${prevX+w} ${230+h/2} L ${xx} ${230+h/2}" class="arrow" marker-end="url(#arrow6)"/>`;
+  });
+  svg.innerHTML = html;
+}
+function merge_step(){
+  if(mState.done) return;
+  const i = mState.i, j = mState.j;
+  if(i >= mergeL1.length && j >= mergeL2.length){
+    mState.done = true;
+    setStatus('mergeStatus', `[DONE] Merged list: [${mState.out.join(', ')}]. O(n+m) time, O(1) extra.`);
+    if(mState.timer){clearInterval(mState.timer); mState.timer=null; document.getElementById('mergePlayBtn').textContent='Auto-play';}
+    return;
+  }
+  let picked, from;
+  if(i >= mergeL1.length){ picked = mergeL2[j]; from='L2'; mState.j++; }
+  else if(j >= mergeL2.length){ picked = mergeL1[i]; from='L1'; mState.i++; }
+  else if(mergeL1[i] <= mergeL2[j]){ picked = mergeL1[i]; from='L1'; mState.i++; }
+  else { picked = mergeL2[j]; from='L2'; mState.j++; }
+  mState.out.push(picked);
+  setStatus('mergeStatus', `Compared L1[${i}]=${mergeL1[i]??'∅'} vs L2[${j}]=${mergeL2[j]??'∅'} → took ${picked} from ${from}.`);
+  merge_render();
+  if(mState.i >= mergeL1.length && mState.j >= mergeL2.length){
+    setTimeout(()=>{
+      mState.done = true;
+      setStatus('mergeStatus', `[DONE] Merged: [${mState.out.join(', ')}].`);
+      if(mState.timer){clearInterval(mState.timer); mState.timer=null; document.getElementById('mergePlayBtn').textContent='Auto-play';}
+    }, 500);
+  }
+}
+function merge_play(){
+  if(mState.timer){clearInterval(mState.timer); mState.timer=null; document.getElementById('mergePlayBtn').textContent='Auto-play'; return;}
+  document.getElementById('mergePlayBtn').textContent='Pause';
+  mState.timer = setInterval(merge_step, 900);
+}
+function merge_reset(){
+  mState = { i:0, j:0, out:[], done:false, timer:null };
+  setStatus('mergeStatus','[INIT] Two sorted lists. Dummy node prepares the merged output.');
+  merge_render();
+}
+
+/* ---------- Initial renders ---------- */
+ops_render();
+fs_render();
+rev_render();
+cycle_render();
+merge_render();
+</script>
+</body>
+</html>
