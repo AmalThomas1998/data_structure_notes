@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Remove Nodes from Linked List — A Visual Walkthrough</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,300..900,0..100&family=JetBrains+Mono:wght@400;500;700&family=Inter+Tight:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f4ede1;
+    --paper-2: #ece2d0;
+    --ink: #1a1815;
+    --ink-soft: #4a443c;
+    --rule: #c9bca5;
+    --accent: #d8442b;       /* vermillion */
+    --accent-2: #1d4d3a;     /* deep green */
+    --gold: #b8893a;
+    --kept: #1d4d3a;
+    --removed: #d8442b;
+    --max: #b8893a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter Tight', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* paper grain */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      radial-gradient(rgba(0,0,0,0.025) 1px, transparent 1px),
+      radial-gradient(rgba(0,0,0,0.018) 1px, transparent 1px);
+    background-size: 3px 3px, 7px 7px;
+    background-position: 0 0, 1px 2px;
+    z-index: 100;
+    mix-blend-mode: multiply;
+  }
+
+  .wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 60px 40px 120px;
+    position: relative;
+  }
+
+  /* ───────── HEADER ───────── */
+  header {
+    border-top: 2px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+    padding: 14px 0 18px;
+    margin-bottom: 56px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  header .meta { color: var(--ink-soft); }
+  header .num { color: var(--accent); font-weight: 700; }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(48px, 7vw, 92px);
+    line-height: 0.95;
+    letter-spacing: -0.025em;
+    margin-bottom: 28px;
+    font-variation-settings: "opsz" 144, "SOFT" 30;
+  }
+  h1 em {
+    font-style: italic;
+    font-weight: 500;
+    color: var(--accent);
+  }
+  h1 .accent-stroke {
+    display: inline-block;
+    position: relative;
+  }
+  h1 .accent-stroke::after {
+    content: "";
+    position: absolute;
+    bottom: 4px; left: -4px; right: -4px;
+    height: 8px;
+    background: var(--accent);
+    opacity: 0.18;
+    z-index: -1;
+    transform: rotate(-1deg);
+  }
+
+  .deck {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-style: italic;
+    font-size: 22px;
+    line-height: 1.45;
+    color: var(--ink-soft);
+    max-width: 640px;
+    margin-bottom: 80px;
+  }
+
+  /* ───────── SECTIONS ───────── */
+  section { margin-bottom: 96px; }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-label::before {
+    content: "";
+    width: 24px; height: 1px;
+    background: var(--accent);
+  }
+
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: clamp(32px, 4vw, 44px);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+    font-variation-settings: "opsz" 96;
+  }
+
+  h2 em { font-style: italic; color: var(--accent); font-weight: 500; }
+
+  p {
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+    margin-bottom: 16px;
+    max-width: 680px;
+  }
+
+  p strong { color: var(--ink); font-weight: 600; }
+
+  code, .mono {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9em;
+    background: var(--paper-2);
+    padding: 2px 6px;
+    border-radius: 3px;
+    color: var(--ink);
+  }
+
+  /* ───────── PROBLEM CARD ───────── */
+  .problem-card {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 40px;
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+  }
+  .problem-card::before {
+    content: "01";
+    position: absolute;
+    top: 20px; right: 30px;
+    font-family: 'Fraunces', serif;
+    font-size: 140px;
+    font-weight: 200;
+    color: var(--accent);
+    opacity: 0.18;
+    line-height: 1;
+  }
+  .problem-card h3 {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 24px;
+    margin-bottom: 14px;
+  }
+  .problem-card p {
+    color: var(--paper);
+    opacity: 0.85;
+    max-width: 720px;
+  }
+  .problem-card .rule {
+    display: inline-block;
+    background: var(--accent);
+    color: var(--paper);
+    padding: 4px 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    margin: 16px 0 8px;
+  }
+
+  /* ───────── LINKED LIST VISUAL ───────── */
+  .list-stage {
+    background: var(--paper-2);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 40px 30px;
+    margin: 28px 0;
+    overflow-x: auto;
+  }
+
+  .list-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    min-width: max-content;
+  }
+
+  .node {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--ink);
+    position: relative;
+    flex-shrink: 0;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .node.kept {
+    background: var(--kept);
+    color: var(--paper);
+    border-color: var(--kept);
+    transform: scale(1.05);
+    box-shadow: 0 8px 24px -8px rgba(29, 77, 58, 0.4);
+  }
+  .node.kept::after {
+    content: "✓";
+    position: absolute;
+    top: -10px; right: -10px;
+    width: 22px; height: 22px;
+    background: var(--kept);
+    color: var(--paper);
+    border-radius: 50%;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--paper);
+  }
+
+  .node.removed {
+    background: var(--paper);
+    color: var(--removed);
+    border-color: var(--removed);
+    border-style: dashed;
+    opacity: 0.45;
+    text-decoration: line-through;
+  }
+  .node.removed::after {
+    content: "✕";
+    position: absolute;
+    top: -10px; right: -10px;
+    width: 22px; height: 22px;
+    background: var(--removed);
+    color: var(--paper);
+    border-radius: 50%;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--paper);
+  }
+
+  .node.max-node {
+    background: var(--max);
+    color: var(--paper);
+    border-color: var(--max);
+  }
+
+  .arrow {
+    width: 36px; height: 2px;
+    background: var(--ink);
+    position: relative;
+    flex-shrink: 0;
+  }
+  .arrow::after {
+    content: "";
+    position: absolute;
+    right: -2px; top: -4px;
+    border-left: 8px solid var(--ink);
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+  }
+  .arrow.removed { opacity: 0.25; }
+  .arrow.reversed::after {
+    right: auto; left: -2px;
+    border-left: none;
+    border-right: 8px solid var(--ink);
+  }
+
+  .stage-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .stage-label .step-num {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 3px 8px;
+    border-radius: 2px;
+    font-weight: 700;
+  }
+
+  /* ───────── ALGO STEPS ───────── */
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 40px;
+  }
+  @media (max-width: 760px) {
+    .steps-grid { grid-template-columns: 1fr; }
+  }
+
+  .step-card {
+    background: var(--paper-2);
+    border: 1px solid var(--rule);
+    padding: 28px 24px;
+    position: relative;
+    border-radius: 4px;
+  }
+  .step-card .num {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: 56px;
+    line-height: 1;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+  .step-card h4 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 22px;
+    margin-bottom: 10px;
+    letter-spacing: -0.01em;
+  }
+  .step-card p {
+    font-size: 15px;
+    color: var(--ink-soft);
+    margin: 0;
+  }
+
+  /* ───────── INSIGHT BLOCK ───────── */
+  .insight {
+    border-left: 3px solid var(--accent);
+    padding: 4px 0 4px 24px;
+    margin: 32px 0;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 22px;
+    line-height: 1.5;
+    color: var(--ink);
+    max-width: 720px;
+  }
+  .insight strong { color: var(--accent); font-style: normal; font-weight: 600; }
+
+  /* ───────── CODE BLOCK ───────── */
+  .code-block {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 32px 36px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    line-height: 1.7;
+    overflow-x: auto;
+    margin: 24px 0;
+    position: relative;
+  }
+  .code-block::before {
+    content: "solution.py";
+    position: absolute;
+    top: 12px; right: 18px;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--paper);
+    opacity: 0.5;
+  }
+  .code-block .kw { color: #f4a26d; }
+  .code-block .fn { color: #ffd58a; }
+  .code-block .str { color: #a3d9a5; }
+  .code-block .com { color: #6a6258; font-style: italic; }
+  .code-block .num { color: #e89bd1; }
+
+  /* ───────── INTERACTIVE PLAYER ───────── */
+  .player {
+    background: var(--paper-2);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 36px 30px;
+    margin: 32px 0;
+  }
+  .player-status {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+    min-height: 1.4em;
+  }
+  .player-status .accent { color: var(--accent); font-weight: 700; }
+  .player-narration {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 19px;
+    line-height: 1.5;
+    color: var(--ink);
+    min-height: 3em;
+    margin-bottom: 24px;
+    max-width: 800px;
+  }
+
+  .player-controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-top: 28px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    padding: 11px 22px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+  .btn:hover { background: var(--accent); transform: translateY(-1px); }
+  .btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+  .btn.primary { background: var(--accent); }
+  .btn.primary:hover { background: var(--ink); }
+  .btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--ink); }
+  .btn.ghost:hover { background: var(--ink); color: var(--paper); }
+
+  .progress-track {
+    flex: 1;
+    height: 2px;
+    background: var(--rule);
+    position: relative;
+    min-width: 80px;
+    margin: 0 8px;
+  }
+  .progress-fill {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    background: var(--accent);
+    transition: width 0.3s ease;
+  }
+
+  .max-tracker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--paper);
+    border: 1px solid var(--ink);
+    padding: 6px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    border-radius: 2px;
+    margin-bottom: 16px;
+  }
+  .max-tracker .label { color: var(--ink-soft); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; }
+  .max-tracker .val { color: var(--max); font-weight: 700; font-size: 16px; }
+
+  /* complexity table */
+  .complexity {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border: 1px solid var(--ink);
+    margin: 24px 0;
+    max-width: 480px;
+  }
+  .complexity > div {
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .complexity > div:nth-child(odd) {
+    border-right: 1px solid var(--ink);
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .complexity > div:nth-child(even) {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 500;
+  }
+  .complexity > div:nth-last-child(-n+2) { border-bottom: none; }
+
+  /* footer */
+  footer {
+    margin-top: 100px;
+    padding-top: 24px;
+    border-top: 1px solid var(--rule);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  @keyframes fadein {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-in { animation: fadein 0.6s ease both; }
+
+  /* legend */
+  .legend {
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+  .legend .swatch {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    margin-right: 8px;
+    vertical-align: middle;
+    border: 2px solid;
+  }
+  .swatch.kept { background: var(--kept); border-color: var(--kept); }
+  .swatch.removed { background: var(--paper); border-color: var(--removed); border-style: dashed; }
+  .swatch.max { background: var(--max); border-color: var(--max); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <span class="meta">LeetCode 2487 · <span class="num">Medium</span></span>
+    <span class="meta">A visual essay</span>
+    <span class="meta">⌬ Linked List</span>
+  </header>
+
+  <h1>
+    Remove Nodes<br>
+    <span class="accent-stroke">from a</span> <em>Linked&nbsp;List</em>
+  </h1>
+
+  <p class="deck">
+    Given the head of a linked list, delete every node that has a greater value somewhere to its right.
+    A small problem with a beautiful trick — read the list backwards.
+  </p>
+
+  <!-- ───────── PROBLEM ───────── -->
+  <section>
+    <div class="section-label">The problem</div>
+    <h2>Keep only the <em>local champions</em>.</h2>
+    <p>
+      A node survives if nothing larger appears anywhere to its right. Equivalently, we want every node
+      that is a <strong>maximum-from-the-right</strong> — including the final node, which trivially has nothing to its right.
+    </p>
+
+    <div class="problem-card">
+      <h3>Example</h3>
+      <p>Input: <code style="background:rgba(255,255,255,0.1);color:#f4ede1">5 → 2 → 13 → 3 → 8</code></p>
+      <span class="rule">5 fails — 13 is larger and to its right</span><br>
+      <span class="rule">2 fails — 13 is larger</span><br>
+      <span class="rule">13 survives — it's the maximum</span><br>
+      <span class="rule">3 fails — 8 is larger</span><br>
+      <span class="rule">8 survives — nothing to its right</span>
+      <p style="margin-top:18px"><strong style="color:#f4ede1">Output:</strong> <code style="background:rgba(255,255,255,0.1);color:#f4ede1">13 → 8</code></p>
+    </div>
+  </section>
+
+  <!-- ───────── INSIGHT ───────── -->
+  <section>
+    <div class="section-label">The insight</div>
+    <h2>Read it <em>backwards.</em></h2>
+    <p>
+      Going left-to-right, "is anything larger to my right?" forces a lookahead at every step.
+      But going <strong>right-to-left</strong>, the question becomes trivial: just track the running maximum.
+      A node survives only if it is at least as large as everything seen so far.
+    </p>
+
+    <div class="insight">
+      Reverse the list, sweep once keeping a running max, then reverse back.
+      <strong>Three passes — all linear, all in-place.</strong>
+    </div>
+  </section>
+
+  <!-- ───────── ALGORITHM STEPS ───────── -->
+  <section>
+    <div class="section-label">The algorithm</div>
+    <h2>Three moves.</h2>
+
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="num">01</div>
+        <h4>Reverse</h4>
+        <p>Flip the list end-over-end. The last node becomes the first; iteration now flows from the original tail back to the head.</p>
+      </div>
+      <div class="step-card">
+        <div class="num">02</div>
+        <h4>Filter</h4>
+        <p>Walk forward in the reversed list. Track the running max. If the next node is smaller — splice it out. Otherwise advance, updating max.</p>
+      </div>
+      <div class="step-card">
+        <div class="num">03</div>
+        <h4>Reverse again</h4>
+        <p>Flip the cleaned list back. The original ordering returns, but only the survivors remain.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────── INTERACTIVE WALKTHROUGH ───────── -->
+  <section>
+    <div class="section-label">Watch it run</div>
+    <h2>Step through <em>5 → 2 → 13 → 3 → 8</em></h2>
+    <p>Press <code>Step</code> to advance the algorithm. Each click moves the cursor one position; nodes turn green when kept, red when removed.</p>
+
+    <div class="player">
+      <div class="player-status" id="status">PHASE 0 · <span class="accent">READY</span></div>
+      <div class="player-narration" id="narration">
+        We start with the original list. Click <strong>Step</strong> to begin reversing.
+      </div>
+
+      <div class="max-tracker" id="maxTracker" style="visibility:hidden">
+        <span class="label">Running max</span>
+        <span class="val" id="maxVal">—</span>
+      </div>
+
+      <div class="list-stage">
+        <div class="list-row" id="listRow"></div>
+      </div>
+
+      <div class="legend">
+        <span><span class="swatch kept"></span>kept (≥ max)</span>
+        <span><span class="swatch removed"></span>removed (&lt; max)</span>
+        <span><span class="swatch max"></span>current max</span>
+      </div>
+
+      <div class="player-controls">
+        <button class="btn primary" id="stepBtn">Step ▸</button>
+        <button class="btn ghost" id="resetBtn">↺ Reset</button>
+        <div class="progress-track"><div class="progress-fill" id="progress" style="width:0%"></div></div>
+        <span class="mono" id="stepCounter" style="font-size:11px;color:var(--ink-soft)">0 / —</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────── CODE ───────── -->
+  <section>
+    <div class="section-label">The code</div>
+    <h2>Clean Python.</h2>
+    <p>
+      Two helpers — a list reversal and a single filtering pass. The filter advances <code>curr</code> only when
+      it <em>doesn't</em> splice; that way, after deleting a node, the new <code>curr.next</code> is re-examined on
+      the following iteration.
+    </p>
+
+<pre class="code-block"><span class="kw">class</span> <span class="fn">Solution</span>:
+    <span class="kw">def</span> <span class="fn">removeNodes</span>(self, head):
+        <span class="com"># 1 ─ reverse</span>
+        head = self.reverse(head)
+
+        <span class="com"># 2 ─ sweep, dropping anything below the running max</span>
+        max_val = head.val
+        curr = head
+        <span class="kw">while</span> curr.next:
+            <span class="kw">if</span> curr.next.val &gt;= max_val:
+                max_val = curr.next.val
+                curr = curr.next         <span class="com"># keep + advance</span>
+            <span class="kw">else</span>:
+                curr.next = curr.next.next  <span class="com"># splice out, do not advance</span>
+
+        <span class="com"># 3 ─ reverse back</span>
+        <span class="kw">return</span> self.reverse(head)
+
+    <span class="kw">def</span> <span class="fn">reverse</span>(self, head):
+        prev, curr = <span class="kw">None</span>, head
+        <span class="kw">while</span> curr:
+            nxt = curr.next
+            curr.next = prev
+            prev, curr = curr, nxt
+        <span class="kw">return</span> prev</pre>
+  </section>
+
+  <!-- ───────── COMPLEXITY ───────── -->
+  <section>
+    <div class="section-label">Cost</div>
+    <h2>Linear in time, constant in space.</h2>
+
+    <div class="complexity">
+      <div>Time</div>
+      <div>O(<em>n</em>)</div>
+      <div>Space</div>
+      <div>O(1)</div>
+    </div>
+
+    <p>Three linear passes: reverse, filter, reverse. No auxiliary structures — only pointer rewiring.</p>
+  </section>
+
+  <footer>
+    <span>⌬ Linked List · LeetCode 2487</span>
+    <span>End</span>
+  </footer>
+
+</div>
+
+<script>
+  // ── State machine for the visual walkthrough ──
+  // Phases: 0 original → 1..n reversing animation → reversed → filter steps → final reverse → done
+
+  const original = [5, 2, 13, 3, 8];
+  const reversed = [...original].reverse(); // [8, 3, 13, 2, 5]
+
+  // Build the precomputed step list.
+  // Each step is: { phase, list, statuses, max, narration, statusLabel }
+  // statuses: array of 'normal' | 'kept' | 'removed' | 'max-node'
+
+  const steps = [];
+
+  // Step 0: original
+  steps.push({
+    list: [...original],
+    statuses: original.map(() => 'normal'),
+    arrows: original.map(() => 'normal'),
+    max: null,
+    showMax: false,
+    narration: 'The original list. Click <strong>Step</strong> to reverse it.',
+    statusLabel: 'PHASE 0 · ORIGINAL',
+  });
+
+  // Step 1: reversed
+  steps.push({
+    list: [...reversed],
+    statuses: reversed.map(() => 'normal'),
+    arrows: reversed.map(() => 'normal'),
+    max: null,
+    showMax: false,
+    narration: 'Reversed. We will walk forward, keeping a running max.',
+    statusLabel: 'PHASE 1 · REVERSED',
+  });
+
+  // Step 2: initialize max with first node (8)
+  steps.push({
+    list: [...reversed],
+    statuses: ['max-node', 'normal', 'normal', 'normal', 'normal'],
+    arrows: reversed.map(() => 'normal'),
+    max: 8,
+    showMax: true,
+    narration: 'Start at the first node. <strong>max = 8</strong>. The first node is always kept.',
+    statusLabel: 'PHASE 2 · INIT MAX',
+  });
+
+  // Walk through the reversed list, simulating the filter.
+  // We track the live list (with deletions) for display.
+  let liveList = [...reversed];
+  let liveStatuses = ['kept', 'normal', 'normal', 'normal', 'normal']; // 8 is kept
+  let max = 8;
+  let cursorIdx = 0; // index in liveList
+
+  // Compare cursor (idx 0=8) with next (idx 1=3) → 3 < 8 → remove
+  liveStatuses[1] = 'removed';
+  steps.push({
+    list: [...liveList],
+    statuses: [...liveStatuses],
+    arrows: liveList.map((_, i) => i === 0 ? 'removed' : 'normal'),
+    max: 8,
+    showMax: true,
+    narration: 'Compare next node <strong>3</strong> with max <strong>8</strong>. 3 &lt; 8 → splice it out.',
+    statusLabel: 'PHASE 2 · STEP',
+  });
+
+  // Remove 3 from liveList
+  liveList = [8, 13, 2, 5];
+  liveStatuses = ['kept', 'normal', 'normal', 'normal'];
+  // cursor still at 8 (idx 0). Now compare with 13.
+  liveStatuses[1] = 'max-node';
+  max = 13;
+  steps.push({
+    list: [...liveList],
+    statuses: [...liveStatuses],
+    arrows: liveList.map(() => 'normal'),
+    max: 13,
+    showMax: true,
+    narration: 'Next node <strong>13</strong> ≥ max. Keep it, update <strong>max = 13</strong>, advance cursor.',
+    statusLabel: 'PHASE 2 · STEP',
+  });
+
+  // Now cursor at 13 (idx 1). Mark 13 as kept (was max-node, becomes kept).
+  liveStatuses[1] = 'kept';
+  // Compare with 2. 2 < 13 → remove.
+  liveStatuses[2] = 'removed';
+  steps.push({
+    list: [...liveList],
+    statuses: [...liveStatuses],
+    arrows: liveList.map((_, i) => i === 1 ? 'removed' : 'normal'),
+    max: 13,
+    showMax: true,
+    narration: 'Next node <strong>2</strong> &lt; 13 → splice it out.',
+    statusLabel: 'PHASE 2 · STEP',
+  });
+
+  // Remove 2.
+  liveList = [8, 13, 5];
+  liveStatuses = ['kept', 'kept', 'normal'];
+  // cursor still at 13 (idx 1). Compare with 5. 5 < 13 → remove.
+  liveStatuses[2] = 'removed';
+  steps.push({
+    list: [...liveList],
+    statuses: [...liveStatuses],
+    arrows: liveList.map((_, i) => i === 1 ? 'removed' : 'normal'),
+    max: 13,
+    showMax: true,
+    narration: 'Next node <strong>5</strong> &lt; 13 → splice it out. Nothing more to compare.',
+    statusLabel: 'PHASE 2 · STEP',
+  });
+
+  // After filter
+  liveList = [8, 13];
+  liveStatuses = ['kept', 'kept'];
+  steps.push({
+    list: [...liveList],
+    statuses: [...liveStatuses],
+    arrows: liveList.map(() => 'normal'),
+    max: 13,
+    showMax: true,
+    narration: 'Filter complete. Two survivors: <strong>8 → 13</strong>.',
+    statusLabel: 'PHASE 2 · FILTERED',
+  });
+
+  // Reverse back
+  steps.push({
+    list: [13, 8],
+    statuses: ['kept', 'kept'],
+    arrows: [13, 8].map(() => 'normal'),
+    max: null,
+    showMax: false,
+    narration: 'Reverse back. <strong>Final answer: 13 → 8.</strong> ✓',
+    statusLabel: 'PHASE 3 · DONE',
+  });
+
+  // ── DOM rendering ──
+  const listRow = document.getElementById('listRow');
+  const narration = document.getElementById('narration');
+  const statusEl = document.getElementById('status');
+  const maxTracker = document.getElementById('maxTracker');
+  const maxVal = document.getElementById('maxVal');
+  const stepBtn = document.getElementById('stepBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const progress = document.getElementById('progress');
+  const stepCounter = document.getElementById('stepCounter');
+
+  let currentStep = 0;
+
+  function render(step) {
+    listRow.innerHTML = '';
+    step.list.forEach((val, i) => {
+      const node = document.createElement('div');
+      node.className = 'node fade-in';
+      const status = step.statuses[i];
+      if (status === 'kept') node.classList.add('kept');
+      else if (status === 'removed') node.classList.add('removed');
+      else if (status === 'max-node') node.classList.add('max-node');
+      node.textContent = val;
+      node.style.animationDelay = (i * 0.04) + 's';
+      listRow.appendChild(node);
+
+      if (i < step.list.length - 1) {
+        const arrow = document.createElement('div');
+        arrow.className = 'arrow';
+        if (step.arrows[i] === 'removed') arrow.classList.add('removed');
+        listRow.appendChild(arrow);
+      }
+    });
+
+    narration.innerHTML = step.narration;
+    statusEl.innerHTML = step.statusLabel.replace(/·\s*([A-Z]+)$/, '· <span class="accent">$1</span>');
+
+    if (step.showMax) {
+      maxTracker.style.visibility = 'visible';
+      maxVal.textContent = step.max;
+    } else {
+      maxTracker.style.visibility = 'hidden';
+    }
+
+    progress.style.width = ((currentStep / (steps.length - 1)) * 100) + '%';
+    stepCounter.textContent = `${currentStep} / ${steps.length - 1}`;
+
+    stepBtn.disabled = currentStep >= steps.length - 1;
+    if (stepBtn.disabled) stepBtn.textContent = 'Done ✓';
+    else stepBtn.textContent = 'Step ▸';
+  }
+
+  stepBtn.addEventListener('click', () => {
+    if (currentStep < steps.length - 1) {
+      currentStep++;
+      render(steps[currentStep]);
+    }
+  });
+
+  resetBtn.addEventListener('click', () => {
+    currentStep = 0;
+    render(steps[currentStep]);
+  });
+
+  render(steps[0]);
+</script>
+
+</body>
+</html>
