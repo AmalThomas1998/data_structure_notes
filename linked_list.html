@@ -728,6 +728,42 @@
     <span class="k">while</span> fast:
         slow, fast = slow.next, fast.next
     <span class="k">return</span> slow</pre>
+
+  <h3>Why the offset trick works — geometric intuition</h3>
+  <div class="two-col">
+    <div>
+      <p>Imagine two runners on a track. The track has total length <code class="mono">L</code> nodes. Place <code class="mono">slow</code> at the start. Place <code class="mono">fast</code> exactly <code class="mono">n</code> steps ahead. Now both run at the same pace until <code class="mono">fast</code> falls off the end (hits <code class="mono">null</code>).</p>
+      <p>At that moment, <code class="mono">fast</code> has traveled <code class="mono">L − n</code> steps from its starting position. Since they ran in lockstep, <code class="mono">slow</code> has also traveled <code class="mono">L − n</code> steps from <em>its</em> start — landing at index <code class="mono">L − n</code>. That index is exactly the <strong>n-th node from the end</strong>.</p>
+      <p>The offset <em>preserves</em> the gap of <code class="mono">n</code> nodes between them. When <code class="mono">fast</code> reaches the end, <code class="mono">slow</code> is <code class="mono">n</code> nodes behind the end — which is what we wanted.</p>
+    </div>
+    <aside class="side-note">
+      <h4>The "fence post" detail</h4>
+      <p>To remove the n-th from the end, you usually want <code style="color:var(--accent-3)">slow</code> to land on the node <em>before</em> the target — so you can splice it out. The fix: start fast <code style="color:var(--accent-3)">n+1</code> steps ahead, or use a dummy node. The off-by-one between "find the n-th" and "remove the n-th" is the most common mistake. <strong>Always draw it.</strong></p>
+    </aside>
+  </div>
+
+  <!-- VIZ: Nth from End -->
+  <div class="viz">
+    <div class="viz-caption"><span class="label">FIG. 04 · ANIMATED</span><span>Nth from end — offset two pointers, walk together</span></div>
+    <svg id="nfeViz" viewBox="0 0 900 240" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrNfe" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="#0a0a0a"/>
+        </marker>
+      </defs>
+      <g id="nfeNodes"></g>
+    </svg>
+    <div class="viz-controls">
+      <label style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#6b6559;margin-right:4px">n =</label>
+      <input type="number" id="nfeN" value="2" min="1" max="7" style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;border:2px solid #0a0a0a;padding:8px 10px;width:60px;background:#f4efe6">
+      <button onclick="nfe_step()" id="nfeStepBtn">Step</button>
+      <button onclick="nfe_play()" id="nfePlayBtn">Auto-play</button>
+      <button class="secondary" onclick="nfe_reset()">Reset</button>
+    </div>
+    <div class="viz-status" id="nfeStatus"><span class="tag">[INIT]</span>List of 7 nodes. Pick <b>n</b>, then Step. Phase 1: advance <b>fast</b> by n. Phase 2: walk both together until fast falls off.</div>
+  </div>
+
+  <div class="insight"><strong>Why this is harder than it looks:</strong> the candidate must reason about two pointer positions <em>and</em> a fixed offset between them — and prove the offset is preserved across the entire walk. Articulating "the gap of n nodes never changes once we enter phase 2" out loud is what convinces an interviewer you understand the algorithm, not just the code.</div>
 </section>
 
 <!-- SECTION 06 — REVERSAL DEEP DIVE -->
@@ -1416,12 +1452,157 @@ function merge_reset(){
   merge_render();
 }
 
+/* ============================================================
+   NTH FROM END VIZ
+   Two phases:
+   Phase 1: advance fast by n steps (slow stays at head)
+   Phase 2: walk slow and fast together until fast = null
+   ============================================================ */
+const nfeList = [9, 4, 7, 2, 8, 3, 5];
+let nfeState = { phase: 0, slow: 0, fast: 0, n: 2, done: false, timer: null, phase1Step: 0 };
+function nfe_render(){
+  const svg = document.getElementById('nfeNodes');
+  const n = nfeList.length;
+  const startX = 50, gap = 110, y = 90, w = 70, h = 50;
+  let html = '';
+  // nodes + arrows
+  nfeList.forEach((v, i) => {
+    let klass = 'node-box';
+    if(nfeState.done && i === nfeState.slow) klass = 'node-box prev'; // answer = purple-ish
+    else if(i === nfeState.slow && i === nfeState.fast) klass = 'node-box prev';
+    else if(i === nfeState.slow) klass = 'node-box slow';
+    else if(i === nfeState.fast && !nfeState.done) klass = 'node-box fast';
+    html += `<g transform="translate(${startX + i*gap},${y})">
+      <rect width="${w}" height="${h}" class="${klass}"/>
+      <text x="${w/2}" y="${h/2}" class="node-val ${klass.includes('slow') || klass.includes('fast') || klass.includes('prev') ? 'light' : ''}">${v}</text>
+    </g>`;
+    // index label
+    html += `<text x="${startX + i*gap + w/2}" y="${y + h + 18}" class="node-label" style="font-size:11px;fill:#6b6559">idx ${i}</text>`;
+    // "n from end" label
+    const fromEnd = n - i;
+    html += `<text x="${startX + i*gap + w/2}" y="${y + h + 34}" class="node-label" style="font-size:10px;fill:#aaa">${fromEnd} from end</text>`;
+    if(i < n - 1){
+      html += `<path d="M ${startX + i*gap + w} ${y + h/2} L ${startX + (i+1)*gap} ${y + h/2}" class="arrow"/>`;
+    }
+  });
+  // trailing null marker
+  const nullX = startX + (n-1)*gap + w + 4;
+  html += `<path d="M ${nullX} ${y + h/2} L ${nullX + 26} ${y + h/2}" class="arrow"/>`;
+  html += `<text x="${nullX + 42}" y="${y + h/2 + 5}" class="node-label" style="font-size:14px;fill:#6b6559">∅</text>`;
+  // fast pointer marker (above)
+  if(nfeState.fast < n){
+    const fx = startX + nfeState.fast * gap + w/2;
+    html += `<g transform="translate(${fx},${y - 10})">
+      <path d="M 0 10 L -8 -6 L 8 -6 Z" fill="#e63946"/>
+      <text x="0" y="-14" class="node-label" style="fill:#e63946;font-size:13px;font-weight:800">fast</text>
+    </g>`;
+  } else {
+    // fast = null, draw it past the end
+    const fx = nullX + 42;
+    html += `<g transform="translate(${fx},${y - 10})">
+      <path d="M 0 10 L -8 -6 L 8 -6 Z" fill="#e63946"/>
+      <text x="0" y="-14" class="node-label" style="fill:#e63946;font-size:12px;font-weight:800">fast=∅</text>
+    </g>`;
+  }
+  // slow pointer marker (below)
+  const sx = startX + nfeState.slow * gap + w/2;
+  html += `<g transform="translate(${sx},${y + h + 50})">
+    <path d="M 0 -10 L -8 6 L 8 6 Z" fill="#2a9d8f"/>
+    <text x="0" y="20" class="node-label" style="fill:#2a9d8f;font-size:13px;font-weight:800">slow</text>
+  </g>`;
+  // phase label at top
+  let phaseText = '';
+  if(nfeState.phase === 0) phaseText = 'BEFORE START — both at head';
+  else if(nfeState.phase === 1) phaseText = `PHASE 1 — advancing fast by n=${nfeState.n} (step ${nfeState.phase1Step}/${nfeState.n})`;
+  else if(nfeState.phase === 2 && !nfeState.done) phaseText = `PHASE 2 — walking together, gap of ${nfeState.n} preserved`;
+  else phaseText = `DONE — slow at idx ${nfeState.slow}, the ${nfeState.n}-th from end`;
+  html += `<text x="20" y="22" class="node-label" style="text-anchor:start;font-size:13px;fill:#e63946;font-weight:700;letter-spacing:.05em">${phaseText}</text>`;
+  // gap visualization line between slow and fast (when both are inside list)
+  if(nfeState.fast < n && nfeState.slow !== nfeState.fast && nfeState.phase >= 1){
+    const sx2 = startX + nfeState.slow * gap + w/2;
+    const fx2 = startX + nfeState.fast * gap + w/2;
+    html += `<path d="M ${sx2} ${y + h + 70} L ${fx2} ${y + h + 70}" stroke="#f4a261" stroke-width="2" stroke-dasharray="4,3"/>`;
+    html += `<text x="${(sx2+fx2)/2}" y="${y + h + 86}" class="node-label" style="font-size:11px;fill:#f4a261;font-weight:800">gap = ${nfeState.fast - nfeState.slow}</text>`;
+  }
+  svg.innerHTML = html;
+}
+function nfe_step(){
+  if(nfeState.done) return;
+  nfeState.n = parseInt(document.getElementById('nfeN').value, 10);
+  if(nfeState.n < 1 || nfeState.n > nfeList.length){
+    setStatus_nfe(`[ERROR] n must be between 1 and ${nfeList.length}.`);
+    return;
+  }
+  if(nfeState.phase === 0){
+    // begin phase 1
+    nfeState.phase = 1;
+    nfeState.phase1Step = 0;
+    setStatus_nfe(`<span class="tag">[PHASE 1]</span>Both pointers at head (idx 0). Now advance <b>fast</b> by n=${nfeState.n} steps while slow stays.`);
+    nfe_render();
+    return;
+  }
+  if(nfeState.phase === 1){
+    if(nfeState.phase1Step < nfeState.n){
+      nfeState.fast += 1;
+      nfeState.phase1Step += 1;
+      setStatus_nfe(`<span class="tag">[PHASE 1 · step ${nfeState.phase1Step}/${nfeState.n}]</span>fast advances to idx ${nfeState.fast}. slow stays at idx ${nfeState.slow}. Gap is now ${nfeState.fast - nfeState.slow}.`);
+      nfe_render();
+      if(nfeState.phase1Step === nfeState.n){
+        // queue up phase 2 message on next step
+        nfeState.phase = 2;
+      }
+      return;
+    }
+  }
+  if(nfeState.phase === 2){
+    // walk both
+    if(nfeState.fast >= nfeList.length){
+      // fast is already null — we're done
+      nfeState.done = true;
+      setStatus_nfe(`<span class="tag">[DONE]</span>fast hit null. <b>slow at idx ${nfeState.slow}</b> = value <b>${nfeList[nfeState.slow]}</b> — the ${nfeState.n}-th node from the end. ✓`);
+      if(nfeState.timer){clearInterval(nfeState.timer); nfeState.timer=null; document.getElementById('nfePlayBtn').textContent='Auto-play';}
+      nfe_render();
+      return;
+    }
+    nfeState.slow += 1;
+    nfeState.fast += 1;
+    if(nfeState.fast >= nfeList.length){
+      nfeState.done = true;
+      setStatus_nfe(`<span class="tag">[DONE]</span>fast walked off the end (now null). <b>slow at idx ${nfeState.slow}</b> = value <b>${nfeList[nfeState.slow]}</b> — the ${nfeState.n}-th from end. ✓`);
+      if(nfeState.timer){clearInterval(nfeState.timer); nfeState.timer=null; document.getElementById('nfePlayBtn').textContent='Auto-play';}
+    } else {
+      setStatus_nfe(`<span class="tag">[PHASE 2]</span>Walk together. slow → idx ${nfeState.slow} (val ${nfeList[nfeState.slow]}), fast → idx ${nfeState.fast} (val ${nfeList[nfeState.fast]}). Gap still ${nfeState.fast - nfeState.slow}.`);
+    }
+    nfe_render();
+  }
+}
+function setStatus_nfe(text){
+  const tag = text.match(/^<span class="tag">\[([^\]]+)\]<\/span>/);
+  if(tag){
+    document.getElementById('nfeStatus').innerHTML = text;
+  } else {
+    setStatus('nfeStatus', text);
+  }
+}
+function nfe_play(){
+  if(nfeState.timer){ clearInterval(nfeState.timer); nfeState.timer = null; document.getElementById('nfePlayBtn').textContent = 'Auto-play'; return; }
+  document.getElementById('nfePlayBtn').textContent = 'Pause';
+  nfeState.timer = setInterval(nfe_step, 900);
+}
+function nfe_reset(){
+  if(nfeState.timer){ clearInterval(nfeState.timer); nfeState.timer = null; document.getElementById('nfePlayBtn').textContent = 'Auto-play'; }
+  nfeState = { phase: 0, slow: 0, fast: 0, n: parseInt(document.getElementById('nfeN').value, 10) || 2, done: false, timer: null, phase1Step: 0 };
+  document.getElementById('nfeStatus').innerHTML = '<span class="tag">[INIT]</span>List of 7 nodes. Pick <b>n</b>, then Step. Phase 1: advance <b>fast</b> by n. Phase 2: walk both together until fast falls off.';
+  nfe_render();
+}
+
 /* ---------- Initial renders ---------- */
 ops_render();
 fs_render();
 rev_render();
 cycle_render();
 merge_render();
+nfe_render();
 </script>
 </body>
 </html>
