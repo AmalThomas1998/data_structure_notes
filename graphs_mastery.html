@@ -1,0 +1,1569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Graphs · The Interview Codex</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,400&family=JetBrains+Mono:wght@400;600;800&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0a1118;
+    --paper:#e8eef2;
+    --paper-2:#d4dde4;
+    --paper-3:#bdc8d2;
+    --accent:#e63946;          /* signal red */
+    --accent-2:#1d3557;        /* deep navy */
+    --accent-3:#06ffa5;        /* electric mint */
+    --accent-4:#ffb703;        /* amber */
+    --accent-5:#a663cc;        /* violet */
+    --code-bg:#0a1118;
+    --code-ink:#e8eef2;
+    --muted:#5a6878;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Fraunces',Georgia,serif;
+    font-size:18px;
+    line-height:1.6;
+    overflow-x:hidden;
+  }
+  /* Subtle network/lattice texture */
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+    background-image:
+      radial-gradient(circle at 30px 30px, rgba(10,17,24,.05) 1.5px, transparent 2px),
+      radial-gradient(circle at 90px 60px, rgba(10,17,24,.03) 1px, transparent 2px);
+    background-size:120px 120px;
+  }
+  .mono{font-family:'JetBrains Mono',monospace}
+  .display{font-family:'Space Grotesk',sans-serif}
+
+  /* ===== MASTHEAD ===== */
+  .masthead{
+    border-bottom:4px solid var(--ink);
+    padding:18px 40px;
+    display:flex;align-items:center;justify-content:space-between;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+    position:relative;z-index:2;
+    background:var(--paper-2);
+  }
+  .masthead .edition{display:flex;gap:24px}
+  .masthead .edition span{border-left:1px solid #0a111833;padding-left:24px}
+  .masthead .edition span:first-child{border-left:none;padding-left:0}
+  .masthead .logo{
+    color:var(--paper);font-weight:800;
+    background:var(--ink);padding:7px 14px;
+    letter-spacing:.15em;
+  }
+
+  /* ===== HERO ===== */
+  .hero{
+    padding:90px 40px 60px;
+    max-width:1400px;margin:0 auto;
+    position:relative;z-index:2;
+  }
+  .hero .kicker{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;letter-spacing:.3em;text-transform:uppercase;
+    color:var(--accent);font-weight:700;margin-bottom:24px;
+    display:flex;align-items:center;gap:16px;
+  }
+  .hero .kicker::before{
+    content:"";width:24px;height:24px;
+    background:
+      radial-gradient(circle at 25% 25%, var(--accent) 22%, transparent 24%),
+      radial-gradient(circle at 75% 25%, var(--accent) 22%, transparent 24%),
+      radial-gradient(circle at 50% 75%, var(--accent) 22%, transparent 24%);
+  }
+  .hero .kicker::after{content:"";height:1px;background:var(--accent);flex:1}
+  .hero h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:clamp(60px,12vw,200px);
+    line-height:.85;letter-spacing:-.045em;
+    margin-bottom:30px;
+  }
+  .hero h1 em{
+    font-family:'Fraunces',serif;font-style:italic;font-weight:400;
+    color:var(--accent);
+  }
+  .hero h1 .net{color:var(--accent-2)}
+  .hero .sub{
+    font-size:22px;max-width:820px;font-style:italic;
+    color:#3a3a3a;border-left:6px solid var(--accent);padding-left:24px;
+    margin-top:30px;
+  }
+  .hero .meta{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:30px;margin-top:50px;padding-top:30px;
+    border-top:1px solid #0a111822;
+    font-family:'JetBrains Mono',monospace;font-size:12px;
+  }
+  .hero .meta div strong{display:block;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .hero .meta div span{font-weight:700;color:var(--accent-2);font-size:14px}
+
+  /* ===== TOC ===== */
+  .toc{
+    position:sticky;top:0;z-index:20;
+    background:var(--ink);color:var(--paper);
+    padding:14px 40px;
+    display:flex;gap:28px;overflow-x:auto;
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;letter-spacing:.1em;text-transform:uppercase;
+    border-bottom:3px solid var(--accent-3);
+  }
+  .toc::-webkit-scrollbar{height:4px}
+  .toc::-webkit-scrollbar-thumb{background:var(--accent-3)}
+  .toc a{color:var(--paper);text-decoration:none;white-space:nowrap;opacity:.6;transition:opacity .2s}
+  .toc a:hover{opacity:1;color:var(--accent-3)}
+  .toc .num{color:var(--accent-3);margin-right:6px}
+
+  /* ===== SECTIONS ===== */
+  section{
+    padding:90px 40px;
+    max-width:1400px;margin:0 auto;
+    position:relative;z-index:2;
+  }
+  .sec-num{
+    font-family:'JetBrains Mono',monospace;font-weight:700;
+    font-size:13px;color:var(--accent);letter-spacing:.2em;text-transform:uppercase;
+    display:flex;align-items:center;gap:14px;margin-bottom:20px;
+  }
+  .sec-num::before{
+    content:"";width:18px;height:18px;background:var(--accent);
+    box-shadow:inset 0 0 0 4px var(--paper);
+    transform:rotate(45deg);
+  }
+  h2{
+    font-family:'Space Grotesk',sans-serif;font-weight:700;
+    font-size:clamp(40px,6vw,82px);line-height:.95;letter-spacing:-.03em;
+    margin-bottom:40px;max-width:1000px;
+  }
+  h2 em{font-family:'Fraunces',serif;font-style:italic;color:var(--accent);font-weight:400}
+  h3{
+    font-family:'Fraunces',serif;font-weight:600;
+    font-size:32px;line-height:1.1;letter-spacing:-.02em;margin:40px 0 20px;
+  }
+  h4{
+    font-family:'JetBrains Mono',monospace;font-weight:700;
+    font-size:13px;letter-spacing:.15em;text-transform:uppercase;
+    margin:30px 0 14px;color:var(--accent);
+  }
+  p{margin-bottom:18px;max-width:75ch}
+  p strong{background:linear-gradient(180deg,transparent 60%,#ffb70355 60%);padding:0 2px;font-weight:700}
+  em{font-style:italic}
+  code.mono{background:#0a111811;padding:2px 6px;border-radius:2px;font-size:.9em}
+
+  /* ===== TWO COL ===== */
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start}
+  .side-note{
+    background:var(--accent-2);color:var(--paper);
+    padding:32px;
+    font-family:'Fraunces',serif;font-size:16.5px;line-height:1.6;
+    position:relative;
+  }
+  .side-note::before{
+    content:"";position:absolute;top:0;left:0;right:0;height:5px;
+    background:linear-gradient(90deg, var(--accent-3) 0%, var(--accent-3) 33%, var(--accent-4) 33%, var(--accent-4) 66%, var(--accent) 66%, var(--accent) 100%);
+  }
+  .side-note h4{margin-top:0;color:var(--accent-3)}
+  .side-note p{color:#cdd5e0;margin-bottom:0;max-width:none;font-style:italic}
+
+  /* ===== INTUITION GRID ===== */
+  .intuition-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:0;margin:30px 0;border:3px solid var(--ink)}
+  .intuition-card{
+    padding:30px;background:var(--paper);
+    position:relative;
+    border-right:1px solid var(--ink);border-bottom:1px solid var(--ink);
+    transition:background .2s;
+  }
+  .intuition-card:hover{background:var(--paper-2)}
+  .intuition-card .num{
+    font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:54px;
+    color:var(--accent);line-height:1;margin-bottom:14px;
+    display:inline-block;
+  }
+  .intuition-card h4{margin:0 0 8px;color:var(--ink);font-size:14px}
+  .intuition-card p{font-family:'Fraunces',serif;font-size:15.5px;margin:0;line-height:1.55}
+
+  /* ===== VIZ ===== */
+  .viz{
+    background:var(--paper);
+    border:3px solid var(--ink);
+    padding:30px;margin:40px 0;
+    position:relative;
+    box-shadow:8px 8px 0 var(--accent-2);
+  }
+  .viz-caption{
+    font-family:'JetBrains Mono',monospace;font-size:11px;
+    letter-spacing:.15em;text-transform:uppercase;color:var(--muted);
+    margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;
+    border-bottom:2px solid var(--ink);padding-bottom:12px;
+  }
+  .viz-caption .label{color:var(--accent);font-weight:800}
+  .viz-controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px;align-items:center}
+  .viz-controls button{
+    font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;
+    letter-spacing:.1em;text-transform:uppercase;
+    background:var(--ink);color:var(--paper);border:2px solid var(--ink);
+    padding:10px 16px;cursor:pointer;transition:all .15s;
+  }
+  .viz-controls button:hover{background:var(--accent);border-color:var(--accent)}
+  .viz-controls button:disabled{opacity:.4;cursor:not-allowed}
+  .viz-controls .secondary{background:transparent;color:var(--ink)}
+  .viz-controls .secondary:hover{background:var(--ink);color:var(--paper)}
+  .viz-controls .accent-btn{background:var(--accent-2);border-color:var(--accent-2)}
+  .viz-controls .accent-btn:hover{background:var(--accent-3);border-color:var(--accent-3);color:var(--ink)}
+  .viz-controls input[type="number"], .viz-controls input[type="text"]{
+    font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;
+    border:2px solid var(--ink);padding:8px 10px;width:70px;
+    background:var(--paper);
+  }
+  .viz-controls label{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+  .viz svg{width:100%;height:auto;display:block}
+  .viz-status{
+    font-family:'JetBrains Mono',monospace;font-size:13px;
+    padding:14px 18px;background:var(--ink);color:var(--paper);
+    margin-top:16px;min-height:46px;border-left:6px solid var(--accent-3);
+  }
+  .viz-status .tag{color:var(--accent-3);font-weight:800;margin-right:8px}
+
+  /* ===== CODE ===== */
+  pre{
+    background:var(--code-bg);color:var(--code-ink);
+    padding:24px;overflow-x:auto;border:3px solid var(--ink);
+    font-family:'JetBrains Mono',monospace;font-size:13.5px;line-height:1.7;
+    margin:20px 0;position:relative;
+  }
+  pre::before{
+    content:"";position:absolute;top:0;left:0;bottom:0;width:6px;background:var(--accent-3);
+  }
+  pre .k{color:#ff79c6}
+  pre .s{color:#f1fa8c}
+  pre .c{color:#7c8499;font-style:italic}
+  pre .f{color:#8be9fd}
+  pre .n{color:#bd93f9}
+  pre .t{color:#50fa7b;font-weight:700}
+  pre .num{color:#ffb86c}
+
+  /* ===== PATTERN LIST ===== */
+  .pattern-list{margin:30px 0;border-top:3px solid var(--ink)}
+  .pattern-item{
+    display:grid;grid-template-columns:90px 1fr 240px;
+    border-bottom:1px solid var(--ink);padding:28px 0;gap:30px;align-items:start;
+    transition:all .2s;
+  }
+  .pattern-item:hover{background:var(--paper-2);padding-left:14px}
+  .pattern-item .pat-num{
+    font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:46px;
+    color:var(--accent);line-height:1;
+  }
+  .pattern-item h4{margin:0 0 8px;font-family:'Fraunces',serif;font-size:24px;letter-spacing:normal;text-transform:none;font-weight:600;color:var(--ink)}
+  .pattern-item p{font-family:'Fraunces',serif;font-size:16px;margin:0;color:#2a2a2a}
+  .pattern-item .tag{
+    font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;
+    letter-spacing:.1em;text-transform:uppercase;
+    display:inline-block;padding:4px 10px;background:var(--ink);color:var(--paper);
+    margin-top:10px;margin-right:6px;
+  }
+  .pattern-item .tag.alt{background:var(--accent);color:var(--paper)}
+  .pattern-item .complexity{
+    font-family:'JetBrains Mono',monospace;font-size:11px;text-align:right;
+    color:var(--muted);
+  }
+  .pattern-item .complexity strong{color:var(--accent-2);display:block;font-size:18px;margin-bottom:2px}
+
+  /* ===== PROBLEM CARDS ===== */
+  .problem-card{
+    border:3px solid var(--ink);margin:30px 0;
+    background:var(--paper);
+  }
+  .problem-card header{
+    background:var(--ink);color:var(--paper);
+    padding:18px 26px;display:flex;justify-content:space-between;align-items:center;
+    font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.1em;font-weight:700;
+  }
+  .problem-card header .diff{
+    padding:5px 12px;font-size:10px;letter-spacing:.2em;font-weight:800;
+  }
+  .problem-card header .diff.easy{background:var(--accent-3);color:var(--ink)}
+  .problem-card header .diff.med{background:var(--accent-4);color:var(--ink)}
+  .problem-card header .diff.hard{background:var(--accent);color:var(--paper)}
+  .problem-card .body{padding:28px}
+  .problem-card h4{margin-top:0}
+  .insight{
+    border-left:6px solid var(--accent);padding:14px 20px;
+    background:var(--paper-2);margin:18px 0;font-style:italic;font-size:15.5px;
+    font-family:'Fraunces',serif;
+  }
+  .insight strong{font-style:normal}
+
+  /* ===== PULL QUOTE ===== */
+  .pullquote{
+    padding:80px 40px;text-align:center;max-width:1100px;margin:40px auto;
+    border-top:6px double var(--ink);border-bottom:6px double var(--ink);
+    position:relative;
+  }
+  .pullquote blockquote{
+    font-family:'Space Grotesk',sans-serif;font-style:normal;font-weight:700;
+    font-size:clamp(28px,4.2vw,52px);line-height:1.1;letter-spacing:-.025em;
+  }
+  .pullquote blockquote em{font-family:'Fraunces',serif;font-style:italic;font-weight:400;color:var(--accent)}
+  .pullquote cite{
+    display:block;margin-top:30px;font-family:'JetBrains Mono',monospace;
+    font-style:normal;font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--muted);
+  }
+
+  /* ===== CHEAT GRID ===== */
+  .cheat{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0;border:3px solid var(--ink);margin:30px 0}
+  .cheat-cell{padding:24px;border-right:1px solid var(--ink);border-bottom:1px solid var(--ink);background:var(--paper)}
+  .cheat-cell h5{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;font-weight:800}
+  .cheat-cell .big{font-family:'Space Grotesk',sans-serif;font-size:36px;font-weight:700;line-height:1;color:var(--ink)}
+  .cheat-cell p{font-family:'Fraunces',serif;font-size:14px;margin-top:10px;color:#3a3a3a}
+
+  /* ===== FOOTER ===== */
+  footer{
+    background:var(--ink);color:var(--paper);
+    padding:60px 40px 40px;margin-top:80px;position:relative;z-index:2;
+    border-top:8px solid var(--accent);
+  }
+  footer .inner{max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:40px}
+  footer h3{font-family:'Space Grotesk',sans-serif;font-size:48px;line-height:1;margin:0;font-weight:700}
+  footer h3 em{color:var(--accent-3);font-style:italic;font-weight:400;font-family:'Fraunces',serif}
+  footer p{font-family:'Fraunces',serif;font-size:15px;color:#a0a8b0;max-width:420px;margin:0;line-height:1.6;font-style:italic}
+  footer .stamp{
+    border:3px solid var(--accent-3);padding:14px 22px;
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--accent-3);font-weight:700;
+  }
+
+  /* ===== GRAPH NODE STYLES ===== */
+  .g-edge{stroke:#5a6878;stroke-width:2;fill:none}
+  .g-edge.active{stroke:var(--accent);stroke-width:3.5}
+  .g-edge.tree{stroke:var(--accent-2);stroke-width:3}
+  .g-edge.dim{stroke:#aaa;opacity:.3}
+  .g-edge-weight{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;fill:var(--ink);text-anchor:middle}
+  .g-node circle{fill:var(--paper);stroke:var(--ink);stroke-width:2.5;transition:fill .2s}
+  .g-node.active circle{fill:var(--accent-4);stroke:var(--ink)}
+  .g-node.frontier circle{fill:var(--accent-3);stroke:var(--ink)}
+  .g-node.visited circle{fill:var(--accent-2);stroke:var(--ink)}
+  .g-node.target circle{fill:var(--accent);stroke:var(--ink)}
+  .g-node.source circle{fill:var(--accent-5);stroke:var(--ink)}
+  .g-node.dim circle{fill:var(--paper-3);stroke:#aaa;opacity:.5}
+  .g-node text{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:800;text-anchor:middle;dominant-baseline:central;fill:var(--ink)}
+  .g-node.visited text, .g-node.target text, .g-node.source text{fill:var(--paper)}
+  .g-node-label{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;text-anchor:middle;fill:var(--accent-2)}
+
+  /* responsive */
+  @media(max-width:900px){
+    .two-col{grid-template-columns:1fr}
+    .pattern-item{grid-template-columns:60px 1fr;gap:18px}
+    .pattern-item .complexity{grid-column:2;text-align:left}
+    .hero{padding:50px 24px}
+    .hero .meta{grid-template-columns:repeat(2,1fr);gap:20px}
+    section{padding:60px 24px}
+    .masthead{padding:14px 20px;font-size:10px}
+    .masthead .edition{display:none}
+  }
+</style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<div class="masthead">
+  <div class="logo">[ THE INTERVIEW CODEX // VOL.III ]</div>
+  <div class="edition">
+    <span>Chapter 09</span>
+    <span>Graphs</span>
+    <span>Senior Engineering Track</span>
+  </div>
+</div>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="kicker">Data Structures · Chapter Nine</div>
+  <h1>The <span class="net">graph</span>,<br/><em>everywhere.</em></h1>
+  <p class="sub">A field manual for the most general data structure in computing — the one behind social networks, maps, dependency systems, and the algorithms that decide who gets the offer at staff-level loops.</p>
+  <div class="meta">
+    <div><strong>Difficulty</strong><span>Foundational → Staff</span></div>
+    <div><strong>Loop Tier</strong><span>FAANG / HFT / Unicorns</span></div>
+    <div><strong>Comp Band</strong><span>$280k – $900k+ TC</span></div>
+    <div><strong>Mastery Time</strong><span>~25 hours focused</span></div>
+  </div>
+</header>
+
+<!-- TOC -->
+<nav class="toc">
+  <a href="#intuition"><span class="num">01</span>Intuition</a>
+  <a href="#representation"><span class="num">02</span>Representation</a>
+  <a href="#traversal"><span class="num">03</span>BFS &amp; DFS</a>
+  <a href="#patterns"><span class="num">04</span>Ten Patterns</a>
+  <a href="#topo"><span class="num">05</span>Topological Sort</a>
+  <a href="#unionfind"><span class="num">06</span>Union-Find</a>
+  <a href="#dijkstra"><span class="num">07</span>Dijkstra</a>
+  <a href="#grids"><span class="num">08</span>Grids as Graphs</a>
+  <a href="#problems"><span class="num">09</span>Interview Problems</a>
+  <a href="#cheatsheet"><span class="num">10</span>Cheat Sheet</a>
+</nav>
+
+<!-- SECTION 01 — INTUITION -->
+<section id="intuition">
+  <div class="sec-num">§01 · The Mental Model</div>
+  <h2>A graph is the <em>universal</em> data structure.</h2>
+
+  <div class="two-col">
+    <div>
+      <p>Every other data structure is a graph in disguise. A linked list is a graph where every node has one outgoing edge. A tree is a graph with no cycles and one root. A grid is a graph where each cell connects to its four neighbors. A dependency map, a road network, a friendship circle, a state machine — all graphs.</p>
+      <p>Once you see this, the world simplifies. The 200 graph problems on LeetCode are not 200 problems. They are <strong>ten patterns</strong>, each applied to a different shape of vertex set and edge set. Recognize the pattern, apply the algorithm, finish in twenty minutes.</p>
+      <p>Interviewers ask about graphs because they reveal whether a candidate can <strong>model a real problem</strong>. The hardest part is not Dijkstra — it's recognizing that "schedule courses with prerequisites" is a graph problem in the first place.</p>
+    </div>
+    <aside class="side-note">
+      <h4>The senior signal</h4>
+      <p>Junior candidates write graph code when told "build a graph." Senior candidates <em>see</em> the graph hidden inside the problem description. <em>"Each course is a node. Each prerequisite is a directed edge. Can I order the nodes such that every edge points forward? That's topological sort."</em> Translating ambiguous problem statements into vertex-and-edge form is the test.</p>
+    </aside>
+  </div>
+
+  <div class="intuition-grid">
+    <div class="intuition-card">
+      <div class="num">i.</div>
+      <h4>Vertices and Edges, Nothing Else</h4>
+      <p>A graph is a set V of vertices and a set E ⊆ V×V of edges. Everything else — directed, weighted, cyclic — is a property layered on top. Start by asking which properties apply.</p>
+    </div>
+    <div class="intuition-card">
+      <div class="num">ii.</div>
+      <h4>The Visited Set is Sacred</h4>
+      <p>Unlike a tree, a graph can have cycles. Without a visited set, BFS and DFS will loop forever. The first line of every graph algorithm is <code class="mono">visited = set()</code>. Forgetting it is the #1 graph bug.</p>
+    </div>
+    <div class="intuition-card">
+      <div class="num">iii.</div>
+      <h4>BFS = Shortest, DFS = Reachable</h4>
+      <p>BFS on an unweighted graph finds shortest paths in O(V+E). DFS finds connected components, cycles, topological orders. Pick by question: "shortest" → BFS, "reachable / order / cycle" → DFS.</p>
+    </div>
+    <div class="intuition-card">
+      <div class="num">iv.</div>
+      <h4>Weights Change the Algorithm</h4>
+      <p>BFS works only on unweighted (or unit-weighted) graphs. Add weights and you need Dijkstra (non-negative) or Bellman-Ford (negative allowed). This single distinction trips half of all candidates.</p>
+    </div>
+  </div>
+
+  <!-- VIZ: graph anatomy -->
+  <div class="viz">
+    <div class="viz-caption"><span class="label">FIG. 01</span><span>Anatomy of a directed weighted graph — vertices, edges, weights</span></div>
+    <svg viewBox="0 0 900 360" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="gArrow" markerWidth="10" markerHeight="10" refX="22" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="#5a6878"/>
+        </marker>
+      </defs>
+      <!-- edges with weights -->
+      <line x1="180" y1="100" x2="380" y2="80" class="g-edge" marker-end="url(#gArrow)"/>
+      <text x="280" y="80" class="g-edge-weight">7</text>
+      <line x1="180" y1="100" x2="280" y2="220" class="g-edge" marker-end="url(#gArrow)"/>
+      <text x="220" y="170" class="g-edge-weight">3</text>
+      <line x1="380" y1="80" x2="580" y2="100" class="g-edge" marker-end="url(#gArrow)"/>
+      <text x="480" y="80" class="g-edge-weight">4</text>
+      <line x1="380" y1="80" x2="380" y2="220" class="g-edge" marker-end="url(#gArrow)"/>
+      <text x="395" y="155" class="g-edge-weight">2</text>
+      <line x1="280" y1="220" x2="380" y2="220" class="g-edge" marker-end="url(#gArrow)"/>
+      <text x="330" y="240" class="g-edge-weight">5</text>
+      <line x1="380" y1="220" x2="580" y2="220" class="g-edge" marker-end="url(#gArrow)"/>
+      <text x="480" y="240" class="g-edge-weight">1</text>
+      <line x1="580" y1="100" x2="720" y2="180" class="g-edge" marker-end="url(#gArrow)"/>
+      <text x="660" y="130" class="g-edge-weight">6</text>
+      <line x1="580" y1="220" x2="720" y2="180" class="g-edge" marker-end="url(#gArrow)"/>
+      <text x="660" y="220" class="g-edge-weight">3</text>
+
+      <!-- nodes -->
+      <g class="g-node source"><circle cx="180" cy="100" r="26"/><text x="180" y="100">A</text></g>
+      <g class="g-node"><circle cx="380" cy="80" r="26"/><text x="380" y="80">B</text></g>
+      <g class="g-node"><circle cx="580" cy="100" r="26"/><text x="580" y="100">C</text></g>
+      <g class="g-node"><circle cx="280" cy="220" r="26"/><text x="280" y="220">D</text></g>
+      <g class="g-node"><circle cx="380" cy="220" r="26"/><text x="380" y="220">E</text></g>
+      <g class="g-node"><circle cx="580" cy="220" r="26"/><text x="580" y="220">F</text></g>
+      <g class="g-node target"><circle cx="720" cy="180" r="26"/><text x="720" y="180">G</text></g>
+
+      <!-- annotations -->
+      <text x="180" y="155" class="g-node-label" style="fill:#a663cc;font-weight:800">SOURCE</text>
+      <text x="720" y="235" class="g-node-label" style="fill:#e63946;font-weight:800">TARGET</text>
+      <text x="850" y="60" class="g-node-label" style="text-anchor:end;font-size:13px;fill:#0a1118;font-weight:800">|V| = 7</text>
+      <text x="850" y="80" class="g-node-label" style="text-anchor:end;font-size:13px;fill:#0a1118;font-weight:800">|E| = 8</text>
+      <text x="850" y="100" class="g-node-label" style="text-anchor:end;font-size:13px;fill:#0a1118;font-weight:800">directed, weighted</text>
+      <text x="850" y="135" class="g-node-label" style="text-anchor:end;font-size:11px;fill:#5a6878">shortest A→G:</text>
+      <text x="850" y="155" class="g-node-label" style="text-anchor:end;font-size:13px;fill:#1d3557;font-weight:800">A→D→E→F→G = 12</text>
+    </svg>
+  </div>
+
+  <div class="cheat">
+    <div class="cheat-cell"><h5>BFS / DFS</h5><div class="big">O(V+E)</div><p>Standard traversals.</p></div>
+    <div class="cheat-cell"><h5>Dijkstra</h5><div class="big">O((V+E) log V)</div><p>With binary heap.</p></div>
+    <div class="cheat-cell"><h5>Topo Sort</h5><div class="big">O(V+E)</div><p>Kahn's or DFS-based.</p></div>
+    <div class="cheat-cell"><h5>Union-Find</h5><div class="big">O(α(n))</div><p>Inverse Ackermann ≈ constant.</p></div>
+    <div class="cheat-cell"><h5>Bellman-Ford</h5><div class="big">O(V·E)</div><p>Handles negative edges.</p></div>
+  </div>
+</section>
+
+<!-- SECTION 02 — REPRESENTATION -->
+<section id="representation">
+  <div class="sec-num">§02 · How to Store a Graph</h3></div>
+  <h2>Three representations. <em>Choose</em> by density.</h2>
+
+  <p>Before any graph algorithm runs, you have to choose how to store the graph. The wrong representation costs an order of magnitude in time and memory. Senior candidates pick deliberately and explain the trade-off.</p>
+
+<pre><span class="c"># 1. ADJACENCY LIST — the default. Sparse graphs. Most interview problems.</span>
+<span class="k">from</span> collections <span class="k">import</span> defaultdict
+graph = defaultdict(list)
+graph[<span class="num">0</span>].append(<span class="num">1</span>)        <span class="c"># edge 0 → 1</span>
+graph[<span class="num">1</span>].append(<span class="num">2</span>)        <span class="c"># edge 1 → 2</span>
+<span class="c"># Space: O(V + E)   Iterate neighbors of u: O(deg(u))   Edge exists?: O(deg(u))</span>
+
+<span class="c"># 2. ADJACENCY MATRIX — for dense graphs (E ≈ V²) or O(1) edge lookup.</span>
+matrix = [[<span class="num">0</span>]*n <span class="k">for</span> _ <span class="k">in</span> range(n)]
+matrix[<span class="num">0</span>][<span class="num">1</span>] = <span class="num">1</span>            <span class="c"># or weight if weighted</span>
+<span class="c"># Space: O(V²)   Iterate neighbors: O(V)   Edge exists?: O(1)</span>
+
+<span class="c"># 3. EDGE LIST — when you only iterate edges (Kruskal's MST, Bellman-Ford).</span>
+edges = [(<span class="num">0</span>, <span class="num">1</span>, <span class="num">7</span>), (<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>)]   <span class="c"># (u, v, weight)</span>
+<span class="c"># Space: O(E)   No fast neighbor lookup — but perfect for sort-by-weight.</span></pre>
+
+  <h3>The decision matrix</h3>
+  <div class="cheat">
+    <div class="cheat-cell"><h5>Sparse (E ≪ V²)</h5><div class="big" style="font-size:22px">Adj. List</div><p>BFS, DFS, Dijkstra. The default.</p></div>
+    <div class="cheat-cell"><h5>Dense (E ≈ V²)</h5><div class="big" style="font-size:22px">Adj. Matrix</div><p>Floyd-Warshall, transitive closure.</p></div>
+    <div class="cheat-cell"><h5>Edge-centric</h5><div class="big" style="font-size:22px">Edge List</div><p>Kruskal MST, Bellman-Ford.</p></div>
+    <div class="cheat-cell"><h5>O(1) edge query</h5><div class="big" style="font-size:22px">Adj. Matrix</div><p>Or set of (u,v) tuples.</p></div>
+  </div>
+
+  <div class="side-note" style="margin-top:40px">
+    <h4>The undirected trap</h4>
+    <p>For an <em>undirected</em> graph stored as an adjacency list, every edge appears <em>twice</em>: once in <code style="color:var(--accent-3)">graph[u]</code> as v, and once in <code style="color:var(--accent-3)">graph[v]</code> as u. Forgetting the second insertion is the most common bug in graph construction. Always add both directions for undirected.</p>
+  </div>
+</section>
+
+<!-- SECTION 03 — TRAVERSAL -->
+<section id="traversal">
+  <div class="sec-num">§03 · BFS &amp; DFS — The Two Traversals</div>
+  <h2>One queue, one stack. <em>Different</em> answers.</h2>
+
+  <p>Every graph algorithm is either BFS, DFS, or a generalization of one of the two. Master both — and the difference between them — and you have unlocked 60% of all graph problems.</p>
+
+  <!-- VIZ: BFS vs DFS -->
+  <div class="viz">
+    <div class="viz-caption"><span class="label">FIG. 02 · ANIMATED</span><span>BFS vs DFS — same graph, different orders</span></div>
+    <svg id="travViz" viewBox="0 0 900 380" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div class="viz-controls">
+      <button onclick="trav_run('bfs')" class="accent-btn">Run BFS</button>
+      <button onclick="trav_run('dfs')" class="accent-btn">Run DFS</button>
+      <button class="secondary" onclick="trav_reset()">Reset</button>
+    </div>
+    <div class="viz-status" id="travStatus"><span class="tag">[READY]</span>Source = node A. Watch BFS expand by layer; watch DFS plunge deep.</div>
+  </div>
+
+<pre><span class="c"># BFS — shortest path on UNWEIGHTED graph. O(V+E).</span>
+<span class="k">from</span> collections <span class="k">import</span> deque
+<span class="k">def</span> <span class="f">bfs</span>(graph, src):
+    dist = {src: <span class="num">0</span>}                        <span class="c"># distance + visited set in one</span>
+    parent = {src: <span class="k">None</span>}                    <span class="c"># for path reconstruction</span>
+    q = deque([src])
+    <span class="k">while</span> q:
+        u = q.popleft()
+        <span class="k">for</span> v <span class="k">in</span> graph[u]:
+            <span class="k">if</span> v <span class="k">not</span> <span class="k">in</span> dist:
+                dist[v]   = dist[u] + <span class="num">1</span>
+                parent[v] = u
+                q.append(v)
+    <span class="k">return</span> dist, parent
+
+<span class="c"># DFS — recursive, finds reachable, detects cycles, builds topo order. O(V+E).</span>
+<span class="k">def</span> <span class="f">dfs</span>(graph, src):
+    visited = set()
+    <span class="k">def</span> <span class="f">go</span>(u):
+        visited.add(u)
+        <span class="k">for</span> v <span class="k">in</span> graph[u]:
+            <span class="k">if</span> v <span class="k">not</span> <span class="k">in</span> visited:
+                go(v)
+    go(src)
+    <span class="k">return</span> visited
+
+<span class="c"># DFS — iterative version, when recursion depth might blow the stack.</span>
+<span class="k">def</span> <span class="f">dfs_iter</span>(graph, src):
+    visited = set([src])
+    stack = [src]
+    <span class="k">while</span> stack:
+        u = stack.pop()
+        <span class="k">for</span> v <span class="k">in</span> graph[u]:
+            <span class="k">if</span> v <span class="k">not</span> <span class="k">in</span> visited:
+                visited.add(v)
+                stack.append(v)
+    <span class="k">return</span> visited</pre>
+
+  <div class="insight"><strong>The key invariant:</strong> add to <code class="mono">visited</code> when you <em>enqueue</em> (BFS) or <em>push</em> (DFS), not when you dequeue/pop. Marking on dequeue causes the same node to be added to the queue multiple times, breaking O(V+E). Senior candidates mark on insert. This is a frequently-missed detail.</div>
+</section>
+
+<!-- PULL QUOTE -->
+<div class="pullquote">
+  <blockquote>The candidate who says <em>"this is a graph problem"</em> in the first thirty seconds has already won. The pattern <em>is</em> the prize.</blockquote>
+  <cite>— from a staff-level interview debrief, Stripe 2024</cite>
+</div>
+
+<!-- SECTION 04 — PATTERNS -->
+<section id="patterns">
+  <div class="sec-num">§04 · Problem Patterns</div>
+  <h2>Ten patterns. <em>Almost every</em> graph problem you'll be asked.</h2>
+
+  <p>This is the master taxonomy. When a graph problem hits your screen, your first task is silent classification. The pattern names below should trigger reflexively.</p>
+
+  <div class="pattern-list">
+    <div class="pattern-item">
+      <div class="pat-num">01</div>
+      <div>
+        <h4>Connected Components / Flood Fill</h4>
+        <p>Count or label connected regions. DFS or BFS from each unvisited node, increment a counter. The bedrock pattern — solves "number of islands," "friend circles," "provinces."</p>
+        <span class="tag">Number of Islands</span><span class="tag">Provinces</span><span class="tag">Flood Fill</span>
+      </div>
+      <div class="complexity"><strong>O(V+E)</strong>linear</div>
+    </div>
+
+    <div class="pattern-item">
+      <div class="pat-num">02</div>
+      <div>
+        <h4>BFS — Shortest Path on Unweighted</h4>
+        <p>Distance in number of edges. Multi-source BFS handles "nearest from any source" simultaneously. The wavefront expands one layer per step.</p>
+        <span class="tag">Word Ladder</span><span class="tag">Rotting Oranges</span><span class="tag">01 Matrix</span>
+      </div>
+      <div class="complexity"><strong>O(V+E)</strong>linear</div>
+    </div>
+
+    <div class="pattern-item">
+      <div class="pat-num">03</div>
+      <div>
+        <h4>Cycle Detection</h4>
+        <p>Directed graph: DFS with three colors (white/gray/black) — gray means "on stack," seeing it again = cycle. Undirected: DFS tracking parent — seeing visited non-parent = cycle.</p>
+        <span class="tag">Course Schedule</span><span class="tag">Find Cycle</span>
+      </div>
+      <div class="complexity"><strong>O(V+E)</strong>linear</div>
+    </div>
+
+    <div class="pattern-item">
+      <div class="pat-num">04</div>
+      <div>
+        <h4>Topological Sort</h4>
+        <p>Order vertices so every edge points forward. Two flavors: Kahn's (BFS on in-degrees) or DFS post-order reversed. Solves any "schedule with dependencies" problem.</p>
+        <span class="tag">Course Schedule II</span><span class="tag">Alien Dict.</span><span class="tag alt">Senior</span>
+      </div>
+      <div class="complexity"><strong>O(V+E)</strong>linear</div>
+    </div>
+
+    <div class="pattern-item">
+      <div class="pat-num">05</div>
+      <div>
+        <h4>Union-Find (Disjoint Set Union)</h4>
+        <p>Maintains a partition of elements into disjoint sets with O(α(n)) union/find. Powers Kruskal's MST, "redundant connection," "accounts merge," and any incremental-connectivity problem.</p>
+        <span class="tag">Redundant Conn.</span><span class="tag">Accounts Merge</span><span class="tag">Kruskal MST</span>
+      </div>
+      <div class="complexity"><strong>O(α(n))</strong>≈ constant</div>
+    </div>
+
+    <div class="pattern-item">
+      <div class="pat-num">06</div>
+      <div>
+        <h4>Dijkstra — Shortest Path (Weighted, Non-negative)</h4>
+        <p>Greedy + min-heap. Pop the closest unvisited vertex, relax its edges, repeat. The standard answer for "shortest weighted path." Cannot handle negative edges.</p>
+        <span class="tag">Network Delay</span><span class="tag">Cheapest Flights</span><span class="tag alt">Senior</span>
+      </div>
+      <div class="complexity"><strong>O((V+E) log V)</strong>with heap</div>
+    </div>
+
+    <div class="pattern-item">
+      <div class="pat-num">07</div>
+      <div>
+        <h4>Bellman-Ford / SPFA</h4>
+        <p>Shortest paths with negative weights. Relax all edges V−1 times. A V-th relaxation that still improves anything proves a negative cycle. Slower than Dijkstra; use only when negatives are present.</p>
+        <span class="tag">Negative Edges</span><span class="tag">Currency Arbitrage</span>
+      </div>
+      <div class="complexity"><strong>O(V·E)</strong>quadratic-ish</div>
+    </div>
+
+    <div class="pattern-item">
+      <div class="pat-num">08</div>
+      <div>
+        <h4>Minimum Spanning Tree</h4>
+        <p>Connect all vertices with minimum total edge weight. Kruskal: sort edges, add if endpoints in different sets (Union-Find). Prim: grow tree from one vertex, always pick cheapest crossing edge.</p>
+        <span class="tag">Min Cost Connect</span><span class="tag">Kruskal</span><span class="tag">Prim</span>
+      </div>
+      <div class="complexity"><strong>O(E log E)</strong>Kruskal</div>
+    </div>
+
+    <div class="pattern-item">
+      <div class="pat-num">09</div>
+      <div>
+        <h4>Bipartite / 2-Coloring</h4>
+        <p>Can vertices be split into two sets with all edges crossing? BFS/DFS coloring alternately. Solves "is bipartite," "possible bipartition," and many scheduling-conflict questions.</p>
+        <span class="tag">Is Bipartite</span><span class="tag">Possible Bipartition</span>
+      </div>
+      <div class="complexity"><strong>O(V+E)</strong>linear</div>
+    </div>
+
+    <div class="pattern-item">
+      <div class="pat-num">10</div>
+      <div>
+        <h4>Strongly Connected Components</h4>
+        <p>Subsets where every vertex reaches every other. Tarjan's (single DFS with low-link) or Kosaraju's (two DFS, one on transpose). Used in compiler optimization, social-network clustering. Staff-tier signal.</p>
+        <span class="tag">Tarjan SCC</span><span class="tag">Kosaraju</span><span class="tag alt">Staff</span>
+      </div>
+      <div class="complexity"><strong>O(V+E)</strong>linear</div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 05 — TOPO SORT -->
+<section id="topo">
+  <div class="sec-num">§05 · Pattern Deep Dive — Topological Sort</div>
+  <h2>Order is just <em>"who depends on whom."</em></h2>
+
+  <div class="two-col">
+    <div>
+      <p>Topological sort answers: "given dependencies, what's a valid order to do things?" Build courses with prerequisites, install packages with dependencies, evaluate spreadsheet cells, link compilation units. All identical underneath.</p>
+      <p>Two algorithms exist. <strong>Kahn's</strong> uses in-degree counts and a queue: repeatedly extract a vertex with in-degree 0, decrement its neighbors' in-degrees, repeat. If you can't extract V vertices, there's a cycle.</p>
+      <p><strong>DFS-based</strong> performs a postorder DFS and reverses the result. Conceptually elegant; Kahn's is more intuitive in interviews.</p>
+    </div>
+    <aside class="side-note">
+      <h4>Why Kahn's is a free cycle detector</h4>
+      <p>If at the end of Kahn's algorithm you haven't extracted all V vertices, the remaining ones form a cycle (each has at least one prerequisite among the others). One algorithm, two answers — order <em>and</em> cycle detection. This is why "Course Schedule II" is just topo sort with a check.</p>
+    </aside>
+  </div>
+
+  <!-- VIZ: Topo Sort -->
+  <div class="viz">
+    <div class="viz-caption"><span class="label">FIG. 03 · ANIMATED</span><span>Kahn's algorithm — extract zero-in-degree, repeat</span></div>
+    <svg id="topoViz" viewBox="0 0 900 380" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div class="viz-controls">
+      <button onclick="topo_step()" id="topoStepBtn">Step</button>
+      <button onclick="topo_play()" id="topoPlayBtn">Auto-play</button>
+      <button class="secondary" onclick="topo_reset()">Reset</button>
+    </div>
+    <div class="viz-status" id="topoStatus"><span class="tag">[INIT]</span>Course graph. Each step: extract a course with 0 remaining prereqs, output it, decrement its dependents.</div>
+  </div>
+
+<pre><span class="c"># Topological Sort — Kahn's algorithm. O(V+E). Detects cycles.</span>
+<span class="k">from</span> collections <span class="k">import</span> deque
+<span class="k">def</span> <span class="f">topo_sort</span>(n, edges):
+    graph = [[] <span class="k">for</span> _ <span class="k">in</span> range(n)]
+    indeg = [<span class="num">0</span>] * n
+    <span class="k">for</span> u, v <span class="k">in</span> edges:                          <span class="c"># u must come before v</span>
+        graph[u].append(v)
+        indeg[v] += <span class="num">1</span>
+    q = deque(i <span class="k">for</span> i <span class="k">in</span> range(n) <span class="k">if</span> indeg[i] == <span class="num">0</span>)
+    order = []
+    <span class="k">while</span> q:
+        u = q.popleft()
+        order.append(u)
+        <span class="k">for</span> v <span class="k">in</span> graph[u]:
+            indeg[v] -= <span class="num">1</span>                         <span class="c"># u is "done" — one fewer prereq for v</span>
+            <span class="k">if</span> indeg[v] == <span class="num">0</span>: q.append(v)
+    <span class="k">return</span> order <span class="k">if</span> len(order) == n <span class="k">else</span> []   <span class="c"># [] means cycle exists</span>
+
+<span class="c"># DFS-based topo sort — postorder, then reverse. The recursive elegance.</span>
+<span class="k">def</span> <span class="f">topo_dfs</span>(n, edges):
+    graph = [[] <span class="k">for</span> _ <span class="k">in</span> range(n)]
+    <span class="k">for</span> u, v <span class="k">in</span> edges: graph[u].append(v)
+    color = [<span class="num">0</span>] * n                              <span class="c"># 0 white, 1 gray (on stack), 2 black</span>
+    order = []
+    has_cycle = [<span class="k">False</span>]
+    <span class="k">def</span> <span class="f">dfs</span>(u):
+        <span class="k">if</span> color[u] == <span class="num">1</span>: has_cycle[<span class="num">0</span>] = <span class="k">True</span>; <span class="k">return</span>
+        <span class="k">if</span> color[u] == <span class="num">2</span>: <span class="k">return</span>             <span class="c"># already finished</span>
+        color[u] = <span class="num">1</span>
+        <span class="k">for</span> v <span class="k">in</span> graph[u]: dfs(v)
+        color[u] = <span class="num">2</span>
+        order.append(u)                          <span class="c"># POSTORDER!</span>
+    <span class="k">for</span> i <span class="k">in</span> range(n): dfs(i)
+    <span class="k">return</span> [] <span class="k">if</span> has_cycle[<span class="num">0</span>] <span class="k">else</span> order[::-<span class="num">1</span>]</pre>
+</section>
+
+<!-- SECTION 06 — UNION FIND -->
+<section id="unionfind">
+  <div class="sec-num">§06 · Pattern Deep Dive — Union-Find</div>
+  <h2>The data structure that makes <em>"same group?"</em> O(1).</h2>
+
+  <p>Union-Find (DSU) maintains a partition of elements into disjoint sets, supporting two operations: <code class="mono">find(x)</code> returns x's group representative; <code class="mono">union(x, y)</code> merges their groups. With path compression and union by rank, both are O(α(n)) — practically constant for any input you'll ever see.</p>
+
+  <p>It is the right answer whenever the problem involves <em>incremental connectivity</em>: edges arrive one at a time, and you ask "are these two nodes connected yet?"</p>
+
+  <!-- VIZ: Union Find -->
+  <div class="viz">
+    <div class="viz-caption"><span class="label">FIG. 04 · ANIMATED</span><span>Union-Find — building components edge by edge</span></div>
+    <svg id="ufViz" viewBox="0 0 900 360" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div class="viz-controls">
+      <button onclick="uf_step()" id="ufStepBtn">Add Edge</button>
+      <button onclick="uf_play()" id="ufPlayBtn">Auto-play</button>
+      <button class="secondary" onclick="uf_reset()">Reset</button>
+    </div>
+    <div class="viz-status" id="ufStatus"><span class="tag">[INIT]</span>9 isolated nodes, 9 components. Add edges one by one; watch components merge.</div>
+  </div>
+
+<pre><span class="c"># Union-Find with path compression + union by rank. O(α(n)) per op.</span>
+<span class="k">class</span> <span class="t">DSU</span>:
+    <span class="k">def</span> <span class="f">__init__</span>(<span class="n">self</span>, n):
+        <span class="n">self</span>.parent = list(range(n))
+        <span class="n">self</span>.rank   = [<span class="num">0</span>] * n
+        <span class="n">self</span>.components = n              <span class="c"># nice for "how many groups?"</span>
+
+    <span class="k">def</span> <span class="f">find</span>(<span class="n">self</span>, x):                  <span class="c"># with path compression</span>
+        <span class="k">if</span> <span class="n">self</span>.parent[x] != x:
+            <span class="n">self</span>.parent[x] = <span class="n">self</span>.find(<span class="n">self</span>.parent[x])  <span class="c"># flatten</span>
+        <span class="k">return</span> <span class="n">self</span>.parent[x]
+
+    <span class="k">def</span> <span class="f">union</span>(<span class="n">self</span>, x, y):              <span class="c"># by rank</span>
+        rx, ry = <span class="n">self</span>.find(x), <span class="n">self</span>.find(y)
+        <span class="k">if</span> rx == ry: <span class="k">return</span> <span class="k">False</span>          <span class="c"># already same — would create cycle</span>
+        <span class="k">if</span> <span class="n">self</span>.rank[rx] &lt; <span class="n">self</span>.rank[ry]: rx, ry = ry, rx
+        <span class="n">self</span>.parent[ry] = rx
+        <span class="k">if</span> <span class="n">self</span>.rank[rx] == <span class="n">self</span>.rank[ry]: <span class="n">self</span>.rank[rx] += <span class="num">1</span>
+        <span class="n">self</span>.components -= <span class="num">1</span>
+        <span class="k">return</span> <span class="k">True</span>
+
+<span class="c"># Number of Connected Components — LC 323. Three lines of logic.</span>
+<span class="k">def</span> <span class="f">count_components</span>(n, edges):
+    dsu = <span class="t">DSU</span>(n)
+    <span class="k">for</span> u, v <span class="k">in</span> edges: dsu.union(u, v)
+    <span class="k">return</span> dsu.components
+
+<span class="c"># Redundant Connection — LC 684. The classic union-find application.</span>
+<span class="k">def</span> <span class="f">redundant</span>(edges):
+    dsu = <span class="t">DSU</span>(len(edges) + <span class="num">1</span>)
+    <span class="k">for</span> u, v <span class="k">in</span> edges:
+        <span class="k">if</span> <span class="k">not</span> dsu.union(u, v):
+            <span class="k">return</span> [u, v]              <span class="c"># this edge closed the cycle</span></pre>
+
+  <div class="insight"><strong>The senior unlock:</strong> Union-Find can replace some BFS/DFS solutions with much cleaner code, especially when the graph is given as an edge list and you only need component info. It's also the right tool for "2D grid → count islands as edges arrive" — a common follow-up that breaks the standard flood-fill solution.</div>
+</section>
+
+<!-- SECTION 07 — DIJKSTRA -->
+<section id="dijkstra">
+  <div class="sec-num">§07 · Pattern Deep Dive — Dijkstra</div>
+  <h2>Greedy + heap. <em>Optimal</em> for non-negative weights.</h2>
+
+  <p>Dijkstra's algorithm is BFS with a priority queue. Instead of expanding by edge count, it expands by accumulated distance. The vertex closest to the source comes out of the heap first; once popped, its distance is final.</p>
+
+  <p>The proof of optimality rests on one fact: with non-negative weights, a vertex's shortest distance cannot improve once it's the heap's minimum. If it could, some other vertex must have a shorter path to it — but that vertex would have been popped first.</p>
+
+  <!-- VIZ: Dijkstra -->
+  <div class="viz">
+    <div class="viz-caption"><span class="label">FIG. 05 · ANIMATED</span><span>Dijkstra from A — heap-driven shortest path</span></div>
+    <svg id="dijkViz" viewBox="0 0 900 380" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div class="viz-controls">
+      <button onclick="dijk_step()" id="dijkStepBtn">Step</button>
+      <button onclick="dijk_play()" id="dijkPlayBtn">Auto-play</button>
+      <button class="secondary" onclick="dijk_reset()">Reset</button>
+    </div>
+    <div class="viz-status" id="dijkStatus"><span class="tag">[INIT]</span>Source A. dist[A]=0, others ∞. Pop closest, relax its edges, repeat.</div>
+  </div>
+
+<pre><span class="c"># Dijkstra's algorithm. O((V+E) log V) with a binary heap.</span>
+<span class="k">import</span> heapq
+<span class="k">def</span> <span class="f">dijkstra</span>(graph, src, n):
+    dist = [float(<span class="s">'inf'</span>)] * n
+    dist[src] = <span class="num">0</span>
+    heap = [(<span class="num">0</span>, src)]                         <span class="c"># (distance, vertex)</span>
+    <span class="k">while</span> heap:
+        d, u = heapq.heappop(heap)
+        <span class="k">if</span> d &gt; dist[u]: <span class="k">continue</span>            <span class="c"># stale entry — skip</span>
+        <span class="k">for</span> v, w <span class="k">in</span> graph[u]:                <span class="c"># neighbors with edge weight</span>
+            nd = d + w
+            <span class="k">if</span> nd &lt; dist[v]:
+                dist[v] = nd
+                heapq.heappush(heap, (nd, v))
+    <span class="k">return</span> dist
+
+<span class="c"># Reconstruct the actual path — track predecessors.</span>
+<span class="k">def</span> <span class="f">dijkstra_path</span>(graph, src, dst, n):
+    dist = [float(<span class="s">'inf'</span>)] * n
+    prev = [<span class="k">None</span>] * n
+    dist[src] = <span class="num">0</span>
+    heap = [(<span class="num">0</span>, src)]
+    <span class="k">while</span> heap:
+        d, u = heapq.heappop(heap)
+        <span class="k">if</span> u == dst: <span class="k">break</span>                  <span class="c"># early exit when target popped</span>
+        <span class="k">if</span> d &gt; dist[u]: <span class="k">continue</span>
+        <span class="k">for</span> v, w <span class="k">in</span> graph[u]:
+            <span class="k">if</span> d + w &lt; dist[v]:
+                dist[v] = d + w
+                prev[v] = u
+                heapq.heappush(heap, (dist[v], v))
+    <span class="c"># walk back from dst</span>
+    path = []
+    cur = dst
+    <span class="k">while</span> cur <span class="k">is</span> <span class="k">not</span> <span class="k">None</span>:
+        path.append(cur)
+        cur = prev[cur]
+    <span class="k">return</span> path[::-<span class="num">1</span>]</pre>
+
+  <div class="insight"><strong>The "stale entry" trick:</strong> Python's heapq doesn't support decrease-key, so we leave outdated entries in the heap and skip them on pop with <code class="mono">if d > dist[u]: continue</code>. This is the canonical idiom — write it in your sleep. The alternative (a custom indexed priority queue) is rarely worth the complexity in interviews.</div>
+</section>
+
+<!-- SECTION 08 — GRIDS -->
+<section id="grids">
+  <div class="sec-num">§08 · Pattern Deep Dive — Grids as Graphs</div>
+  <h2>A grid is a graph in <em>disguise</em>.</h2>
+
+  <p>Half of all graph interview problems are presented as 2D grids. Each cell is a vertex; edges go to its 4 (or 8) neighbors. Walls/obstacles are missing edges. Once you make this translation, all the graph algorithms apply unchanged.</p>
+
+<pre><span class="c"># Number of Islands — LC 200. Connected components on a grid.</span>
+<span class="k">def</span> <span class="f">num_islands</span>(grid):
+    <span class="k">if</span> <span class="k">not</span> grid: <span class="k">return</span> <span class="num">0</span>
+    R, C = len(grid), len(grid[<span class="num">0</span>])
+    count = <span class="num">0</span>
+    <span class="k">def</span> <span class="f">dfs</span>(r, c):
+        <span class="k">if</span> r &lt; <span class="num">0</span> <span class="k">or</span> r &gt;= R <span class="k">or</span> c &lt; <span class="num">0</span> <span class="k">or</span> c &gt;= C <span class="k">or</span> grid[r][c] != <span class="s">'1'</span>:
+            <span class="k">return</span>
+        grid[r][c] = <span class="s">'#'</span>            <span class="c"># mark visited in-place — saves O(V) memory</span>
+        <span class="k">for</span> dr, dc <span class="k">in</span> [(-<span class="num">1</span>,<span class="num">0</span>),(<span class="num">1</span>,<span class="num">0</span>),(<span class="num">0</span>,-<span class="num">1</span>),(<span class="num">0</span>,<span class="num">1</span>)]:
+            dfs(r+dr, c+dc)
+    <span class="k">for</span> r <span class="k">in</span> range(R):
+        <span class="k">for</span> c <span class="k">in</span> range(C):
+            <span class="k">if</span> grid[r][c] == <span class="s">'1'</span>:
+                count += <span class="num">1</span>
+                dfs(r, c)
+    <span class="k">return</span> count
+
+<span class="c"># Shortest path on grid with obstacles — BFS, O(R·C).</span>
+<span class="k">from</span> collections <span class="k">import</span> deque
+<span class="k">def</span> <span class="f">shortest_path</span>(grid, src, dst):
+    R, C = len(grid), len(grid[<span class="num">0</span>])
+    q = deque([(*src, <span class="num">0</span>)])
+    seen = {src}
+    <span class="k">while</span> q:
+        r, c, d = q.popleft()
+        <span class="k">if</span> (r, c) == dst: <span class="k">return</span> d
+        <span class="k">for</span> dr, dc <span class="k">in</span> [(-<span class="num">1</span>,<span class="num">0</span>),(<span class="num">1</span>,<span class="num">0</span>),(<span class="num">0</span>,-<span class="num">1</span>),(<span class="num">0</span>,<span class="num">1</span>)]:
+            nr, nc = r+dr, c+dc
+            <span class="k">if</span> <span class="num">0</span>&lt;=nr&lt;R <span class="k">and</span> <span class="num">0</span>&lt;=nc&lt;C <span class="k">and</span> grid[nr][nc] != <span class="s">'#'</span> <span class="k">and</span> (nr,nc) <span class="k">not</span> <span class="k">in</span> seen:
+                seen.add((nr, nc))
+                q.append((nr, nc, d+<span class="num">1</span>))
+    <span class="k">return</span> -<span class="num">1</span>                                <span class="c"># unreachable</span></pre>
+
+  <div class="insight"><strong>The four directions idiom:</strong> <code class="mono">[(-1,0),(1,0),(0,-1),(0,1)]</code> — up, down, left, right. Memorize the tuple. For diagonals, add <code class="mono">[(-1,-1),(-1,1),(1,-1),(1,1)]</code>. Saves time in every grid problem.</div>
+</section>
+
+<!-- SECTION 09 — PROBLEMS -->
+<section id="problems">
+  <div class="sec-num">§09 · The Canon</div>
+  <h2>Fourteen problems. <em>Solve these cold, you are ready.</em></h2>
+
+  <div class="problem-card">
+    <header><span>01 · Number of Islands</span><span class="diff med">MEDIUM</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Count connected regions of '1's in a 2D grid (4-neighbor connectivity).</p>
+      <h4>Pattern</h4><p>Connected components on a grid. DFS or BFS from each unvisited '1'.</p>
+      <div class="insight">In-place marking ('1' → '#') saves O(R·C) auxiliary memory. Mention this — it shows you think about space, not just correctness.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>02 · Clone Graph</span><span class="diff med">MEDIUM</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Deep-copy an undirected graph given a starting node.</p>
+      <h4>Pattern</h4><p>BFS or DFS with a hashmap <code class="mono">{original → clone}</code>. Two passes (or interleave clone-creation with traversal).</p>
+      <div class="insight">Single-pass version: when you visit a node, look up or create its clone, then for each neighbor look up or create theirs and link. The hashmap doubles as the visited set.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>03 · Course Schedule</span><span class="diff med">MEDIUM</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Given prerequisites, can all courses be finished?</p>
+      <h4>Pattern</h4><p>Cycle detection on directed graph. Topo sort succeeds iff no cycle.</p>
+      <div class="insight">Kahn's is the cleaner answer. If the topo order has fewer than n vertices, there's a cycle. Two algorithms in one.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>04 · Course Schedule II</span><span class="diff med">MEDIUM</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Return any valid course order, or empty if impossible.</p>
+      <h4>Pattern</h4><p>Topological sort. Kahn's directly outputs the order.</p>
+      <div class="insight">The natural follow-up to Course Schedule. The same algorithm — just keep the queue's pop order.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>05 · Word Ladder</span><span class="diff hard">HARD</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Shortest transformation from beginWord to endWord, changing one letter at a time, with each intermediate in a dictionary.</p>
+      <h4>Pattern</h4><p>BFS on an implicit graph. Each word is a vertex; edges connect words differing by one letter.</p>
+      <div class="insight">The performance trick: build neighbor templates like <code class="mono">"h*t"</code> mapping to all matching words. This avoids comparing every pair of words. Bidirectional BFS halves the explored space — staff-tier signal.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>06 · Network Delay Time</span><span class="diff med">MEDIUM</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Signal travels through a network; return time for all nodes to receive it, or -1.</p>
+      <h4>Pattern</h4><p>Dijkstra from the source; answer is <code class="mono">max(dist)</code>, or -1 if any is infinity.</p>
+      <div class="insight">Direct Dijkstra application. The "max of all distances" twist tests whether you understand what Dijkstra returns (distance to <em>every</em> node, not just one).</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>07 · Cheapest Flights Within K Stops</span><span class="diff med">MEDIUM</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Cheapest path from src to dst with at most k stops.</p>
+      <h4>Pattern</h4><p>Modified BFS or Bellman-Ford limited to k+1 iterations. Dijkstra works only with state augmentation: <code class="mono">(cost, node, stops_left)</code>.</p>
+      <div class="insight">The "k stops" constraint breaks vanilla Dijkstra (visited-once invariant fails). Bellman-Ford for exactly k+1 rounds is the cleaner answer. State this trade-off — it earns points.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>08 · Redundant Connection</span><span class="diff med">MEDIUM</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Given a tree (n nodes, n−1 edges) plus one extra edge, find the extra.</p>
+      <h4>Pattern</h4><p>Union-Find. Add edges in order; the first one whose endpoints are already connected is the answer.</p>
+      <div class="insight">Direct Union-Find application — three lines of logic. The textbook example for why DSU is in your toolkit.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>09 · Accounts Merge</span><span class="diff med">MEDIUM</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Merge accounts sharing any email into one.</p>
+      <h4>Pattern</h4><p>Union-Find on email indices, with hashmap from email → account-index.</p>
+      <div class="insight">A messy real-world problem that exposes whether you can model: "emails are nodes, sharing-an-account is an edge, components are merged accounts." Modeling clarity matters more than the code.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>10 · Pacific Atlantic Water Flow</span><span class="diff med">MEDIUM</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Find cells from which water can flow to both oceans.</p>
+      <h4>Pattern</h4><p>Reverse BFS/DFS from each ocean's edge inward. Cells reachable from both are the answer.</p>
+      <div class="insight">The reversal is the trick. Naive forward search from each cell is O(R²C²); reverse is O(R·C). Always ask "can I run this backward?" on grid problems.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>11 · Is Graph Bipartite?</span><span class="diff med">MEDIUM</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Can the vertices be split into two sets with all edges crossing between them?</p>
+      <h4>Pattern</h4><p>2-coloring via BFS or DFS. If a neighbor has the same color as you, not bipartite.</p>
+      <div class="insight">Don't forget disconnected components — run the check from every uncolored vertex. This is a common "one test case fails" debugging fix.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>12 · Min Cost to Connect All Points</span><span class="diff med">MEDIUM</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Connect all points with minimum total Manhattan distance.</p>
+      <h4>Pattern</h4><p>Minimum Spanning Tree. Kruskal (sort all <code class="mono">n²</code> edges, Union-Find) or Prim (heap from any vertex).</p>
+      <div class="insight">For dense graphs (every pair is an edge), Prim with adjacency-matrix is O(V²) and beats Kruskal's O(E log E) = O(V² log V). State this; it's the senior consideration.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>13 · Alien Dictionary</span><span class="diff hard">HARD</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Given a sorted list of words in an alien language, recover the alphabet order.</p>
+      <h4>Pattern</h4><p>Topo sort. Build directed edges from comparing adjacent word pairs (first differing char gives a precedence).</p>
+      <div class="insight">Edge cases: prefix relationships ("abc" before "ab" is invalid); duplicate edges; characters appearing only in one word still need to be in the result. This is the staff-level test.</div>
+    </div>
+  </div>
+
+  <div class="problem-card">
+    <header><span>14 · Critical Connections in a Network</span><span class="diff hard">HARD</span></header>
+    <div class="body">
+      <p><strong>Prompt:</strong> Find all bridges (edges whose removal disconnects the graph).</p>
+      <h4>Pattern</h4><p>Tarjan's bridge-finding via DFS with discovery times and low-link values.</p>
+      <div class="insight">A staff-tier algorithm. <code class="mono">low[v] = min(low[v], disc[u])</code> for back edges; an edge (u,v) is a bridge iff <code class="mono">low[v] > disc[u]</code>. If you can derive this on the spot, you're ready for L6+ loops.</div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 10 — CHEAT SHEET -->
+<section id="cheatsheet">
+  <div class="sec-num">§10 · The Night-Before Cheat Sheet</div>
+  <h2>If you forget <em>everything</em> else — remember this page.</h2>
+
+  <div class="cheat">
+    <div class="cheat-cell"><h5>First reflex</h5><div class="big" style="font-size:20px">"What kind of graph?"</div><p>Directed? Weighted? Cyclic? Connected? Ask before coding.</p></div>
+    <div class="cheat-cell"><h5>Visited set</h5><div class="big" style="font-size:20px">Mark on insert</div><p>Add to visited when enqueueing, not when popping. Bug magnet.</p></div>
+    <div class="cheat-cell"><h5>Undirected</h5><div class="big" style="font-size:20px">Both directions</div><p>Add edge to both <code>graph[u]</code> AND <code>graph[v]</code>.</p></div>
+    <div class="cheat-cell"><h5>Disconnected</h5><div class="big" style="font-size:20px">Loop over V</div><p>Run from every unvisited vertex, not just one.</p></div>
+  </div>
+
+  <h3>Trigger words → algorithm</h3>
+  <div class="cheat">
+    <div class="cheat-cell"><h5>"shortest unweighted"</h5><div class="big" style="font-size:18px">BFS</div></div>
+    <div class="cheat-cell"><h5>"shortest weighted +"</h5><div class="big" style="font-size:18px">Dijkstra</div></div>
+    <div class="cheat-cell"><h5>"shortest with negatives"</h5><div class="big" style="font-size:18px">Bellman-Ford</div></div>
+    <div class="cheat-cell"><h5>"order with prereqs"</h5><div class="big" style="font-size:18px">Topo Sort</div></div>
+    <div class="cheat-cell"><h5>"are X and Y connected"</h5><div class="big" style="font-size:18px">Union-Find</div></div>
+    <div class="cheat-cell"><h5>"connect all w/ min cost"</h5><div class="big" style="font-size:18px">MST (Kruskal/Prim)</div></div>
+    <div class="cheat-cell"><h5>"can it be 2-colored"</h5><div class="big" style="font-size:18px">Bipartite BFS</div></div>
+    <div class="cheat-cell"><h5>"count regions / islands"</h5><div class="big" style="font-size:18px">Flood Fill</div></div>
+  </div>
+
+  <h3>Complexity at a glance</h3>
+  <div class="cheat">
+    <div class="cheat-cell"><h5>BFS / DFS</h5><div class="big">O(V+E)</div></div>
+    <div class="cheat-cell"><h5>Dijkstra</h5><div class="big">O((V+E)log V)</div></div>
+    <div class="cheat-cell"><h5>Bellman-Ford</h5><div class="big">O(V·E)</div></div>
+    <div class="cheat-cell"><h5>Topo Sort</h5><div class="big">O(V+E)</div></div>
+    <div class="cheat-cell"><h5>Union-Find op</h5><div class="big">O(α(n))</div></div>
+    <div class="cheat-cell"><h5>Kruskal MST</h5><div class="big">O(E log E)</div></div>
+  </div>
+
+  <h3>The BFS template — write this from memory tonight:</h3>
+<pre><span class="k">from</span> collections <span class="k">import</span> deque
+<span class="k">def</span> <span class="f">bfs</span>(graph, src):
+    seen = {src}                          <span class="c"># mark on insert!</span>
+    q = deque([(src, <span class="num">0</span>)])             <span class="c"># (node, distance)</span>
+    <span class="k">while</span> q:
+        u, d = q.popleft()
+        <span class="c"># ... process u, possibly check target ...</span>
+        <span class="k">for</span> v <span class="k">in</span> graph[u]:
+            <span class="k">if</span> v <span class="k">not</span> <span class="k">in</span> seen:
+                seen.add(v)
+                q.append((v, d + <span class="num">1</span>))</pre>
+
+  <div class="insight" style="margin-top:40px"><strong>The final unlock:</strong> in the interview, before you write a single line, narrate the model. <em>"I'm modeling each course as a node and each prereq as a directed edge from prereq → course. I want a topological order. I'll use Kahn's algorithm — extract zero-in-degree nodes, decrement their dependents, repeat. If the order has fewer than n nodes, there's a cycle."</em> Interviewers grade modeling clarity above syntax. Speak the graph before you build it.</div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="inner">
+    <div>
+      <h3>Chapter Nine, <em>complete.</em></h3>
+      <p style="margin-top:16px">Continue the Codex: Chapter 02 — Arrays. Chapter 04 — Stacks &amp; Queues. Chapter 07 — Linked Lists. Chapter 08 — Trees. Chapter 10 — Dynamic Programming. The compounding compensation of systematic study.</p>
+    </div>
+    <div class="stamp">VOL.III · CH.09 · ED. MMXXVI</div>
+  </div>
+</footer>
+
+<script>
+/* =========================================================
+   Helpers
+   ========================================================= */
+function setStatus(id, text){
+  const tag = text.match(/^\[([^\]]+)\]/);
+  const rest = text.replace(/^\[[^\]]+\]\s*/,'');
+  document.getElementById(id).innerHTML = `<span class="tag">[${tag?tag[1]:'INFO'}]</span> ${rest}`;
+}
+
+/* =========================================================
+   Generic graph renderer
+   nodes: [{id, x, y, label}]
+   edges: [{u, v, w?, directed?}]
+   states: Map<id, 'active'|'frontier'|'visited'|'target'|'source'|'dim'>
+   edgeStates: Map<"u-v", 'active'|'tree'|'dim'>
+   ========================================================= */
+function renderGraph(svgId, nodes, edges, opts={}){
+  const svg = document.getElementById(svgId);
+  if(!svg) return;
+  const states = opts.states || new Map();
+  const edgeStates = opts.edgeStates || new Map();
+  const nodeLabels = opts.nodeLabels || new Map();
+  const directed = opts.directed !== false;
+  const showWeights = opts.showWeights !== false;
+  const byId = new Map(nodes.map(n => [n.id, n]));
+  let html = '';
+  // arrow marker
+  html += `<defs><marker id="${svgId}_arr" markerWidth="10" markerHeight="10" refX="22" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#5a6878"/></marker><marker id="${svgId}_arrA" markerWidth="10" markerHeight="10" refX="22" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#e63946"/></marker><marker id="${svgId}_arrT" markerWidth="10" markerHeight="10" refX="22" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#1d3557"/></marker></defs>`;
+  // edges
+  edges.forEach(e => {
+    const a = byId.get(e.u), b = byId.get(e.v);
+    if(!a || !b) return;
+    const key = e.u + '-' + e.v;
+    const st = edgeStates.get(key) || edgeStates.get(e.v + '-' + e.u) || '';
+    let marker = '';
+    if(directed){
+      if(st === 'active') marker = `marker-end="url(#${svgId}_arrA)"`;
+      else if(st === 'tree') marker = `marker-end="url(#${svgId}_arrT)"`;
+      else marker = `marker-end="url(#${svgId}_arr)"`;
+    }
+    html += `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" class="g-edge ${st}" ${marker}/>`;
+    if(showWeights && e.w !== undefined){
+      const mx = (a.x + b.x)/2, my = (a.y + b.y)/2;
+      html += `<text x="${mx}" y="${my - 6}" class="g-edge-weight">${e.w}</text>`;
+    }
+  });
+  // nodes
+  nodes.forEach(n => {
+    const st = states.get(n.id) || '';
+    html += `<g class="g-node ${st}"><circle cx="${n.x}" cy="${n.y}" r="22"/><text x="${n.x}" y="${n.y}">${n.label || n.id}</text></g>`;
+    if(nodeLabels.has(n.id)){
+      html += `<text x="${n.x}" y="${n.y + 38}" class="g-node-label">${nodeLabels.get(n.id)}</text>`;
+    }
+  });
+  svg.innerHTML = html;
+}
+
+/* =========================================================
+   TRAVERSAL VIZ — BFS vs DFS
+   ========================================================= */
+const travNodes = [
+  {id:'A', x:130, y:90,  label:'A'},
+  {id:'B', x:300, y:60,  label:'B'},
+  {id:'C', x:300, y:160, label:'C'},
+  {id:'D', x:470, y:60,  label:'D'},
+  {id:'E', x:470, y:160, label:'E'},
+  {id:'F', x:470, y:260, label:'F'},
+  {id:'G', x:640, y:110, label:'G'},
+  {id:'H', x:640, y:210, label:'H'},
+];
+const travEdges = [
+  {u:'A',v:'B'},{u:'A',v:'C'},{u:'B',v:'D'},{u:'B',v:'E'},
+  {u:'C',v:'E'},{u:'C',v:'F'},{u:'D',v:'G'},{u:'E',v:'G'},
+  {u:'E',v:'H'},{u:'F',v:'H'},
+];
+let travState = { timer: null, visited: [] };
+function trav_render(){
+  const states = new Map();
+  travState.visited.forEach((id, idx) => {
+    states.set(id, idx === travState.visited.length - 1 ? 'active' : 'visited');
+  });
+  if(travState.visited.length === 0){
+    states.set('A', 'source');
+  }
+  renderGraph('travViz', travNodes, travEdges, { states, directed: false, showWeights: false });
+  // visit order
+  const svg = document.getElementById('travViz');
+  svg.innerHTML += `<text x="20" y="350" class="g-node-label" style="text-anchor:start;font-size:14px;fill:#0a1118;font-weight:800">VISIT ORDER → [${travState.visited.join(', ')}]</text>`;
+}
+function trav_run(kind){
+  trav_reset();
+  // build adjacency for traversal
+  const adj = {};
+  travNodes.forEach(n => adj[n.id] = []);
+  travEdges.forEach(e => { adj[e.u].push(e.v); adj[e.v].push(e.u); });
+  Object.values(adj).forEach(a => a.sort()); // deterministic order
+  let order = [];
+  if(kind === 'bfs'){
+    const seen = new Set(['A']);
+    const q = ['A'];
+    while(q.length){
+      const u = q.shift();
+      order.push(u);
+      for(const v of adj[u]){
+        if(!seen.has(v)){ seen.add(v); q.push(v); }
+      }
+    }
+  } else {
+    const seen = new Set();
+    function go(u){
+      if(seen.has(u)) return;
+      seen.add(u);
+      order.push(u);
+      for(const v of adj[u]) go(v);
+    }
+    go('A');
+  }
+  let i = 0;
+  travState.timer = setInterval(() => {
+    if(i >= order.length){
+      clearInterval(travState.timer);
+      travState.timer = null;
+      setStatus('travStatus', `[DONE] ${kind.toUpperCase()} complete: [${order.join(', ')}]`);
+      return;
+    }
+    travState.visited.push(order[i]);
+    setStatus('travStatus', `[${kind.toUpperCase()}] visit ${order[i]}`);
+    trav_render();
+    i++;
+  }, 600);
+}
+function trav_reset(){
+  if(travState.timer) clearInterval(travState.timer);
+  travState = { timer: null, visited: [] };
+  setStatus('travStatus', '[READY] Source = node A. Watch BFS expand by layer; watch DFS plunge deep.');
+  trav_render();
+}
+
+/* =========================================================
+   TOPO SORT VIZ
+   ========================================================= */
+const topoNodes = [
+  {id:0, x:130, y:80,  label:'CS101'},
+  {id:1, x:130, y:200, label:'MATH'},
+  {id:2, x:330, y:80,  label:'CS201'},
+  {id:3, x:330, y:200, label:'CS210'},
+  {id:4, x:330, y:320, label:'CS220'},
+  {id:5, x:530, y:140, label:'CS301'},
+  {id:6, x:530, y:280, label:'CS310'},
+  {id:7, x:730, y:200, label:'CS401'},
+];
+// edges: prereq → course
+const topoEdges = [
+  {u:0, v:2},{u:0, v:3},{u:1, v:3},{u:1, v:4},
+  {u:2, v:5},{u:3, v:5},{u:3, v:6},{u:4, v:6},
+  {u:5, v:7},{u:6, v:7},
+];
+let topoState;
+function topo_initState(){
+  const indeg = new Array(topoNodes.length).fill(0);
+  topoEdges.forEach(e => indeg[e.v]++);
+  const queue = [];
+  indeg.forEach((d, i) => { if(d === 0) queue.push(i); });
+  topoState = { indeg, queue, order: [], removed: new Set(), removedEdges: new Set(), timer: null, done: false };
+}
+topo_initState();
+function topo_render(){
+  const states = new Map();
+  const edgeStates = new Map();
+  const nodeLabels = new Map();
+  topoState.order.forEach(id => states.set(id, 'visited'));
+  topoState.queue.forEach(id => states.set(id, 'frontier'));
+  topoState.removedEdges.forEach(k => edgeStates.set(k, 'dim'));
+  topoNodes.forEach(n => {
+    if(!topoState.removed.has(n.id)){
+      nodeLabels.set(n.id, `in=${topoState.indeg[n.id]}`);
+    }
+  });
+  renderGraph('topoViz', topoNodes, topoEdges, { states, edgeStates, nodeLabels, directed: true, showWeights: false });
+  const svg = document.getElementById('topoViz');
+  svg.innerHTML += `<text x="20" y="350" class="g-node-label" style="text-anchor:start;font-size:13px;fill:#0a1118;font-weight:800">QUEUE: [${topoState.queue.map(i => topoNodes[i].label).join(', ') || '—'}]    ORDER: [${topoState.order.map(i => topoNodes[i].label).join(' → ') || '—'}]</text>`;
+}
+function topo_step(){
+  if(topoState.done) return;
+  if(topoState.queue.length === 0){
+    topoState.done = true;
+    if(topoState.order.length === topoNodes.length){
+      setStatus('topoStatus', `[DONE ✓] Valid topological order: [${topoState.order.map(i => topoNodes[i].label).join(' → ')}]. No cycle.`);
+    } else {
+      setStatus('topoStatus', `[CYCLE] Only ${topoState.order.length}/${topoNodes.length} extracted. Remaining nodes form a cycle.`);
+    }
+    if(topoState.timer){clearInterval(topoState.timer); topoState.timer=null; document.getElementById('topoPlayBtn').textContent='Auto-play';}
+    return;
+  }
+  const u = topoState.queue.shift();
+  topoState.order.push(u);
+  topoState.removed.add(u);
+  let decremented = [];
+  topoEdges.forEach(e => {
+    if(e.u === u){
+      topoState.indeg[e.v]--;
+      topoState.removedEdges.add(e.u + '-' + e.v);
+      decremented.push(topoNodes[e.v].label);
+      if(topoState.indeg[e.v] === 0){
+        topoState.queue.push(e.v);
+      }
+    }
+  });
+  setStatus('topoStatus', `Extract ${topoNodes[u].label} (in-deg 0). Decrement: ${decremented.join(', ') || 'none'}.`);
+  topo_render();
+}
+function topo_play(){
+  if(topoState.timer){clearInterval(topoState.timer); topoState.timer=null; document.getElementById('topoPlayBtn').textContent='Auto-play'; return;}
+  document.getElementById('topoPlayBtn').textContent='Pause';
+  topoState.timer = setInterval(topo_step, 1000);
+}
+function topo_reset(){
+  if(topoState.timer) clearInterval(topoState.timer);
+  topo_initState();
+  setStatus('topoStatus', '[INIT] Course graph. Each step: extract a course with 0 remaining prereqs, output it, decrement its dependents.');
+  topo_render();
+}
+
+/* =========================================================
+   UNION-FIND VIZ
+   ========================================================= */
+const ufNodes = [
+  {id:0, x:130, y:80, label:'0'},
+  {id:1, x:280, y:80, label:'1'},
+  {id:2, x:430, y:80, label:'2'},
+  {id:3, x:130, y:200, label:'3'},
+  {id:4, x:280, y:200, label:'4'},
+  {id:5, x:430, y:200, label:'5'},
+  {id:6, x:130, y:320, label:'6'},
+  {id:7, x:280, y:320, label:'7'},
+  {id:8, x:430, y:320, label:'8'},
+];
+const ufEdgeSequence = [
+  [0,1],[3,4],[6,7],[1,2],[4,5],[7,8],[0,3],[2,5],
+];
+let ufState;
+function ufInitParent(){ return ufNodes.map(n => n.id); }
+function ufFind(p, x){ while(p[x] !== x){ p[x] = p[p[x]]; x = p[x]; } return x; }
+function uf_initState(){
+  ufState = { parent: ufInitParent(), addedEdges: [], components: 9, idx: 0, timer: null };
+}
+uf_initState();
+const ufComponentColors = ['#06ffa5','#ffb703','#a663cc','#e63946','#1d3557','#06b6d4','#84cc16','#f97316','#ec4899'];
+function uf_render(){
+  // group nodes by root and assign colors
+  const states = new Map();
+  const edgeStates = new Map();
+  const nodeLabels = new Map();
+  // assign component colors
+  const rootColor = new Map();
+  let colorIdx = 0;
+  ufNodes.forEach(n => {
+    const r = ufFind(ufState.parent, n.id);
+    if(!rootColor.has(r)){
+      rootColor.set(r, ufComponentColors[colorIdx++ % ufComponentColors.length]);
+    }
+  });
+  // edges (only added ones)
+  const edgesToRender = ufState.addedEdges.map(([u,v]) => ({u, v}));
+  // mark edges as 'tree' visually
+  ufState.addedEdges.forEach(([u,v]) => edgeStates.set(u+'-'+v, 'tree'));
+  // For nodes, manually inject custom color via nodeLabels won't work — use SVG override
+  const svg = document.getElementById('ufViz');
+  let html = '';
+  // edges
+  edgesToRender.forEach(e => {
+    const a = ufNodes[e.u], b = ufNodes[e.v];
+    html += `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" class="g-edge tree"/>`;
+  });
+  // nodes with component color
+  ufNodes.forEach(n => {
+    const r = ufFind(ufState.parent, n.id);
+    const fill = rootColor.get(r);
+    const isRoot = (r === n.id);
+    html += `<g><circle cx="${n.x}" cy="${n.y}" r="22" fill="${fill}" stroke="#0a1118" stroke-width="${isRoot ? 4 : 2.5}"/>`;
+    html += `<text x="${n.x}" y="${n.y}" font-family="JetBrains Mono" font-size="14" font-weight="800" text-anchor="middle" dominant-baseline="central" fill="#0a1118">${n.label}</text></g>`;
+    if(isRoot){
+      html += `<text x="${n.x}" y="${n.y - 30}" font-family="JetBrains Mono" font-size="10" font-weight="700" text-anchor="middle" fill="#e63946">ROOT</text>`;
+    }
+  });
+  // status
+  html += `<text x="20" y="355" font-family="JetBrains Mono" font-size="13" font-weight="800" fill="#0a1118">COMPONENTS: ${ufState.components}    EDGES ADDED: ${ufState.addedEdges.length}/${ufEdgeSequence.length}</text>`;
+  svg.innerHTML = html;
+}
+function uf_step(){
+  if(ufState.idx >= ufEdgeSequence.length){
+    setStatus('ufStatus', `[DONE] All edges processed. Final components: ${ufState.components}.`);
+    if(ufState.timer){clearInterval(ufState.timer); ufState.timer=null; document.getElementById('ufPlayBtn').textContent='Auto-play';}
+    return;
+  }
+  const [u, v] = ufEdgeSequence[ufState.idx++];
+  const ru = ufFind(ufState.parent, u);
+  const rv = ufFind(ufState.parent, v);
+  if(ru === rv){
+    setStatus('ufStatus', `Edge (${u},${v}): SAME ROOT (${ru}) → would create cycle, skip.`);
+  } else {
+    ufState.parent[rv] = ru;
+    ufState.components--;
+    ufState.addedEdges.push([u, v]);
+    setStatus('ufStatus', `Edge (${u},${v}): UNION roots ${ru}+${rv} → merged. Components: ${ufState.components}.`);
+  }
+  uf_render();
+}
+function uf_play(){
+  if(ufState.timer){clearInterval(ufState.timer); ufState.timer=null; document.getElementById('ufPlayBtn').textContent='Auto-play'; return;}
+  document.getElementById('ufPlayBtn').textContent='Pause';
+  ufState.timer = setInterval(uf_step, 900);
+}
+function uf_reset(){
+  if(ufState.timer) clearInterval(ufState.timer);
+  uf_initState();
+  setStatus('ufStatus', '[INIT] 9 isolated nodes, 9 components. Add edges one by one; watch components merge.');
+  uf_render();
+}
+
+/* =========================================================
+   DIJKSTRA VIZ
+   ========================================================= */
+const dijkNodes = [
+  {id:'A', x:130, y:180, label:'A'},
+  {id:'B', x:300, y:80,  label:'B'},
+  {id:'C', x:300, y:280, label:'C'},
+  {id:'D', x:480, y:80,  label:'D'},
+  {id:'E', x:480, y:280, label:'E'},
+  {id:'F', x:660, y:180, label:'F'},
+  {id:'G', x:820, y:180, label:'G'},
+];
+const dijkEdges = [
+  {u:'A',v:'B',w:4},{u:'A',v:'C',w:2},
+  {u:'B',v:'D',w:5},{u:'B',v:'C',w:1},
+  {u:'C',v:'E',w:8},{u:'C',v:'D',w:3},
+  {u:'D',v:'F',w:2},{u:'E',v:'F',w:1},{u:'F',v:'G',w:3},
+];
+let dijkState;
+function dijk_initState(){
+  const dist = {};
+  dijkNodes.forEach(n => dist[n.id] = Infinity);
+  dist['A'] = 0;
+  // build adj
+  const adj = {};
+  dijkNodes.forEach(n => adj[n.id] = []);
+  dijkEdges.forEach(e => { adj[e.u].push([e.v, e.w]); adj[e.v].push([e.u, e.w]); });
+  dijkState = { dist, adj, settled: new Set(), heap: [['A', 0]], order: [], current: null, prev: {}, timer: null, done: false };
+}
+dijk_initState();
+function dijk_render(){
+  const states = new Map();
+  const nodeLabels = new Map();
+  const edgeStates = new Map();
+  dijkState.settled.forEach(id => states.set(id, 'visited'));
+  if(dijkState.current) states.set(dijkState.current, 'active');
+  states.set('A', dijkState.settled.has('A') || dijkState.current === 'A' ? states.get('A') : 'source');
+  // distance labels
+  dijkNodes.forEach(n => {
+    const d = dijkState.dist[n.id];
+    nodeLabels.set(n.id, d === Infinity ? '∞' : `d=${d}`);
+  });
+  // tree edges (predecessor)
+  Object.entries(dijkState.prev).forEach(([v, u]) => {
+    edgeStates.set(u + '-' + v, 'tree');
+    edgeStates.set(v + '-' + u, 'tree');
+  });
+  renderGraph('dijkViz', dijkNodes, dijkEdges, { states, edgeStates, nodeLabels, directed: false, showWeights: true });
+  const svg = document.getElementById('dijkViz');
+  const distStr = dijkNodes.map(n => `${n.id}=${dijkState.dist[n.id] === Infinity ? '∞' : dijkState.dist[n.id]}`).join(', ');
+  svg.innerHTML += `<text x="20" y="365" class="g-node-label" style="text-anchor:start;font-size:12px;fill:#0a1118;font-weight:800">DIST: [${distStr}]</text>`;
+}
+function dijk_step(){
+  if(dijkState.done) return;
+  // pop the heap (linear scan since heap is small)
+  while(dijkState.heap.length){
+    dijkState.heap.sort((a,b) => a[1] - b[1]);
+    const [u, d] = dijkState.heap.shift();
+    if(dijkState.settled.has(u)) continue;
+    if(d > dijkState.dist[u]) continue;
+    dijkState.current = u;
+    dijkState.settled.add(u);
+    let relaxed = [];
+    for(const [v, w] of dijkState.adj[u]){
+      if(dijkState.settled.has(v)) continue;
+      const nd = d + w;
+      if(nd < dijkState.dist[v]){
+        dijkState.dist[v] = nd;
+        dijkState.prev[v] = u;
+        dijkState.heap.push([v, nd]);
+        relaxed.push(`${v}→${nd}`);
+      }
+    }
+    setStatus('dijkStatus', `Pop ${u} (d=${d}). Settled. Relaxed: ${relaxed.join(', ') || 'nothing new'}.`);
+    dijk_render();
+    return;
+  }
+  dijkState.done = true;
+  dijkState.current = null;
+  setStatus('dijkStatus', `[DONE] All vertices settled. dist[G] = ${dijkState.dist['G']}.`);
+  if(dijkState.timer){clearInterval(dijkState.timer); dijkState.timer=null; document.getElementById('dijkPlayBtn').textContent='Auto-play';}
+  dijk_render();
+}
+function dijk_play(){
+  if(dijkState.timer){clearInterval(dijkState.timer); dijkState.timer=null; document.getElementById('dijkPlayBtn').textContent='Auto-play'; return;}
+  document.getElementById('dijkPlayBtn').textContent='Pause';
+  dijkState.timer = setInterval(dijk_step, 1000);
+}
+function dijk_reset(){
+  if(dijkState.timer) clearInterval(dijkState.timer);
+  dijk_initState();
+  setStatus('dijkStatus', '[INIT] Source A. dist[A]=0, others ∞. Pop closest, relax its edges, repeat.');
+  dijk_render();
+}
+
+/* ---------- Initial renders ---------- */
+trav_render();
+topo_render();
+uf_render();
+dijk_render();
+</script>
+</body>
+</html>
