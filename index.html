@@ -1,119 +1,334 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Structures Index</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Data Structures — The Interview Codex</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..900&family=JetBrains+Mono:wght@400;500;700&family=Inter+Tight:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f4ede1;
+    --paper-2: #ece2d0;
+    --ink: #1a1815;
+    --ink-soft: #4a443c;
+    --rule: #c9bca5;
+    --accent: #d8442b;       /* vermillion */
+    --accent-2: #1d4d3a;     /* deep green */
+    --gold: #b8893a;
+  }
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f8;
-            margin: 0;
-            padding: 0;
-        }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        header {
-            background-color: #2c3e50;
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
+  html { scroll-behavior: smooth; }
 
-        main {
-            max-width: 800px;
-            margin: 30px auto;
-            padding: 20px;
-        }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter Tight', sans-serif;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
 
-        .chapter {
-            background: white;
-            margin: 10px 0;
-            padding: 15px 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            transition: 0.2s;
-        }
+  /* paper grain */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      radial-gradient(rgba(0,0,0,0.025) 1px, transparent 1px),
+      radial-gradient(rgba(0,0,0,0.018) 1px, transparent 1px);
+    background-size: 3px 3px, 7px 7px;
+    background-position: 0 0, 1px 2px;
+    z-index: 100;
+    mix-blend-mode: multiply;
+  }
 
-        .chapter:hover {
-            transform: scale(1.02);
-            background-color: #ecf0f1;
-        }
+  .wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 60px 40px 120px;
+    position: relative;
+  }
 
-        a {
-            text-decoration: none;
-            color: #2c3e50;
-            font-size: 18px;
-            font-weight: bold;
-        }
+  /* ───────── HEADER ───────── */
+  header {
+    border-top: 2px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+    padding: 14px 0 18px;
+    margin-bottom: 56px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
 
-        footer {
-            text-align: center;
-            margin-top: 30px;
-            color: #777;
-        }
-    </style>
+  header .edition { display: flex; gap: 22px; }
+  header .edition span:not(:first-child) {
+    border-left: 1px solid var(--rule);
+    padding-left: 22px;
+  }
+
+  /* ───────── MASTHEAD ───────── */
+  .masthead { text-align: center; margin-bottom: 14px; }
+
+  .masthead .kicker {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 18px;
+  }
+
+  .masthead h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    font-size: clamp(48px, 9vw, 104px);
+    line-height: 0.92;
+    letter-spacing: -0.02em;
+  }
+
+  .masthead h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .masthead .dek {
+    margin: 26px auto 0;
+    max-width: 540px;
+    font-size: 18px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+  }
+
+  .rule-fat {
+    height: 4px;
+    background: var(--ink);
+    margin: 40px 0 8px;
+  }
+  .rule-thin {
+    height: 1px;
+    background: var(--ink);
+    margin-bottom: 48px;
+  }
+
+  /* ───────── CHAPTER GRID ───────── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 22px;
+  }
+
+  .chapter {
+    position: relative;
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    background: var(--paper-2);
+    border: 1.5px solid var(--ink);
+    padding: 28px 26px 24px;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  }
+
+  .chapter::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 1.5px solid var(--ink);
+    transform: translate(6px, 6px);
+    z-index: -1;
+    transition: transform 0.18s ease;
+  }
+
+  .chapter:hover {
+    transform: translate(-3px, -3px);
+    background: var(--paper);
+  }
+  .chapter:hover::after {
+    transform: translate(10px, 10px);
+  }
+
+  .chapter .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 14px;
+  }
+
+  .chapter h2 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    font-size: 27px;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    margin-bottom: 10px;
+  }
+
+  .chapter p {
+    font-size: 14.5px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+  }
+
+  .chapter .arrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    margin-top: 18px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .chapter:hover .arrow { color: var(--accent); }
+
+  .chapter .tag {
+    position: absolute;
+    top: -1.5px;
+    right: -1.5px;
+    background: var(--accent);
+    color: var(--paper);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 5px 9px;
+  }
+  .chapter.fresh { border-color: var(--accent); }
+  .chapter.fresh .num { color: var(--accent-2); }
+
+  /* ───────── SECTION LABEL ───────── */
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 56px 0 22px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .section-label::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
+  }
+
+  /* ───────── FOOTER ───────── */
+  footer {
+    margin-top: 80px;
+    border-top: 2px solid var(--ink);
+    padding-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  @media (max-width: 560px) {
+    .wrap { padding: 36px 22px 80px; }
+    header { flex-direction: column; gap: 8px; }
+  }
+</style>
 </head>
 <body>
+<div class="wrap">
 
-<header>
-    <h1>📘 Data Structures</h1>
-    <p>Select a chapter to learn</p>
-</header>
-
-<main>
-
-    <div class="chapter">
-        <a href="arrays.html">1. Arrays</a>
+  <header>
+    <span>The Interview Codex</span>
+    <div class="edition">
+      <span>Vol. I</span>
+      <span>Data Structures</span>
+      <span>2026</span>
     </div>
+  </header>
 
-    <div class="chapter">
-        <a href="linked_list.html">2. Linked List</a>
-    </div>
+  <div class="masthead">
+    <div class="kicker">A Visual Field Guide</div>
+    <h1>Data <em>Structures</em></h1>
+    <p class="dek">Hand-drawn walkthroughs, runnable intuition, and interview-grade patterns — one chapter at a time.</p>
+  </div>
 
-    <div class="chapter">
-        <a href="stack_queue.html">3. Stack And Queue</a>
-    </div>
+  <div class="rule-fat"></div>
+  <div class="rule-thin"></div>
 
-   
+  <div class="section-label">Chapters</div>
 
-    <div class="chapter">
-        <a href="hashing.html">5. Hashing</a>
-    </div>
+  <div class="grid">
 
-    <div class="chapter">
-        <a href="trees.html">6. Trees</a>
-    </div>
+    <a class="chapter" href="arrays.html">
+      <span class="num">01 / Foundations</span>
+      <h2>Arrays</h2>
+      <p>Contiguous memory, two-pointer technique, and the sliding window.</p>
+      <span class="arrow">Read →</span>
+    </a>
 
-    <div class="chapter">
-        <a href="binary_tree.html">7. Binary Tree</a>
-    </div>
+    <a class="chapter" href="linked_list.html">
+      <span class="num">02 / Pointers</span>
+      <h2>Linked Lists</h2>
+      <p>Nodes, traversal, reversal, and the fast/slow pointer family.</p>
+      <span class="arrow">Read →</span>
+    </a>
 
-    <div class="chapter">
-        <a href="bst.html">8. Binary Search Tree</a>
-    </div>
+    <a class="chapter" href="stack_queue.html">
+      <span class="num">03 / LIFO &amp; FIFO</span>
+      <h2>Stacks &amp; Queues</h2>
+      <p>Push, pop, enqueue, dequeue — and the monotonic stack trick.</p>
+      <span class="arrow">Read →</span>
+    </a>
 
-    <div class="chapter">
-        <a href="heap.html">9. Heap</a>
-    </div>
+    <a class="chapter" href="trees_mastery.html">
+      <span class="num">04 / Hierarchy</span>
+      <h2>Trees</h2>
+      <p>Binary trees, traversals, BSTs, and recursive thinking.</p>
+      <span class="arrow">Read →</span>
+    </a>
 
-    <div class="chapter">
-        <a href="graph.html">10. Graph</a>
-    </div>
+    <a class="chapter" href="graphs_mastery.html">
+      <span class="num">05 / Networks</span>
+      <h2>Graphs</h2>
+      <p>BFS, DFS, topological sort, and shortest-path foundations.</p>
+      <span class="arrow">Read →</span>
+    </a>
 
-    <div class="chapter">
-        <a href="trie.html">11. Trie</a>
-    </div>
+  </div>
 
-    <div class="chapter">
-        <a href="dp.html">12. Dynamic Programming</a>
-    </div>
+  <div class="section-label">Just Added — Problem Walkthroughs</div>
 
-</main>
+  <div class="grid">
 
-<footer>
-    <p>Made for structured learning 🚀</p>
-</footer>
+    <a class="chapter fresh" href="Remove%20Nodes%20From%20Linked%20List">
+      <span class="tag">New</span>
+      <span class="num">Linked List · Hard</span>
+      <h2>Remove Nodes from a Linked List</h2>
+      <p>A visual, step-by-step walkthrough of the monotonic-stack pattern and the N-th-from-end technique.</p>
+      <span class="arrow">Open walkthrough →</span>
+    </a>
 
+  </div>
+
+  <footer>
+    <span>Made for structured learning 🚀</span>
+    <span>Self-paced · Open notes</span>
+  </footer>
+
+</div>
 </body>
 </html>
